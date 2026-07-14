@@ -52,20 +52,44 @@ namespace Tritone.Kernel.Tests
         /// Verifies that lower update order values execute first.
         /// </summary>
         [Test]
-        public void Tick_UsesUpdateOrder()
+        public void Update_UsesSystemOrder()
         {
             var events      = new List<string>();
             var application = new GameApplicationBuilder()
-                .AddModule(new LateUpdateModule(events))
+                .AddModule(new HighOrderUpdateModule(events))
                 .AddModule(new EarlyUpdateModule(events))
                 .Build();
 
             application.Start();
             var time = new FrameTime(0.016, 0.016, 0.016, 0);
-            application.Tick(in time);
+            application.Update(in time);
             application.Stop();
 
             CollectionAssert.AreEqual(new[] { "Early", "Late" }, events);
+        }
+
+        /// <summary>
+        /// Verifies stage order and ensures stopped applications reject every update stage.
+        /// </summary>
+        [Test]
+        public void UpdateStages_DispatchInExpectedOrderOnlyWhileRunning()
+        {
+            var events      = new List<string>();
+            var application = new GameApplicationBuilder()
+                .AddModule(new AllStageModule(events))
+                .Build();
+            var time = new FrameTime(0.016, 0.016, 0.016, 0);
+
+            application.Start();
+            application.Update(in time);
+            application.LateUpdate(in time);
+            application.FixedUpdate(in time);
+            application.Stop();
+            application.Update(in time);
+            application.LateUpdate(in time);
+            application.FixedUpdate(in time);
+
+            CollectionAssert.AreEqual(new[] { "PreUpdate", "Update", "LateUpdate", "FixedUpdate" }, events);
         }
 
         /// <summary>
@@ -206,13 +230,78 @@ namespace Tritone.Kernel.Tests
         /// <summary>
         /// Represents the late update system.
         /// </summary>
-        private sealed class LateUpdateModule : UpdateModule
+        private sealed class HighOrderUpdateModule : UpdateModule
         {
             /// <summary>
             /// Initializes the late update system.
             /// </summary>
             /// <param name="events">The shared event output list.</param>
-            internal LateUpdateModule(List<string> events) : base("Late", 100, events) { }
+            internal HighOrderUpdateModule(List<string> events) : base("Late", 100, events) { }
+        }
+
+        /// <summary>
+        /// Records callbacks from every application update stage.
+        /// </summary>
+        private sealed class AllStageModule : ModuleBase,
+                                              IPreUpdateSystem,
+                                              IUpdateSystem,
+                                              ILateUpdateSystem,
+                                              IFixedUpdateSystem
+        {
+            /// <summary>
+            /// Stores update stage events in execution order.
+            /// </summary>
+            private readonly List<string> mEvents;
+
+            /// <summary>
+            /// Initializes a module that participates in every update stage.
+            /// </summary>
+            /// <param name="events">The shared event output list.</param>
+            internal AllStageModule(List<string> events)
+            {
+                mEvents = events;
+            }
+
+            /// <summary>
+            /// Gets the execution order used in every update stage.
+            /// </summary>
+            public int Order => 0;
+
+            /// <summary>
+            /// Records the pre-update callback.
+            /// </summary>
+            /// <param name="time">The timing data for the current frame.</param>
+            public void PreUpdate(in FrameTime time)
+            {
+                mEvents.Add("PreUpdate");
+            }
+
+            /// <summary>
+            /// Records the normal update callback.
+            /// </summary>
+            /// <param name="time">The timing data for the current frame.</param>
+            public void Update(in FrameTime time)
+            {
+                mEvents.Add("Update");
+            }
+
+            /// <summary>
+            /// Records the late-update callback.
+            /// </summary>
+            /// <param name="time">The timing data for the current frame.</param>
+            public void LateUpdate(in FrameTime time)
+            {
+                mEvents.Add("LateUpdate");
+            }
+
+            /// <summary>
+            /// Records the fixed-update callback.
+            /// </summary>
+            /// <param name="time">The timing data for the current fixed update.</param>
+            public void FixedUpdate(in FrameTime time)
+            {
+                mEvents.Add("FixedUpdate");
+            }
         }
 
         /// <summary>

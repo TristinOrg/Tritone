@@ -25,6 +25,21 @@ namespace Tritone.Unity
         private ulong mFrameIndex;
 
         /// <summary>
+        /// Stores timing data shared by the update and late-update stages.
+        /// </summary>
+        private FrameTime mFrameTime;
+
+        /// <summary>
+        /// Tracks total unscaled time advanced by fixed simulation updates.
+        /// </summary>
+        private double mFixedElapsedTime;
+
+        /// <summary>
+        /// Tracks the zero-based fixed simulation step index.
+        /// </summary>
+        private ulong mFixedFrameIndex;
+
+        /// <summary>
         /// Gets the running Tritone application instance.
         /// </summary>
         protected GameApplication Application => mApplication;
@@ -59,11 +74,41 @@ namespace Tritone.Unity
             var unscaledDeltaTime = (double)Time.unscaledDeltaTime;
             mElapsedTime         += unscaledDeltaTime;
 
+            mFrameTime = new FrameTime(deltaTime,
+                                       unscaledDeltaTime,
+                                       mElapsedTime,
+                                       mFrameIndex++);
+            mApplication.Update(in mFrameTime);
+        }
+
+        /// <summary>
+        /// Forwards the Unity late-update stage to the Tritone update pipeline.
+        /// </summary>
+        protected virtual void LateUpdate()
+        {
+            if (mApplication == null)
+                return;
+
+            mApplication.LateUpdate(in mFrameTime);
+        }
+
+        /// <summary>
+        /// Forwards one Unity fixed simulation step to the Tritone update pipeline.
+        /// </summary>
+        protected virtual void FixedUpdate()
+        {
+            if (mApplication == null)
+                return;
+
+            var deltaTime         = (double)Time.fixedDeltaTime;
+            var unscaledDeltaTime = (double)Time.fixedUnscaledDeltaTime;
+            mFixedElapsedTime    += unscaledDeltaTime;
+
             var frameTime = new FrameTime(deltaTime,
                                           unscaledDeltaTime,
-                                          mElapsedTime,
-                                          mFrameIndex++);
-            mApplication.Tick(in frameTime);
+                                          mFixedElapsedTime,
+                                          mFixedFrameIndex++);
+            mApplication.FixedUpdate(in frameTime);
         }
 
         /// <summary>

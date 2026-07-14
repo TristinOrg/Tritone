@@ -3,13 +3,8 @@ namespace Tritone.Kernel
     /// <summary>
     /// Defines a module or service that receives application frame updates.
     /// </summary>
-    public interface IUpdateSystem
+    public interface IUpdateSystem : IOrderedUpdateSystem
     {
-        /// <summary>
-        /// Gets the update order. Systems with lower values update first.
-        /// </summary>
-        int Order { get; }
-
         /// <summary>
         /// Updates the system for one application frame.
         /// </summary>

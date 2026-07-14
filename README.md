@@ -10,7 +10,7 @@ The first milestone provides:
 - Explicit module dependencies with topological startup order.
 - Reverse-order shutdown and partial-start rollback.
 - A small singleton service registry.
-- Allocation-free per-frame update dispatch.
+- Allocation-free PreUpdate, Update, LateUpdate, and FixedUpdate dispatch.
 - A Unity bootstrap component.
 - A filtered, multi-sink diagnostic logging service.
 

@@ -14,9 +14,24 @@ namespace Tritone.Kernel
         private readonly ModuleRegistration[] mModules;
 
         /// <summary>
-        /// Stores update systems in stable execution order.
+        /// Stores pre-update systems in stable execution order.
+        /// </summary>
+        private readonly IPreUpdateSystem[] mPreUpdateSystems;
+
+        /// <summary>
+        /// Stores normal update systems in stable execution order.
         /// </summary>
         private readonly IUpdateSystem[] mUpdateSystems;
+
+        /// <summary>
+        /// Stores late-update systems in stable execution order.
+        /// </summary>
+        private readonly ILateUpdateSystem[] mLateUpdateSystems;
+
+        /// <summary>
+        /// Stores fixed-update systems in stable execution order.
+        /// </summary>
+        private readonly IFixedUpdateSystem[] mFixedUpdateSystems;
 
         /// <summary>
         /// Stores all application-scoped services.
@@ -49,19 +64,10 @@ namespace Tritone.Kernel
             mLoggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             mModuleContext = new ModuleContext(mServices, mLoggerFactory);
 
-            var updateSystems = new List<IUpdateSystem>(modules.Length);
-            for (var i = 0; i < modules.Length; i++)
-            {
-                if (modules[i].Module is not IUpdateSystem updateSystem)
-                    continue;
-
-                var insertionIndex = updateSystems.Count;
-                while (insertionIndex > 0 && updateSystems[insertionIndex - 1].Order > updateSystem.Order)
-                    insertionIndex--;
-
-                updateSystems.Insert(insertionIndex, updateSystem);
-            }
-            mUpdateSystems = updateSystems.ToArray();
+            mPreUpdateSystems   = CreateUpdateSystems<IPreUpdateSystem>(modules);
+            mUpdateSystems      = CreateUpdateSystems<IUpdateSystem>(modules);
+            mLateUpdateSystems  = CreateUpdateSystems<ILateUpdateSystem>(modules);
+            mFixedUpdateSystems = CreateUpdateSystems<IFixedUpdateSystem>(modules);
         }
 
         /// <summary>
@@ -119,16 +125,44 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
-        /// Dispatches one frame update to every registered update system.
+        /// Dispatches pre-update and normal update stages for one application frame.
         /// </summary>
         /// <param name="time">The immutable timing data for the current frame.</param>
-        public void Tick(in FrameTime time)
+        public void Update(in FrameTime time)
         {
             if (State != EApplicationState.Running)
                 return;
 
+            for (var i = 0; i < mPreUpdateSystems.Length; i++)
+                mPreUpdateSystems[i].PreUpdate(in time);
             for (var i = 0; i < mUpdateSystems.Length; i++)
                 mUpdateSystems[i].Update(in time);
+        }
+
+        /// <summary>
+        /// Dispatches the late-update stage for one application frame.
+        /// </summary>
+        /// <param name="time">The immutable timing data for the current frame.</param>
+        public void LateUpdate(in FrameTime time)
+        {
+            if (State != EApplicationState.Running)
+                return;
+
+            for (var i = 0; i < mLateUpdateSystems.Length; i++)
+                mLateUpdateSystems[i].LateUpdate(in time);
+        }
+
+        /// <summary>
+        /// Dispatches the fixed-update stage for one simulation step.
+        /// </summary>
+        /// <param name="time">The immutable timing data for the current fixed update.</param>
+        public void FixedUpdate(in FrameTime time)
+        {
+            if (State != EApplicationState.Running)
+                return;
+
+            for (var i = 0; i < mFixedUpdateSystems.Length; i++)
+                mFixedUpdateSystems[i].FixedUpdate(in time);
         }
 
         /// <summary>
@@ -208,6 +242,30 @@ namespace Tritone.Kernel
             {
                 return exception;
             }
+        }
+
+        /// <summary>
+        /// Collects and stably sorts systems for one update stage during application construction.
+        /// </summary>
+        /// <typeparam name="TSystem">The update stage interface to collect.</typeparam>
+        /// <param name="modules">The modules in dependency-safe startup order.</param>
+        /// <returns>The systems sorted by order while preserving module order for equal values.</returns>
+        private static TSystem[] CreateUpdateSystems<TSystem>(ModuleRegistration[] modules)
+            where TSystem : IOrderedUpdateSystem
+        {
+            var systems = new List<TSystem>(modules.Length);
+            for (var i = 0; i < modules.Length; i++)
+            {
+                if (modules[i].Module is not TSystem system)
+                    continue;
+
+                var insertionIndex = systems.Count;
+                while (insertionIndex > 0 && systems[insertionIndex - 1].Order > system.Order)
+                    insertionIndex--;
+
+                systems.Insert(insertionIndex, system);
+            }
+            return systems.ToArray();
         }
     }
 }
