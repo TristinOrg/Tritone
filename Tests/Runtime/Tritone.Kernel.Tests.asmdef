@@ -2,7 +2,8 @@
   "name": "Tritone.Kernel.Tests",
   "rootNamespace": "Tritone.Kernel.Tests",
   "references": [
-    "Tritone.Kernel"
+    "Tritone.Kernel",
+    "Tritone.Diagnostics"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

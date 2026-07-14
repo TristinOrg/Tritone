@@ -1,0 +1,9 @@
+{
+  "name": "Tritone.Diagnostics",
+  "rootNamespace": "Tritone.Diagnostics",
+  "references": [
+    "Tritone.Kernel"
+  ],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

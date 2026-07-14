@@ -8,8 +8,8 @@ namespace Tritone.Kernel
         /// <summary>
         /// Registers services and resolves dependencies before any module starts.
         /// </summary>
-        /// <param name="services">The application service registry.</param>
-        void Configure(IServiceRegistry services);
+        /// <param name="context">The immutable application infrastructure available to this module.</param>
+        void Configure(ModuleContext context);
 
         /// <summary>
         /// Starts the module after every module has completed configuration.

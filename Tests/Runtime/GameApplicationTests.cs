@@ -97,8 +97,8 @@ namespace Tritone.Kernel.Tests
             /// <summary>
             /// Records module configuration.
             /// </summary>
-            /// <param name="services">The application service registry.</param>
-            public void Configure(IServiceRegistry services)
+            /// <param name="context">The immutable application infrastructure.</param>
+            public void Configure(ModuleContext context)
             {
                 mEvents.Add($"{mName}.Configure");
             }
@@ -168,8 +168,8 @@ namespace Tritone.Kernel.Tests
             /// <summary>
             /// Performs no configuration for this test module.
             /// </summary>
-            /// <param name="services">The application service registry.</param>
-            public void Configure(IServiceRegistry services) { }
+            /// <param name="context">The immutable application infrastructure.</param>
+            public void Configure(ModuleContext context) { }
 
             /// <summary>
             /// Performs no startup work for this test module.
@@ -223,8 +223,8 @@ namespace Tritone.Kernel.Tests
             /// <summary>
             /// Performs no configuration for this test module.
             /// </summary>
-            /// <param name="services">The application service registry.</param>
-            public void Configure(IServiceRegistry services) { }
+            /// <param name="context">The immutable application infrastructure.</param>
+            public void Configure(ModuleContext context) { }
 
             /// <summary>
             /// Performs no startup work for this test module.
@@ -245,8 +245,8 @@ namespace Tritone.Kernel.Tests
             /// <summary>
             /// Performs no configuration for this test module.
             /// </summary>
-            /// <param name="services">The application service registry.</param>
-            public void Configure(IServiceRegistry services) { }
+            /// <param name="context">The immutable application infrastructure.</param>
+            public void Configure(ModuleContext context) { }
 
             /// <summary>
             /// Performs no startup work for this test module.

@@ -24,6 +24,16 @@ namespace Tritone.Kernel
         private readonly ServiceRegistry mServices = new ServiceRegistry();
 
         /// <summary>
+        /// Stores immutable infrastructure passed to every module during configuration.
+        /// </summary>
+        private readonly ModuleContext mModuleContext;
+
+        /// <summary>
+        /// Stores the logger factory owned by this application.
+        /// </summary>
+        private readonly IModuleLoggerFactory mLoggerFactory;
+
+        /// <summary>
         /// Tracks the number of modules that started successfully.
         /// </summary>
         private int mStartedModuleCount;
@@ -32,9 +42,12 @@ namespace Tritone.Kernel
         /// Initializes an application with validated module registrations.
         /// </summary>
         /// <param name="modules">The modules in dependency-safe startup order.</param>
-        internal GameApplication(ModuleRegistration[] modules)
+        /// <param name="loggerFactory">The factory used to create and own module loggers.</param>
+        internal GameApplication(ModuleRegistration[] modules, IModuleLoggerFactory loggerFactory)
         {
-            mModules = modules ?? throw new ArgumentNullException(nameof(modules));
+            mModules       = modules ?? throw new ArgumentNullException(nameof(modules));
+            mLoggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+            mModuleContext = new ModuleContext(mServices, mLoggerFactory);
 
             var updateSystems = new List<IUpdateSystem>(modules.Length);
             for (var i = 0; i < modules.Length; i++)
@@ -76,7 +89,7 @@ namespace Tritone.Kernel
                 for (var i = 0; i < mModules.Length; i++)
                     mServices.AddSingleton(mModules[i].ModuleType, mModules[i].Module);
                 for (var i = 0; i < mModules.Length; i++)
-                    mModules[i].Module.Configure(mServices);
+                    mModules[i].Module.Configure(mModuleContext);
 
                 mServices.Seal();
                 for (var i = 0; i < mModules.Length; i++)
@@ -89,9 +102,17 @@ namespace Tritone.Kernel
             catch (Exception startupException)
             {
                 State = EApplicationState.Faulted;
-                var shutdownException = StopStartedModules();
-                if (shutdownException != null)
-                    throw new AggregateException("Application startup and rollback both failed.", startupException, shutdownException);
+                var shutdownException       = StopStartedModules();
+                var infrastructureException = DisposeInfrastructure();
+                if (shutdownException != null || infrastructureException != null)
+                {
+                    var errors = new List<Exception> { startupException };
+                    if (shutdownException != null)
+                        errors.Add(shutdownException);
+                    if (infrastructureException != null)
+                        errors.Add(infrastructureException);
+                    throw new AggregateException("Application startup or rollback failed.", errors);
+                }
 
                 throw;
             }
@@ -120,14 +141,22 @@ namespace Tritone.Kernel
             if (State == EApplicationState.Created)
             {
                 State = EApplicationState.Stopped;
+                var createdInfrastructureException = DisposeInfrastructure();
+                if (createdInfrastructureException != null)
+                    throw createdInfrastructureException;
                 return;
             }
 
             State = EApplicationState.Stopping;
-            var shutdownException = StopStartedModules();
+            var shutdownException       = StopStartedModules();
+            var infrastructureException = DisposeInfrastructure();
             State = EApplicationState.Stopped;
+            if (shutdownException != null && infrastructureException != null)
+                throw new AggregateException("Application modules and infrastructure failed to stop.", shutdownException, infrastructureException);
             if (shutdownException != null)
                 throw shutdownException;
+            if (infrastructureException != null)
+                throw infrastructureException;
         }
 
         /// <summary>
@@ -162,6 +191,23 @@ namespace Tritone.Kernel
             return errors == null
                 ? null
                 : new AggregateException("One or more modules failed to stop.", errors);
+        }
+
+        /// <summary>
+        /// Releases application infrastructure after every module has stopped.
+        /// </summary>
+        /// <returns>The disposal exception when infrastructure cleanup failed; otherwise, null.</returns>
+        private Exception DisposeInfrastructure()
+        {
+            try
+            {
+                mLoggerFactory.Dispose();
+                return null;
+            }
+            catch (Exception exception)
+            {
+                return exception;
+            }
         }
     }
 }

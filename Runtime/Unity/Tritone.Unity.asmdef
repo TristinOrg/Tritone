@@ -2,7 +2,8 @@
   "name": "Tritone.Unity",
   "rootNamespace": "Tritone.Unity",
   "references": [
-    "Tritone.Kernel"
+    "Tritone.Kernel",
+    "Tritone.Diagnostics"
   ],
   "autoReferenced": true,
   "noEngineReferences": false

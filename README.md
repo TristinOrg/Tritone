@@ -12,6 +12,7 @@ The first milestone provides:
 - A small singleton service registry.
 - Allocation-free per-frame update dispatch.
 - A Unity bootstrap component.
+- A filtered, multi-sink diagnostic logging service.
 
 ## Unity quick start
 
@@ -19,28 +20,25 @@ Create a module:
 
 ```csharp
 using Tritone.Kernel;
-using UnityEngine;
 
-public sealed class HelloModule : IModule, IUpdateSystem
+public sealed class HelloModule : ModuleBase, IUpdateSystem
 {
     public int Order => 0;
 
-    public void Configure(IServiceRegistry services)
-    {
-    }
+    protected override ELogLevel LogLevel => ELogLevel.Debug;
 
-    public void Start()
+    protected override void OnStart()
     {
-        Debug.Log("Tritone started.");
+        Logger.Info("Hello module started.");
     }
 
     public void Update(in FrameTime time)
     {
     }
 
-    public void Stop()
+    protected override void OnStop()
     {
-        Debug.Log("Tritone stopped.");
+        Logger.Info("Hello module stopped.");
     }
 }
 ```
@@ -48,6 +46,7 @@ public sealed class HelloModule : IModule, IUpdateSystem
 Create the project entry point:
 
 ```csharp
+using Tritone.Diagnostics;
 using Tritone.Kernel;
 using Tritone.Unity;
 
@@ -55,6 +54,7 @@ public sealed class GameBootstrap : TritoneBootstrap
 {
     protected override void Configure(GameApplicationBuilder builder)
     {
+        builder.UseLogging(ELogLevel.Debug, new UnityLogSink());
         builder.AddModule(new HelloModule());
     }
 }
