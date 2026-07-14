@@ -1,0 +1,9 @@
+{
+  "name": "Tritone.Unity",
+  "rootNamespace": "Tritone.Unity",
+  "references": [
+    "Tritone.Kernel"
+  ],
+  "autoReferenced": true,
+  "noEngineReferences": false
+}

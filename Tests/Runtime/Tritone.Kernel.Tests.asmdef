@@ -1,0 +1,15 @@
+{
+  "name": "Tritone.Kernel.Tests",
+  "rootNamespace": "Tritone.Kernel.Tests",
+  "references": [
+    "Tritone.Kernel"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "noEngineReferences": true
+}
