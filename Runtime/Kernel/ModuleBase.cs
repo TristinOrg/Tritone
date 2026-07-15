@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Tritone.Events;
 using Tritone.Timing;
+using Tritone.UI;
 
 namespace Tritone.Kernel
 {
@@ -24,6 +25,11 @@ namespace Tritone.Kernel
         /// Stores event bindings that are automatically released when this module stops.
         /// </summary>
         private List<EventBinding> mEventBindings;
+
+        /// <summary>
+        /// Owns the window types made available by this module.
+        /// </summary>
+        private IUIWindowScope mUIWindowScope;
 
         /// <summary>
         /// Gets the minimum severity accepted by this module.
@@ -51,6 +57,7 @@ namespace Tritone.Kernel
             {
                 ReleaseTimerScope();
                 UnbindAllEvents();
+                ReleaseUIWindowScope();
                 mServices = null;
                 Logger = NullModuleLogger.Instance;
                 throw;
@@ -78,6 +85,7 @@ namespace Tritone.Kernel
             {
                 ReleaseTimerScope();
                 UnbindAllEvents();
+                ReleaseUIWindowScope();
                 mServices = null;
                 Logger = NullModuleLogger.Instance;
             }
@@ -185,6 +193,55 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
+        /// Makes one catalogued window available for this module's lifetime.
+        /// </summary>
+        /// <typeparam name="TWindow">The concrete window type.</typeparam>
+        protected void AddWindow<TWindow>() where TWindow : class
+        {
+            GetUIWindowScope().AddWindow(typeof(TWindow));
+        }
+
+        /// <summary>
+        /// Opens one window currently available to the application.
+        /// </summary>
+        /// <typeparam name="TWindow">The concrete window type.</typeparam>
+        /// <returns>The opened window instance.</returns>
+        protected TWindow OpenWindow<TWindow>() where TWindow : class
+        {
+            return (TWindow)GetUIService().OpenWindow(typeof(TWindow));
+        }
+
+        /// <summary>
+        /// Closes one previously created window.
+        /// </summary>
+        /// <typeparam name="TWindow">The concrete window type.</typeparam>
+        /// <returns>True when the window was closed; otherwise, false.</returns>
+        protected bool CloseWindow<TWindow>() where TWindow : class
+        {
+            return GetUIService().CloseWindow(typeof(TWindow));
+        }
+
+        /// <summary>
+        /// Gets one previously created window without opening it.
+        /// </summary>
+        /// <typeparam name="TWindow">The concrete window type.</typeparam>
+        /// <returns>The window instance, or null when it has not been created.</returns>
+        protected TWindow GetWindow<TWindow>() where TWindow : class
+        {
+            return GetUIService().GetWindow(typeof(TWindow)) as TWindow;
+        }
+
+        /// <summary>
+        /// Determines whether one window is currently open.
+        /// </summary>
+        /// <typeparam name="TWindow">The concrete window type.</typeparam>
+        /// <returns>True when the window is open; otherwise, false.</returns>
+        protected bool IsWindowOpen<TWindow>() where TWindow : class
+        {
+            return GetUIService().IsWindowOpen(typeof(TWindow));
+        }
+
+        /// <summary>
         /// Configures services and dependencies required by the concrete module.
         /// </summary>
         /// <param name="services">The application-scoped service registry.</param>
@@ -250,6 +307,42 @@ namespace Tritone.Kernel
             for (int i = mEventBindings.Count - 1; i >= 0; i--)
                 mEventBindings[i].Dispose();
             mEventBindings.Clear();
+        }
+
+        /// <summary>
+        /// Gets the configured UI service.
+        /// </summary>
+        /// <returns>The application UI service.</returns>
+        private IUIService GetUIService()
+        {
+            if (mServices == null)
+                throw new InvalidOperationException("Windows can only be accessed during an active module lifecycle.");
+            if (!mServices.TryGet<IUIService>(out var uiService))
+                throw new InvalidOperationException("UI infrastructure is not configured. Call builder.UseUI() before adding game modules.");
+
+            return uiService;
+        }
+
+        /// <summary>
+        /// Gets or lazily creates the window scope owned by this module.
+        /// </summary>
+        /// <returns>The module-owned window scope.</returns>
+        private IUIWindowScope GetUIWindowScope()
+        {
+            mUIWindowScope ??= GetUIService().CreateScope();
+            return mUIWindowScope;
+        }
+
+        /// <summary>
+        /// Removes this module's window ownership and releases its scope.
+        /// </summary>
+        private void ReleaseUIWindowScope()
+        {
+            if (mUIWindowScope == null)
+                return;
+
+            mUIWindowScope.Dispose();
+            mUIWindowScope = null;
         }
     }
 }

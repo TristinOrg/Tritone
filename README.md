@@ -153,3 +153,32 @@ public sealed class ShopWindow : UIWindow<UIShopView>
 ```
 
 `UIElement<TView>` resolves the view once, binds listeners during `OnBindEvents`, and releases every Unity and Tritone listener when disabled. `ModuleBase` releases all of its bindings when the module stops.
+
+Create one `UIWindowCatalog` asset, assign each window prefab, layer, and lifetime, then configure the UI module:
+
+```csharp
+protected override void Configure(GameApplicationBuilder builder)
+{
+    builder.UseUI(mUIRoot, mWindowCatalog);
+    builder.AddModule(new ShopModule());
+}
+```
+
+Modules declare only the window types they own. Prefab and layer configuration remain in the catalog:
+
+```csharp
+public sealed class ShopModule : ModuleBase
+{
+    protected override void OnConfigure(IServiceRegistry services)
+    {
+        AddWindow<ShopWindow>();
+    }
+
+    private void ShowShop()
+    {
+        OpenWindow<ShopWindow>();
+    }
+}
+```
+
+Module windows are available while at least one active module owns them. Releasing the final owner automatically closes and destroys the cached instance. Application windows remain available until the application stops.

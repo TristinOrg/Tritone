@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Tritone.Events;
 using Tritone.Kernel;
+using Tritone.UI;
 using UnityEngine;
 
 namespace Tritone.Unity
@@ -28,6 +29,36 @@ namespace Tritone.Unity
                 throw new InvalidOperationException("No running Tritone bootstrap is available.");
 
             return application.Services.GetRequired<TModule>();
+        }
+
+        /// <summary>
+        /// Opens one window currently available to an active module or the application.
+        /// </summary>
+        /// <typeparam name="TWindow">The concrete window type.</typeparam>
+        /// <returns>The opened window instance.</returns>
+        protected TWindow OpenWindow<TWindow>() where TWindow : class
+        {
+            return (TWindow)GetUIService().OpenWindow(typeof(TWindow));
+        }
+
+        /// <summary>
+        /// Closes one previously created window.
+        /// </summary>
+        protected bool CloseWindow<TWindow>() where TWindow : class
+        {
+            return GetUIService().CloseWindow(typeof(TWindow));
+        }
+
+        /// <summary>
+        /// Gets the configured application UI service.
+        /// </summary>
+        private static IUIService GetUIService()
+        {
+            var application = TritoneBootstrap.Current;
+            if (application == null)
+                throw new InvalidOperationException("No running Tritone bootstrap is available.");
+
+            return application.Services.GetRequired<IUIService>();
         }
 
         /// <summary>Binds a parameterless Tritone event.</summary>
