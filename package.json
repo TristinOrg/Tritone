@@ -4,6 +4,9 @@
   "displayName": "Tritone Framework",
   "description": "A clean, modular, high-performance game framework for Unity.",
   "unity": "2022.3",
+  "dependencies": {
+    "com.unity.ugui": "1.0.0"
+  },
   "author": {
     "name": "Tristin Wen"
   }

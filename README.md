@@ -117,13 +117,27 @@ public sealed class PlayerModule : ModuleBase
 }
 ```
 
-Unity UI can bind without manually unbinding each event:
+Keep prefab references in a view without adding business logic:
 
 ```csharp
-public sealed class PlayerPanel : TritoneBehaviour
+public sealed class UIShopView : UIView
+{
+    public Button        BtnClose;
+    public Button        BtnRule;
+    public RectTransform NodePanels;
+}
+```
+
+Bind Unity controls and Tritone events in the window's dedicated binding stage:
+
+```csharp
+public sealed class ShopWindow : UIWindow<UIShopView>
 {
     protected override void OnBindEvents()
     {
+        BindButton(mView.BtnClose, Close);
+        BindButton(mView.BtnRule, OnRule);
+
         var playerModule = GetModule<PlayerModule>();
         BindEvent(playerModule.EventsList.HealthChanged, OnHealthChanged);
     }
@@ -131,7 +145,11 @@ public sealed class PlayerPanel : TritoneBehaviour
     private void OnHealthChanged(int health)
     {
     }
+
+    private void OnRule()
+    {
+    }
 }
 ```
 
-`TritoneBehaviour` releases all bindings on disable and binds them again on enable. `ModuleBase` releases all of its bindings when the module stops.
+`UIElement<TView>` resolves the view once, binds listeners during `OnBindEvents`, and releases every Unity and Tritone listener when disabled. `ModuleBase` releases all of its bindings when the module stops.
