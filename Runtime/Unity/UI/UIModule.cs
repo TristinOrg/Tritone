@@ -52,8 +52,11 @@ namespace Tritone.Unity.UI
         public object OpenWindow(Type windowType)
         {
             var record = GetAvailableRecord(windowType);
-            if (record.Instance == null || record.Instance.GameObject == null)
-                record.Instance = CreateWindow(windowType, record.Definition);
+            if (record.InstanceObject == null)
+            {
+                record.Instance       = CreateWindow(windowType, record.Definition, out var instanceObject);
+                record.InstanceObject = instanceObject;
+            }
 
             record.Instance.Open();
             return record.Instance;
@@ -63,11 +66,10 @@ namespace Tritone.Unity.UI
         public bool CloseWindow(Type windowType)
         {
             if (!mWindows.TryGetValue(windowType, out var record) ||
-                record.Instance == null ||
-                record.Instance.GameObject == null)
+                record.InstanceObject == null)
                 return false;
 
-            record.Instance.Close();
+            record.InstanceObject.SetActive(false);
             return true;
         }
 
@@ -75,8 +77,7 @@ namespace Tritone.Unity.UI
         public object GetWindow(Type windowType)
         {
             if (!mWindows.TryGetValue(windowType, out var record) ||
-                record.Instance == null ||
-                record.Instance.GameObject == null)
+                record.InstanceObject == null)
                 return null;
 
             return record.Instance;
@@ -86,11 +87,10 @@ namespace Tritone.Unity.UI
         public bool IsWindowOpen(Type windowType)
         {
             if (!mWindows.TryGetValue(windowType, out var record) ||
-                record.Instance == null ||
-                record.Instance.GameObject == null)
+                record.InstanceObject == null)
                 return false;
 
-            return record.Instance.GameObject.activeSelf;
+            return record.InstanceObject.activeSelf;
         }
 
         /// <summary>
@@ -168,7 +168,13 @@ namespace Tritone.Unity.UI
         /// <summary>
         /// Creates one window instance below its configured layer.
         /// </summary>
-        private IUIWindow CreateWindow(Type windowType, UIWindowDefinition definition)
+        /// <param name="windowType">The concrete window component type.</param>
+        /// <param name="definition">The fixed catalog definition.</param>
+        /// <param name="instanceObject">The created window GameObject.</param>
+        /// <returns>The window interface found on the created GameObject.</returns>
+        private IUIWindow CreateWindow(Type windowType,
+                                       UIWindowDefinition definition,
+                                       out GameObject instanceObject)
         {
             var parent   = mRoot.GetLayer(definition.Layer);
             var instance = Object.Instantiate(definition.Prefab, parent, false);
@@ -179,6 +185,7 @@ namespace Tritone.Unity.UI
                 throw new InvalidOperationException($"Created prefab {definition.Prefab.name} does not contain {windowType.Name}.");
             }
 
+            instanceObject = instance;
             return window;
         }
 
@@ -210,12 +217,14 @@ namespace Tritone.Unity.UI
         /// </summary>
         private static void DestroyWindow(WindowRecord record)
         {
-            if (record.Instance == null || record.Instance.GameObject == null)
+            var instanceObject = record.InstanceObject;
+            record.Instance       = null;
+            record.InstanceObject = null;
+            if (instanceObject == null)
                 return;
 
-            record.Instance.Close();
-            Object.Destroy(record.Instance.GameObject);
-            record.Instance = null;
+            instanceObject.SetActive(false);
+            Object.Destroy(instanceObject);
         }
 
         /// <summary>
@@ -224,8 +233,15 @@ namespace Tritone.Unity.UI
         private sealed class WindowRecord
         {
             internal readonly UIWindowDefinition Definition;
-            internal IUIWindow Instance;
-            internal int       OwnerCount;
+
+            /// <summary>Stores the cached window behavior.</summary>
+            internal IUIWindow  Instance;
+
+            /// <summary>Stores the Unity object used for destruction-safe null checks.</summary>
+            internal GameObject InstanceObject;
+
+            /// <summary>Stores the number of active module owners.</summary>
+            internal int        OwnerCount;
 
             internal WindowRecord(UIWindowDefinition definition)
             {

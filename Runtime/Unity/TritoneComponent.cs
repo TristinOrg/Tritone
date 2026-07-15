@@ -78,7 +78,7 @@ namespace Tritone.Unity
         /// <summary>Binds a parameterless Tritone event.</summary>
         /// <param name="eventSource">The event that owns the listener.</param>
         /// <param name="listener">The callback invoked when the event is published.</param>
-        protected void BindEvent(Event eventSource, Action listener)
+        protected void BindEvent(Tritone.Events.Event eventSource, Action listener)
         {
             AddBinding(eventSource?.Bind(listener) ?? throw new ArgumentNullException(nameof(eventSource)));
         }

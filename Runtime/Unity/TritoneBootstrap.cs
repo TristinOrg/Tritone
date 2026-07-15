@@ -64,8 +64,18 @@ namespace Tritone.Unity
             Configure(builder);
 
             mApplication = builder.Build();
-            mApplication.Start();
-            Current = mApplication;
+            Current      = mApplication;
+            try
+            {
+                mApplication.Start();
+            }
+            catch
+            {
+                if (object.ReferenceEquals(Current, mApplication))
+                    Current = null;
+                mApplication = null;
+                throw;
+            }
         }
 
         /// <summary>
