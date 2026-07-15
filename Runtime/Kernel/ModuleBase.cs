@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Tritone.Events;
 using Tritone.Timing;
 
 namespace Tritone.Kernel
@@ -17,6 +19,11 @@ namespace Tritone.Kernel
         /// Owns every timer created through this module's timer helper methods.
         /// </summary>
         private ITimerScope mTimerScope;
+
+        /// <summary>
+        /// Stores event bindings that are automatically released when this module stops.
+        /// </summary>
+        private List<EventBinding> mEventBindings;
 
         /// <summary>
         /// Gets the minimum severity accepted by this module.
@@ -43,6 +50,7 @@ namespace Tritone.Kernel
             catch
             {
                 ReleaseTimerScope();
+                UnbindAllEvents();
                 mServices = null;
                 Logger = NullModuleLogger.Instance;
                 throw;
@@ -69,6 +77,7 @@ namespace Tritone.Kernel
             finally
             {
                 ReleaseTimerScope();
+                UnbindAllEvents();
                 mServices = null;
                 Logger = NullModuleLogger.Instance;
             }
@@ -135,6 +144,47 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
+        /// Binds a parameterless event for the lifetime of this module.
+        /// </summary>
+        protected void BindEvent(Event eventSource, Action listener)
+        {
+            AddEventBinding(eventSource?.Bind(listener) ?? throw new ArgumentNullException(nameof(eventSource)));
+        }
+
+        /// <summary>
+        /// Binds a one-parameter event for the lifetime of this module.
+        /// </summary>
+        protected void BindEvent<T1>(Event<T1> eventSource, Action<T1> listener)
+        {
+            AddEventBinding(eventSource?.Bind(listener) ?? throw new ArgumentNullException(nameof(eventSource)));
+        }
+
+        /// <summary>
+        /// Binds a two-parameter event for the lifetime of this module.
+        /// </summary>
+        protected void BindEvent<T1, T2>(Event<T1, T2> eventSource, Action<T1, T2> listener)
+        {
+            AddEventBinding(eventSource?.Bind(listener) ?? throw new ArgumentNullException(nameof(eventSource)));
+        }
+
+        /// <summary>
+        /// Binds a three-parameter event for the lifetime of this module.
+        /// </summary>
+        protected void BindEvent<T1, T2, T3>(Event<T1, T2, T3> eventSource, Action<T1, T2, T3> listener)
+        {
+            AddEventBinding(eventSource?.Bind(listener) ?? throw new ArgumentNullException(nameof(eventSource)));
+        }
+
+        /// <summary>
+        /// Binds a four-parameter event for the lifetime of this module.
+        /// </summary>
+        protected void BindEvent<T1, T2, T3, T4>(Event<T1, T2, T3, T4> eventSource,
+                                                  Action<T1, T2, T3, T4> listener)
+        {
+            AddEventBinding(eventSource?.Bind(listener) ?? throw new ArgumentNullException(nameof(eventSource)));
+        }
+
+        /// <summary>
         /// Configures services and dependencies required by the concrete module.
         /// </summary>
         /// <param name="services">The application-scoped service registry.</param>
@@ -177,6 +227,29 @@ namespace Tritone.Kernel
 
             mTimerScope.Dispose();
             mTimerScope = null;
+        }
+
+        /// <summary>
+        /// Stores one binding for automatic module lifetime cleanup.
+        /// </summary>
+        /// <param name="binding">The newly created event binding.</param>
+        private void AddEventBinding(EventBinding binding)
+        {
+            mEventBindings ??= new();
+            mEventBindings.Add(binding);
+        }
+
+        /// <summary>
+        /// Releases every event listener owned by this module.
+        /// </summary>
+        private void UnbindAllEvents()
+        {
+            if (mEventBindings == null)
+                return;
+
+            for (int i = mEventBindings.Count - 1; i >= 0; i--)
+                mEventBindings[i].Dispose();
+            mEventBindings.Clear();
         }
     }
 }

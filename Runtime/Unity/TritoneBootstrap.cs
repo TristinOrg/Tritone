@@ -10,6 +10,11 @@ namespace Tritone.Unity
     public abstract class TritoneBootstrap : MonoBehaviour
     {
         /// <summary>
+        /// Gets the application owned by the active Unity bootstrap.
+        /// </summary>
+        public static GameApplication Current { get; private set; }
+
+        /// <summary>
         /// Owns the Tritone application created by this component.
         /// </summary>
         private GameApplication mApplication;
@@ -60,6 +65,7 @@ namespace Tritone.Unity
 
             mApplication = builder.Build();
             mApplication.Start();
+            Current = mApplication;
         }
 
         /// <summary>
@@ -120,6 +126,8 @@ namespace Tritone.Unity
                 return;
 
             mApplication.Dispose();
+            if (object.ReferenceEquals(Current, mApplication))
+                Current = null;
             mApplication = null;
         }
     }

@@ -94,3 +94,44 @@ private void OnRefresh()
 Each module can own multiple keyed timers. Setting the same key replaces its previous timer, and stopping the module automatically cancels every timer it owns and clears its key cache.
 
 Use cached method-group delegates on frequently scheduled paths. Capturing lambdas can allocate even though the timer scheduler itself reuses preallocated storage.
+
+## Event quick start
+
+Keep strongly typed events together in the module that owns them:
+
+```csharp
+public sealed class PlayerModule : ModuleBase
+{
+    public EventsList EventsList { get; } = new();
+
+    public sealed class EventsList
+    {
+        public readonly Event<int> HealthChanged = new();
+        public readonly Event<int, PlayerData> PlayerDied = new();
+    }
+
+    private void NotifyHealthChanged(int health)
+    {
+        EventsList.HealthChanged.Publish(health);
+    }
+}
+```
+
+Unity UI can bind without manually unbinding each event:
+
+```csharp
+public sealed class PlayerPanel : TritoneBehaviour
+{
+    protected override void OnBindEvents()
+    {
+        var playerModule = GetModule<PlayerModule>();
+        BindEvent(playerModule.EventsList.HealthChanged, OnHealthChanged);
+    }
+
+    private void OnHealthChanged(int health)
+    {
+    }
+}
+```
+
+`TritoneBehaviour` releases all bindings on disable and binds them again on enable. `ModuleBase` releases all of its bindings when the module stops.
