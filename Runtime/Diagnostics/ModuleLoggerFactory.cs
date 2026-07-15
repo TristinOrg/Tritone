@@ -20,7 +20,7 @@ namespace Tritone.Diagnostics
         /// <param name="sinks">The destinations that receive accepted events.</param>
         public ModuleLoggerFactory(ELogLevel minimumLevel, params ILogSink[] sinks)
         {
-            mLogger = new Logger(minimumLevel, sinks);
+            mLogger = new(minimumLevel, sinks);
         }
 
         /// <summary>

@@ -55,7 +55,7 @@ namespace Tritone.Unity
         /// </summary>
         protected virtual void Awake()
         {
-            var builder = new GameApplicationBuilder();
+            GameApplicationBuilder builder = new();
             Configure(builder);
 
             mApplication = builder.Build();
@@ -74,10 +74,10 @@ namespace Tritone.Unity
             var unscaledDeltaTime = (double)Time.unscaledDeltaTime;
             mElapsedTime         += unscaledDeltaTime;
 
-            mFrameTime = new FrameTime(deltaTime,
-                                       unscaledDeltaTime,
-                                       mElapsedTime,
-                                       mFrameIndex++);
+            mFrameTime = new(deltaTime,
+                             unscaledDeltaTime,
+                             mElapsedTime,
+                             mFrameIndex++);
             mApplication.Update(in mFrameTime);
         }
 
@@ -104,10 +104,10 @@ namespace Tritone.Unity
             var unscaledDeltaTime = (double)Time.fixedUnscaledDeltaTime;
             mFixedElapsedTime    += unscaledDeltaTime;
 
-            var frameTime = new FrameTime(deltaTime,
-                                          unscaledDeltaTime,
-                                          mFixedElapsedTime,
-                                          mFixedFrameIndex++);
+            FrameTime frameTime = new(deltaTime,
+                                      unscaledDeltaTime,
+                                      mFixedElapsedTime,
+                                      mFixedFrameIndex++);
             mApplication.FixedUpdate(in frameTime);
         }
 

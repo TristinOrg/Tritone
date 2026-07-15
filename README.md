@@ -61,3 +61,36 @@ public sealed class GameBootstrap : TritoneBootstrap
 ```
 
 Attach `GameBootstrap` to one GameObject in the startup scene and enter Play Mode.
+
+## Timer quick start
+
+Register the shared timer scheduler once:
+
+```csharp
+builder.UseTimers();
+builder.AddModule(new GameplayModule());
+```
+
+Use integer or string keys directly from any `ModuleBase` implementation:
+
+```csharp
+protected override void OnStart()
+{
+    SetTimer("Refresh", 2.0, OnRefresh);
+    SetRepeatedTimer(1001, 1.0, OnSecondPassed);
+}
+
+private void OnSecondPassed()
+{
+    Logger.Debug("One second passed.");
+}
+
+private void OnRefresh()
+{
+    CancelTimer(1001);
+}
+```
+
+Each module can own multiple keyed timers. Setting the same key replaces its previous timer, and stopping the module automatically cancels every timer it owns and clears its key cache.
+
+Use cached method-group delegates on frequently scheduled paths. Capturing lambdas can allocate even though the timer scheduler itself reuses preallocated storage.

@@ -3,7 +3,8 @@
   "rootNamespace": "Tritone.Kernel.Tests",
   "references": [
     "Tritone.Kernel",
-    "Tritone.Diagnostics"
+    "Tritone.Diagnostics",
+    "Tritone.Timing"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

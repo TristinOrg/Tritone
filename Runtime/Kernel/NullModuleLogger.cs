@@ -10,7 +10,7 @@ namespace Tritone.Kernel
         /// <summary>
         /// Stores the shared no-op logger instance.
         /// </summary>
-        internal static readonly NullModuleLogger Instance = new NullModuleLogger();
+        internal static readonly NullModuleLogger Instance = new();
 
         /// <summary>
         /// Prevents external construction of the shared no-op logger.

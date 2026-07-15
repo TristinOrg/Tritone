@@ -36,7 +36,7 @@ namespace Tritone.Kernel
         /// <summary>
         /// Stores all application-scoped services.
         /// </summary>
-        private readonly ServiceRegistry mServices = new ServiceRegistry();
+        private readonly ServiceRegistry mServices = new();
 
         /// <summary>
         /// Stores immutable infrastructure passed to every module during configuration.
@@ -62,7 +62,7 @@ namespace Tritone.Kernel
         {
             mModules       = modules ?? throw new ArgumentNullException(nameof(modules));
             mLoggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
-            mModuleContext = new ModuleContext(mServices, mLoggerFactory);
+            mModuleContext = new(mServices, mLoggerFactory);
 
             mPreUpdateSystems   = CreateUpdateSystems<IPreUpdateSystem>(modules);
             mUpdateSystems      = CreateUpdateSystems<IUpdateSystem>(modules);
@@ -92,13 +92,13 @@ namespace Tritone.Kernel
             try
             {
                 // Register modules first so configuration can resolve concrete module dependencies.
-                for (var i = 0; i < mModules.Length; i++)
+                for (int i = 0, cnt = mModules.Length; i < cnt; i++)
                     mServices.AddSingleton(mModules[i].ModuleType, mModules[i].Module);
-                for (var i = 0; i < mModules.Length; i++)
+                for (int i = 0, cnt = mModules.Length; i < cnt; i++)
                     mModules[i].Module.Configure(mModuleContext);
 
                 mServices.Seal();
-                for (var i = 0; i < mModules.Length; i++)
+                for (int i = 0, cnt = mModules.Length; i < cnt; i++)
                 {
                     mModules[i].Module.Start();
                     mStartedModuleCount++;
@@ -133,9 +133,9 @@ namespace Tritone.Kernel
             if (State != EApplicationState.Running)
                 return;
 
-            for (var i = 0; i < mPreUpdateSystems.Length; i++)
+            for (int i = 0, cnt = mPreUpdateSystems.Length; i < cnt; i++)
                 mPreUpdateSystems[i].PreUpdate(in time);
-            for (var i = 0; i < mUpdateSystems.Length; i++)
+            for (int i = 0, cnt = mUpdateSystems.Length; i < cnt; i++)
                 mUpdateSystems[i].Update(in time);
         }
 
@@ -148,7 +148,7 @@ namespace Tritone.Kernel
             if (State != EApplicationState.Running)
                 return;
 
-            for (var i = 0; i < mLateUpdateSystems.Length; i++)
+            for (int i = 0, cnt = mLateUpdateSystems.Length; i < cnt; i++)
                 mLateUpdateSystems[i].LateUpdate(in time);
         }
 
@@ -161,7 +161,7 @@ namespace Tritone.Kernel
             if (State != EApplicationState.Running)
                 return;
 
-            for (var i = 0; i < mFixedUpdateSystems.Length; i++)
+            for (int i = 0, cnt = mFixedUpdateSystems.Length; i < cnt; i++)
                 mFixedUpdateSystems[i].FixedUpdate(in time);
         }
 
@@ -216,7 +216,7 @@ namespace Tritone.Kernel
                 }
                 catch (Exception exception)
                 {
-                    errors ??= new List<Exception>();
+                    errors ??= new();
                     errors.Add(exception);
                 }
             }
@@ -253,8 +253,8 @@ namespace Tritone.Kernel
         private static TSystem[] CreateUpdateSystems<TSystem>(ModuleRegistration[] modules)
             where TSystem : IOrderedUpdateSystem
         {
-            var systems = new List<TSystem>(modules.Length);
-            for (var i = 0; i < modules.Length; i++)
+            List<TSystem> systems = new(modules.Length);
+            for (int i = 0, cnt = modules.Length; i < cnt; i++)
             {
                 if (modules[i].Module is not TSystem system)
                     continue;

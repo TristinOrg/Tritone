@@ -1,0 +1,9 @@
+{
+  "name": "Tritone.Timing",
+  "rootNamespace": "Tritone.Timing",
+  "references": [
+    "Tritone.Kernel"
+  ],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

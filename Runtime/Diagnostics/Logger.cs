@@ -11,7 +11,7 @@ namespace Tritone.Diagnostics
         /// <summary>
         /// Synchronizes sink writes and logger disposal across threads.
         /// </summary>
-        private readonly object mSyncRoot = new object();
+        private readonly object mSyncRoot = new();
 
         /// <summary>
         /// Stores the immutable log destinations.
@@ -40,7 +40,7 @@ namespace Tritone.Diagnostics
 
             mMinimumLevel = minimumLevel;
             mSinks        = new ILogSink[sinks.Length];
-            for (var i = 0; i < sinks.Length; i++)
+            for (int i = 0, cnt = sinks.Length; i < cnt; i++)
             {
                 if (sinks[i] == null)
                     throw new ArgumentException("A log sink cannot be null.", nameof(sinks));
@@ -74,12 +74,12 @@ namespace Tritone.Diagnostics
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            var logEvent = new LogEvent(DateTime.UtcNow, level, category, message, exception);
+            LogEvent logEvent = new(DateTime.UtcNow, level, category, message, exception);
             lock (mSyncRoot)
             {
                 if (mDisposed)
                     return;
-                for (var i = 0; i < mSinks.Length; i++)
+                for (int i = 0, cnt = mSinks.Length; i < cnt; i++)
                     mSinks[i].Write(in logEvent);
             }
         }

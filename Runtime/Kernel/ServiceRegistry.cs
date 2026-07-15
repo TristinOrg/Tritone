@@ -11,7 +11,7 @@ namespace Tritone.Kernel
         /// <summary>
         /// Stores service instances by their explicit service contract.
         /// </summary>
-        private readonly Dictionary<Type, object> mServices = new Dictionary<Type, object>();
+        private readonly Dictionary<Type, object> mServices = new();
 
         /// <summary>
         /// Indicates whether service registration has been closed.

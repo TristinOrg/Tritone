@@ -10,7 +10,7 @@ namespace Tritone.Kernel
         /// <summary>
         /// Stores the shared no-op factory instance.
         /// </summary>
-        internal static readonly NullModuleLoggerFactory Instance = new NullModuleLoggerFactory();
+        internal static readonly NullModuleLoggerFactory Instance = new();
 
         /// <summary>
         /// Prevents external construction of the shared no-op factory.

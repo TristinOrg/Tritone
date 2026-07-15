@@ -15,8 +15,8 @@ namespace Tritone.Kernel
         /// <returns>The registrations in dependency-safe startup order.</returns>
         internal static ModuleRegistration[] Sort(IReadOnlyList<ModuleRegistration> registrations)
         {
-            var registrationsByType = new Dictionary<Type, ModuleRegistration>(registrations.Count);
-            for (var i = 0; i < registrations.Count; i++)
+            Dictionary<Type, ModuleRegistration> registrationsByType = new(registrations.Count);
+            for (int i = 0, cnt = registrations.Count; i < cnt; i++)
             {
                 var registration = registrations[i];
                 if (registrationsByType.ContainsKey(registration.ModuleType))
@@ -25,10 +25,10 @@ namespace Tritone.Kernel
                 registrationsByType.Add(registration.ModuleType, registration);
             }
 
-            var states = new Dictionary<Type, byte>(registrations.Count);
-            var result = new List<ModuleRegistration>(registrations.Count);
-            var path   = new List<Type>(registrations.Count);
-            for (var i = 0; i < registrations.Count; i++)
+            Dictionary<Type, byte> states       = new(registrations.Count);
+            List<ModuleRegistration> result     = new(registrations.Count);
+            List<Type> path                     = new(registrations.Count);
+            for (int i = 0, cnt = registrations.Count; i < cnt; i++)
                 Visit(registrations[i], registrationsByType, states, result, path);
 
             return result.ToArray();
@@ -55,7 +55,7 @@ namespace Tritone.Kernel
                 if (state == 1)
                 {
                     var cycleStart = path.IndexOf(current.ModuleType);
-                    var cycle      = new List<string>();
+                    List<string> cycle = new();
                     for (var i = cycleStart; i < path.Count; i++)
                         cycle.Add(path[i].FullName);
                     cycle.Add(current.ModuleType.FullName);
@@ -66,7 +66,7 @@ namespace Tritone.Kernel
 
             states[current.ModuleType] = 1;
             path.Add(current.ModuleType);
-            for (var i = 0; i < current.Dependencies.Length; i++)
+            for (int i = 0, cnt = current.Dependencies.Length; i < cnt; i++)
             {
                 var dependency = current.Dependencies[i];
                 if (!registrationsByType.TryGetValue(dependency, out var dependencyRegistration))

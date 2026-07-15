@@ -11,7 +11,7 @@ namespace Tritone.Kernel
         /// <summary>
         /// Stores module registrations in their original declaration order.
         /// </summary>
-        private readonly List<ModuleRegistration> mModules = new List<ModuleRegistration>();
+        private readonly List<ModuleRegistration> mModules = new();
 
         /// <summary>
         /// Stores the application logger factory or the default no-op implementation.
