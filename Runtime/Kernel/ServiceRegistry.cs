@@ -97,5 +97,31 @@ namespace Tritone.Kernel
         {
             mSealed = true;
         }
+
+        /// <summary>
+        /// Registers the currently active scene module after normal services are sealed.
+        /// </summary>
+        internal void AddRuntime(Type serviceType, object instance)
+        {
+            if (serviceType == null)
+                throw new ArgumentNullException(nameof(serviceType));
+            if (instance == null)
+                throw new ArgumentNullException(nameof(instance));
+            if (mServices.ContainsKey(serviceType))
+                throw new InvalidOperationException($"Service '{serviceType.FullName}' is already registered.");
+
+            mServices.Add(serviceType, instance);
+        }
+
+        /// <summary>
+        /// Removes the exact active scene module instance from runtime lookup.
+        /// </summary>
+        internal void RemoveRuntime(Type serviceType, object instance)
+        {
+            if (!mServices.TryGetValue(serviceType, out var current) || !ReferenceEquals(current, instance))
+                return;
+
+            mServices.Remove(serviceType);
+        }
     }
 }

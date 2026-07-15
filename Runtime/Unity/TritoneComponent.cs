@@ -50,6 +50,20 @@ namespace Tritone.Unity
         }
 
         /// <summary>
+        /// Stops the current scene module and enters a newly created registered module.
+        /// </summary>
+        /// <typeparam name="TModule">The concrete registered scene module type.</typeparam>
+        /// <returns>The newly active module instance.</returns>
+        protected TModule SwitchModule<TModule>() where TModule : class, IModule
+        {
+            var application = TritoneBootstrap.Current;
+            if (application == null)
+                throw new InvalidOperationException("No running Tritone bootstrap is available.");
+
+            return application.SwitchModule<TModule>();
+        }
+
+        /// <summary>
         /// Gets the configured application UI service.
         /// </summary>
         private static IUIService GetUIService()

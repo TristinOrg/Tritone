@@ -242,6 +242,19 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
+        /// Stops the current scene module and enters a newly created registered module.
+        /// </summary>
+        /// <typeparam name="TModule">The concrete registered scene module type.</typeparam>
+        /// <returns>The newly active module instance.</returns>
+        protected TModule SwitchModule<TModule>() where TModule : class, IModule
+        {
+            if (mServices == null)
+                throw new InvalidOperationException("Scene modules can only be switched during an active module lifecycle.");
+
+            return (TModule)mServices.GetRequired<ISceneModuleService>().SwitchModule(typeof(TModule));
+        }
+
+        /// <summary>
         /// Configures services and dependencies required by the concrete module.
         /// </summary>
         /// <param name="services">The application-scoped service registry.</param>

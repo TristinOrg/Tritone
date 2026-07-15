@@ -182,3 +182,24 @@ public sealed class ShopModule : ModuleBase
 ```
 
 Module windows are available while at least one active module owns them. Releasing the final owner automatically closes and destroys the cached instance. Application windows remain available until the application stops.
+
+## Scene module switching
+
+Persistent infrastructure modules start with the application. Scene modules are registered as factories and created only when entered:
+
+```csharp
+builder.UseTimers();
+builder.UseUI(mUIRoot, mWindowCatalog);
+builder.AddSceneModule<LoginModule>();
+builder.AddSceneModule(() => new BattleModule(mBattleConfig));
+builder.UseInitialSceneModule<LoginModule>();
+```
+
+Switch from the application, a module, or a `TritoneComponent`:
+
+```csharp
+SwitchModule<LoginModule>();
+SwitchModule<BattleModule>();
+```
+
+Switching stops and removes the previous scene module before configuring a fresh instance. Its timers, event bindings, and window ownership are released automatically. Data that must survive scene module changes should live in a persistent model module.

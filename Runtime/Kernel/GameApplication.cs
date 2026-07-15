@@ -6,12 +6,20 @@ namespace Tritone.Kernel
     /// <summary>
     /// Owns the service registry, module lifecycle, and per-frame update dispatch.
     /// </summary>
-    public sealed class GameApplication : IDisposable
+    public sealed class GameApplication : IDisposable, ISceneModuleService
     {
         /// <summary>
         /// Stores modules in dependency-safe startup order.
         /// </summary>
         private readonly ModuleRegistration[] mModules;
+
+        /// <summary>
+        /// Maps registered scene module types to fresh-instance factories.
+        /// </summary>
+        private readonly Dictionary<Type, SceneModuleRegistration> mSceneModules;
+
+        /// <summary>Stores the scene module entered immediately after persistent startup.</summary>
+        private readonly Type mInitialSceneModuleType;
 
         /// <summary>
         /// Stores pre-update systems in stable execution order.
@@ -53,16 +61,47 @@ namespace Tritone.Kernel
         /// </summary>
         private int mStartedModuleCount;
 
+        /// <summary>Stores the currently active scene module.</summary>
+        private IModule mActiveSceneModule;
+
+        /// <summary>Stores the active scene module type.</summary>
+        private Type mActiveSceneModuleType;
+
+        /// <summary>Stores the active scene module's optional pre-update interface.</summary>
+        private IPreUpdateSystem   mScenePreUpdateSystem;
+
+        /// <summary>Stores the active scene module's optional normal update interface.</summary>
+        private IUpdateSystem      mSceneUpdateSystem;
+
+        /// <summary>Stores the active scene module's optional late-update interface.</summary>
+        private ILateUpdateSystem  mSceneLateUpdateSystem;
+
+        /// <summary>Stores the active scene module's optional fixed-update interface.</summary>
+        private IFixedUpdateSystem mSceneFixedUpdateSystem;
+
         /// <summary>
         /// Initializes an application with validated module registrations.
         /// </summary>
         /// <param name="modules">The modules in dependency-safe startup order.</param>
+        /// <param name="sceneModules">The scene module factories available for dynamic activation.</param>
+        /// <param name="initialSceneModuleType">The optional scene module entered after startup.</param>
         /// <param name="loggerFactory">The factory used to create and own module loggers.</param>
-        internal GameApplication(ModuleRegistration[] modules, IModuleLoggerFactory loggerFactory)
+        internal GameApplication(ModuleRegistration[] modules,
+                                 SceneModuleRegistration[] sceneModules,
+                                 Type initialSceneModuleType,
+                                 IModuleLoggerFactory loggerFactory)
         {
-            mModules       = modules ?? throw new ArgumentNullException(nameof(modules));
-            mLoggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
-            mModuleContext = new(mServices, mLoggerFactory);
+            mModules                = modules ?? throw new ArgumentNullException(nameof(modules));
+            mLoggerFactory          = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+            mModuleContext          = new(mServices, mLoggerFactory);
+            mSceneModules           = new(sceneModules?.Length ?? 0);
+            mInitialSceneModuleType = initialSceneModuleType;
+
+            if (sceneModules != null)
+            {
+                for (int i = 0, cnt = sceneModules.Length; i < cnt; i++)
+                    mSceneModules.Add(sceneModules[i].ModuleType, sceneModules[i]);
+            }
 
             mPreUpdateSystems   = CreateUpdateSystems<IPreUpdateSystem>(modules);
             mUpdateSystems      = CreateUpdateSystems<IUpdateSystem>(modules);
@@ -80,6 +119,9 @@ namespace Tritone.Kernel
         /// </summary>
         public IServiceRegistry Services => mServices;
 
+        /// <inheritdoc />
+        public Type ActiveModuleType => mActiveSceneModuleType;
+
         /// <summary>
         /// Configures and starts every module in dependency order.
         /// </summary>
@@ -92,6 +134,7 @@ namespace Tritone.Kernel
             try
             {
                 // Register modules first so configuration can resolve concrete module dependencies.
+                mServices.AddSingleton<ISceneModuleService>(this);
                 for (int i = 0, cnt = mModules.Length; i < cnt; i++)
                     mServices.AddSingleton(mModules[i].ModuleType, mModules[i].Module);
                 for (int i = 0, cnt = mModules.Length; i < cnt; i++)
@@ -104,6 +147,8 @@ namespace Tritone.Kernel
                     mStartedModuleCount++;
                 }
                 State = EApplicationState.Running;
+                if (mInitialSceneModuleType != null)
+                    SwitchModule(mInitialSceneModuleType);
             }
             catch (Exception startupException)
             {
@@ -133,10 +178,31 @@ namespace Tritone.Kernel
             if (State != EApplicationState.Running)
                 return;
 
+            var scenePreUpdated = false;
             for (int i = 0, cnt = mPreUpdateSystems.Length; i < cnt; i++)
+            {
+                if (!scenePreUpdated && mScenePreUpdateSystem != null && mScenePreUpdateSystem.Order < mPreUpdateSystems[i].Order)
+                {
+                    mScenePreUpdateSystem.PreUpdate(in time);
+                    scenePreUpdated = true;
+                }
                 mPreUpdateSystems[i].PreUpdate(in time);
+            }
+            if (!scenePreUpdated)
+                mScenePreUpdateSystem?.PreUpdate(in time);
+
+            var sceneUpdated = false;
             for (int i = 0, cnt = mUpdateSystems.Length; i < cnt; i++)
+            {
+                if (!sceneUpdated && mSceneUpdateSystem != null && mSceneUpdateSystem.Order < mUpdateSystems[i].Order)
+                {
+                    mSceneUpdateSystem.Update(in time);
+                    sceneUpdated = true;
+                }
                 mUpdateSystems[i].Update(in time);
+            }
+            if (!sceneUpdated)
+                mSceneUpdateSystem?.Update(in time);
         }
 
         /// <summary>
@@ -148,8 +214,18 @@ namespace Tritone.Kernel
             if (State != EApplicationState.Running)
                 return;
 
+            var sceneUpdated = false;
             for (int i = 0, cnt = mLateUpdateSystems.Length; i < cnt; i++)
+            {
+                if (!sceneUpdated && mSceneLateUpdateSystem != null && mSceneLateUpdateSystem.Order < mLateUpdateSystems[i].Order)
+                {
+                    mSceneLateUpdateSystem.LateUpdate(in time);
+                    sceneUpdated = true;
+                }
                 mLateUpdateSystems[i].LateUpdate(in time);
+            }
+            if (!sceneUpdated)
+                mSceneLateUpdateSystem?.LateUpdate(in time);
         }
 
         /// <summary>
@@ -161,8 +237,95 @@ namespace Tritone.Kernel
             if (State != EApplicationState.Running)
                 return;
 
+            var sceneUpdated = false;
             for (int i = 0, cnt = mFixedUpdateSystems.Length; i < cnt; i++)
+            {
+                if (!sceneUpdated && mSceneFixedUpdateSystem != null && mSceneFixedUpdateSystem.Order < mFixedUpdateSystems[i].Order)
+                {
+                    mSceneFixedUpdateSystem.FixedUpdate(in time);
+                    sceneUpdated = true;
+                }
                 mFixedUpdateSystems[i].FixedUpdate(in time);
+            }
+            if (!sceneUpdated)
+                mSceneFixedUpdateSystem?.FixedUpdate(in time);
+        }
+
+        /// <summary>
+        /// Switches to a registered scene module and returns its fresh instance.
+        /// </summary>
+        /// <typeparam name="TModule">The concrete registered scene module type.</typeparam>
+        /// <returns>The active scene module instance.</returns>
+        public TModule SwitchModule<TModule>() where TModule : class, IModule
+        {
+            return (TModule)SwitchModule(typeof(TModule));
+        }
+
+        /// <inheritdoc />
+        public object SwitchModule(Type moduleType)
+        {
+            if (State != EApplicationState.Running)
+                throw new InvalidOperationException("Scene modules can only be switched while the application is running.");
+            if (moduleType == null)
+                throw new ArgumentNullException(nameof(moduleType));
+            if (moduleType == mActiveSceneModuleType)
+                return mActiveSceneModule;
+            if (!mSceneModules.TryGetValue(moduleType, out var registration))
+                throw new InvalidOperationException($"Scene module '{moduleType.FullName}' is not registered.");
+
+            ExitModule();
+            var module = registration.Factory();
+            if (module == null || module.GetType() != moduleType)
+                throw new InvalidOperationException($"Scene module factory for '{moduleType.FullName}' returned an invalid instance.");
+
+            var configured = false;
+            mServices.AddRuntime(moduleType, module);
+            try
+            {
+                module.Configure(mModuleContext);
+                configured = true;
+                module.Start();
+                SetActiveSceneModule(moduleType, module);
+                return module;
+            }
+            catch (Exception startupException)
+            {
+                Exception cleanupException = null;
+                if (configured)
+                {
+                    try
+                    {
+                        module.Stop();
+                    }
+                    catch (Exception exception)
+                    {
+                        cleanupException = exception;
+                    }
+                }
+                mServices.RemoveRuntime(moduleType, module);
+                if (cleanupException != null)
+                    throw new AggregateException("Scene module startup and cleanup failed.", startupException, cleanupException);
+                throw;
+            }
+        }
+
+        /// <inheritdoc />
+        public void ExitModule()
+        {
+            if (mActiveSceneModule == null)
+                return;
+
+            var module     = mActiveSceneModule;
+            var moduleType = mActiveSceneModuleType;
+            SetActiveSceneModule(null, null);
+            try
+            {
+                module.Stop();
+            }
+            finally
+            {
+                mServices.RemoveRuntime(moduleType, module);
+            }
         }
 
         /// <summary>
@@ -182,9 +345,27 @@ namespace Tritone.Kernel
             }
 
             State = EApplicationState.Stopping;
+            Exception sceneException = null;
+            try
+            {
+                ExitModule();
+            }
+            catch (Exception exception)
+            {
+                sceneException = exception;
+            }
             var shutdownException       = StopStartedModules();
             var infrastructureException = DisposeInfrastructure();
             State = EApplicationState.Stopped;
+            if (sceneException != null)
+            {
+                List<Exception> errors = new() { sceneException };
+                if (shutdownException != null)
+                    errors.Add(shutdownException);
+                if (infrastructureException != null)
+                    errors.Add(infrastructureException);
+                throw new AggregateException("Application shutdown failed.", errors);
+            }
             if (shutdownException != null && infrastructureException != null)
                 throw new AggregateException("Application modules and infrastructure failed to stop.", shutdownException, infrastructureException);
             if (shutdownException != null)
@@ -242,6 +423,19 @@ namespace Tritone.Kernel
             {
                 return exception;
             }
+        }
+
+        /// <summary>
+        /// Updates the active scene module and caches its optional update interfaces.
+        /// </summary>
+        private void SetActiveSceneModule(Type moduleType, IModule module)
+        {
+            mActiveSceneModuleType  = moduleType;
+            mActiveSceneModule      = module;
+            mScenePreUpdateSystem   = module as IPreUpdateSystem;
+            mSceneUpdateSystem      = module as IUpdateSystem;
+            mSceneLateUpdateSystem  = module as ILateUpdateSystem;
+            mSceneFixedUpdateSystem = module as IFixedUpdateSystem;
         }
 
         /// <summary>
