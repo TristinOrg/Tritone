@@ -4,6 +4,7 @@
   "references": [
     "Tritone.Kernel",
     "Tritone.Diagnostics",
+    "Tritone.Content",
     "Unity.ugui"
   ],
   "autoReferenced": true,

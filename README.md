@@ -282,3 +282,41 @@ var prefab = await LoadAssetAsync<GameObject>("UI/LoginWindow");
 ```
 
 The registry validates missing dependencies and cycles once, then precomputes a unique dependency-first load order. Assets share loaded bundles and in-flight bundle requests. Releasing the final asset unloads its root bundle and dependencies in reverse order. The registry becomes immutable after provider construction; feature code may compose registrations before that point without editing a central ScriptableObject. `FileAssetBundleSource` is the local first-stage source. A later remote source can implement `IAssetBundleSource` without changing AssetModule or gameplay calls.
+
+## Content update planning
+
+Describe one installed or remote content version with immutable bundle and asset entries:
+
+```csharp
+var remoteManifest = new ContentManifest(
+    "1.1.0",
+    new[]
+    {
+        new ContentBundle("core", "core.bundle", coreHash, coreSize),
+        new ContentBundle("ui", "ui.bundle", uiHash, uiSize, "core")
+    },
+    new[]
+    {
+        new ContentAsset("UI/LoginWindow", "ui", "Assets/Game/UI/LoginWindow.prefab")
+    });
+```
+
+Compare the installed manifest with the remote manifest before downloading files:
+
+```csharp
+var plan = ContentUpdatePlanner.CreatePlan(localManifest, remoteManifest);
+
+for (int i = 0, cnt = plan.Downloads.Count; i < cnt; i++)
+{
+    var bundle = plan.Downloads[i];
+    // A later update executor downloads and verifies this file.
+}
+```
+
+Planning compares bundle file names, hashes, and sizes instead of trusting the version label alone. It reuses identical local files after logical bundle renames, reports obsolete files separately, and preserves remote manifest order for deterministic downloads. After a successful update, create the loading registry directly from the active manifest:
+
+```csharp
+var registry = remoteManifest.CreateAssetBundleRegistry();
+var provider = new AssetBundleAssetProvider(registry, source);
+builder.UseAssets(provider);
+```

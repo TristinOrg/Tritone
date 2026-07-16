@@ -1,0 +1,7 @@
+{
+  "name": "Tritone.Content",
+  "rootNamespace": "Tritone.Content",
+  "references": [],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}
