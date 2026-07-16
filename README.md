@@ -227,3 +227,26 @@ Despawn(effect);
 ```
 
 The first request creates the matching type or prefab pool. Objects left active are automatically returned when their owning module or `TritoneComponent` is released. Implement `IPoolable` only when an object needs spawn and despawn reset callbacks.
+
+## Asset quick start
+
+Enable asset management with the built-in Unity Resources provider:
+
+```csharp
+builder.UseAssets();
+```
+
+Load assets directly from a `ModuleBase` or `TritoneComponent`:
+
+```csharp
+var config = LoadAsset<TextAsset>("Configs/GameConfig");
+var prefab = await LoadAssetAsync<GameObject>("UI/LoginWindow");
+```
+
+Repeated path and type requests share one cached load. Concurrent asynchronous calls also join the same provider operation. Manual release is optional:
+
+```csharp
+ReleaseAsset(config);
+```
+
+Every remaining reference is released automatically when its owning module stops or its `TritoneComponent` is destroyed. Implement `IAssetProvider` and pass it to `UseAssets(provider)` when replacing Resources with Addressables or another backend.

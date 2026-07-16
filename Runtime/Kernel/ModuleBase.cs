@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Tritone.Assets;
 using Tritone.Events;
 using Tritone.Pooling;
 using Tritone.Timing;
@@ -35,6 +37,9 @@ namespace Tritone.Kernel
         // Owns every pooled object borrowed through this module's helper methods.
         private IPoolScope mPoolScope;
 
+        // Owns every asset reference loaded through this module's helper methods.
+        private IAssetScope mAssetScope;
+
         /// <summary>
         /// Gets the minimum severity accepted by this module.
         /// </summary>
@@ -63,6 +68,7 @@ namespace Tritone.Kernel
                 UnbindAllEvents();
                 ReleaseUIWindowScope();
                 ReleasePoolScope();
+                ReleaseAssetScope();
                 mServices = null;
                 Logger = NullModuleLogger.Instance;
                 throw;
@@ -92,6 +98,7 @@ namespace Tritone.Kernel
                 UnbindAllEvents();
                 ReleaseUIWindowScope();
                 ReleasePoolScope();
+                ReleaseAssetScope();
                 mServices = null;
                 Logger = NullModuleLogger.Instance;
             }
@@ -293,6 +300,30 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
+        /// Loads one asset synchronously and owns its reference for this module's lifetime.
+        /// </summary>
+        protected T LoadAsset<T>(string path) where T : class
+        {
+            return GetAssetScope().Load<T>(path);
+        }
+
+        /// <summary>
+        /// Loads one asset asynchronously and owns its reference for this module's lifetime.
+        /// </summary>
+        protected Task<T> LoadAssetAsync<T>(string path) where T : class
+        {
+            return GetAssetScope().LoadAsync<T>(path);
+        }
+
+        /// <summary>
+        /// Releases one asset reference owned by this module before the module stops.
+        /// </summary>
+        protected bool ReleaseAsset<T>(T asset) where T : class
+        {
+            return mAssetScope != null && mAssetScope.Release(asset);
+        }
+
+        /// <summary>
         /// Configures services and dependencies required by the concrete module.
         /// </summary>
         /// <param name="services">The application-scoped service registry.</param>
@@ -422,6 +453,34 @@ namespace Tritone.Kernel
 
             mPoolScope.Dispose();
             mPoolScope = null;
+        }
+
+        /// <summary>
+        /// Gets or lazily creates the asset scope owned by this module.
+        /// </summary>
+        private IAssetScope GetAssetScope()
+        {
+            if (mAssetScope != null)
+                return mAssetScope;
+            if (mServices == null)
+                throw new InvalidOperationException("Assets can only be loaded during an active module lifecycle.");
+            if (!mServices.TryGet<IAssetService>(out var assetService))
+                throw new InvalidOperationException("Asset infrastructure is not configured. Call builder.UseAssets() before adding game modules.");
+
+            mAssetScope = assetService.CreateScope();
+            return mAssetScope;
+        }
+
+        /// <summary>
+        /// Releases every asset reference owned by this module and releases its scope.
+        /// </summary>
+        private void ReleaseAssetScope()
+        {
+            if (mAssetScope == null)
+                return;
+
+            mAssetScope.Dispose();
+            mAssetScope = null;
         }
     }
 }

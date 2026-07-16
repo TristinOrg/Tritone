@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Tritone.Assets;
 using Tritone.Events;
 using Tritone.Kernel;
 using Tritone.Pooling;
@@ -20,6 +22,9 @@ namespace Tritone.Unity
 
         // Owns pooled objects borrowed by this Unity component.
         private IPoolScope mPoolScope;
+
+        // Owns asset references loaded by this Unity component.
+        private IAssetScope mAssetScope;
 
         /// <summary>
         /// Gets one registered application module.
@@ -113,6 +118,30 @@ namespace Tritone.Unity
         }
 
         /// <summary>
+        /// Loads one asset synchronously and owns its reference for this component's lifetime.
+        /// </summary>
+        protected T LoadAsset<T>(string path) where T : class
+        {
+            return GetAssetScope().Load<T>(path);
+        }
+
+        /// <summary>
+        /// Loads one asset asynchronously and owns its reference for this component's lifetime.
+        /// </summary>
+        protected Task<T> LoadAssetAsync<T>(string path) where T : class
+        {
+            return GetAssetScope().LoadAsync<T>(path);
+        }
+
+        /// <summary>
+        /// Releases one asset reference owned by this component before it is destroyed.
+        /// </summary>
+        protected bool ReleaseAsset<T>(T asset) where T : class
+        {
+            return mAssetScope != null && mAssetScope.Release(asset);
+        }
+
+        /// <summary>
         /// Gets the configured application UI service.
         /// </summary>
         private static IUIService GetUIService()
@@ -200,6 +229,7 @@ namespace Tritone.Unity
         {
             ReleaseBindings();
             ReleasePoolScope();
+            ReleaseAssetScope();
         }
 
         /// <summary>
@@ -227,6 +257,33 @@ namespace Tritone.Unity
 
             mPoolScope.Dispose();
             mPoolScope = null;
+        }
+
+        /// <summary>
+        /// Gets or lazily creates the asset scope owned by this component.
+        /// </summary>
+        private IAssetScope GetAssetScope()
+        {
+            if (mAssetScope != null)
+                return mAssetScope;
+
+            var application = TritoneBootstrap.Current;
+            if (application == null)
+                throw new InvalidOperationException("No running Tritone bootstrap is available.");
+            mAssetScope = application.Services.GetRequired<IAssetService>().CreateScope();
+            return mAssetScope;
+        }
+
+        /// <summary>
+        /// Releases every asset reference owned by this component and releases its scope.
+        /// </summary>
+        private void ReleaseAssetScope()
+        {
+            if (mAssetScope == null)
+                return;
+
+            mAssetScope.Dispose();
+            mAssetScope = null;
         }
     }
 }
