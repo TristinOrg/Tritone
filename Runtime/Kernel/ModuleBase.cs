@@ -284,6 +284,18 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
+        /// Returns one plain C# object and clears the caller's reference after a successful return.
+        /// </summary>
+        protected bool Return<T>(ref T instance) where T : class
+        {
+            if (instance == null || !Return(instance))
+                return false;
+
+            instance = null;
+            return true;
+        }
+
+        /// <summary>
         /// Spawns one GameObject or Component prefab from a lazily created prefab pool.
         /// </summary>
         protected T Spawn<T>(T prefab, object parent = null) where T : class
@@ -297,6 +309,18 @@ namespace Tritone.Kernel
         protected bool Despawn<T>(T instance) where T : class
         {
             return mPoolScope != null && mPoolScope.Despawn(instance);
+        }
+
+        /// <summary>
+        /// Returns one spawned Unity object and clears the caller's reference after a successful return.
+        /// </summary>
+        protected bool Despawn<T>(ref T instance) where T : class
+        {
+            if (instance == null || !Despawn(instance))
+                return false;
+
+            instance = null;
+            return true;
         }
 
         /// <summary>

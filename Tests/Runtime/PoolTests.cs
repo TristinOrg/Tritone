@@ -1,7 +1,9 @@
 using NUnit.Framework;
 using Tritone.Kernel;
 using Tritone.Pooling;
+using Tritone.Unity;
 using Tritone.Unity.Pooling;
+using Tritone.Unity.UI;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -23,11 +25,13 @@ namespace Tritone.Tests
             first.Value     = 42;
 
             Assert.AreEqual(1, first.SpawnCount);
-            Assert.IsTrue(consumer.ReturnData(first));
-            Assert.AreEqual(1, first.DespawnCount);
+            var returned = first;
+            Assert.IsTrue(consumer.ReturnData(ref first));
+            Assert.IsNull(first);
+            Assert.AreEqual(1, returned.DespawnCount);
 
             var second = consumer.RentData();
-            Assert.AreSame(first, second);
+            Assert.AreSame(returned, second);
             Assert.AreEqual(2, second.SpawnCount);
             application.Stop();
         }
@@ -38,7 +42,7 @@ namespace Tritone.Tests
         [Test]
         public void Spawn_Despawn_ReusesComponentPrefab()
         {
-            var prefabObject = new GameObject("PoolTestPrefab");
+            GameObject prefabObject = new("PoolTestPrefab");
             prefabObject.SetActive(false);
             var prefab      = prefabObject.AddComponent<PoolTestComponent>();
             var application = CreateApplication(out var consumer);
@@ -48,12 +52,14 @@ namespace Tritone.Tests
             Assert.IsTrue(first.gameObject.activeSelf);
             Assert.AreEqual(1, first.SpawnCount);
 
-            Assert.IsTrue(consumer.DespawnComponent(first));
-            Assert.IsFalse(first.gameObject.activeSelf);
-            Assert.AreEqual(1, first.DespawnCount);
+            var returned = first;
+            Assert.IsTrue(consumer.DespawnComponent(ref first));
+            Assert.IsNull(first);
+            Assert.IsFalse(returned.gameObject.activeSelf);
+            Assert.AreEqual(1, returned.DespawnCount);
 
             var second = consumer.SpawnComponent(prefab);
-            Assert.AreSame(first, second);
+            Assert.AreSame(returned, second);
             Assert.AreEqual(2, second.SpawnCount);
 
             application.Stop();
@@ -75,13 +81,50 @@ namespace Tritone.Tests
         }
 
         /// <summary>
+        /// Verifies that disabling a UI element returns all objects spawned during its open lifetime.
+        /// </summary>
+        [Test]
+        public void UIElementDisable_AutomaticallyReturnsSpawnedObjects()
+        {
+            GameObject bootstrapObject = new("PoolTestBootstrap");
+            bootstrapObject.SetActive(false);
+            var bootstrap = bootstrapObject.AddComponent<PoolTestBootstrap>();
+            bootstrap.StartForTest();
+
+            GameObject prefabObject = new("PoolTestUIPrefab");
+            prefabObject.SetActive(false);
+            var prefab = prefabObject.AddComponent<PoolTestComponent>();
+
+            GameObject elementObject = new("PoolTestUIElement");
+            elementObject.SetActive(false);
+            elementObject.AddComponent<PoolTestView>();
+            var element = elementObject.AddComponent<PoolTestElement>();
+
+            var first = element.SpawnForTest(prefab);
+            Assert.IsTrue(first.gameObject.activeSelf);
+
+            element.DisableForTest();
+            Assert.IsFalse(first.gameObject.activeSelf);
+            Assert.AreEqual(1, first.DespawnCount);
+
+            var second = element.SpawnForTest(prefab);
+            Assert.AreSame(first, second);
+            element.DisableForTest();
+
+            bootstrap.StopForTest();
+            Object.DestroyImmediate(elementObject);
+            Object.DestroyImmediate(prefabObject);
+            Object.DestroyImmediate(bootstrapObject);
+        }
+
+        /// <summary>
         /// Creates one application containing pool infrastructure and a pool consumer.
         /// </summary>
         private static GameApplication CreateApplication(out PoolConsumerModule consumer)
         {
             consumer = new();
-            var application = new GameApplicationBuilder()
-                .UsePools()
+            GameApplicationBuilder builder = new();
+            var application                = builder.UsePools()
                 .AddModule(consumer)
                 .Build();
             application.Start();
@@ -104,9 +147,9 @@ namespace Tritone.Tests
             /// <summary>
             /// Returns one test data object.
             /// </summary>
-            internal bool ReturnData(PoolTestData instance)
+            internal bool ReturnData(ref PoolTestData instance)
             {
-                return Return(instance);
+                return Return(ref instance);
             }
 
             /// <summary>
@@ -120,9 +163,9 @@ namespace Tritone.Tests
             /// <summary>
             /// Despawns one test Component instance.
             /// </summary>
-            internal bool DespawnComponent(PoolTestComponent instance)
+            internal bool DespawnComponent(ref PoolTestComponent instance)
             {
-                return Despawn(instance);
+                return Despawn(ref instance);
             }
         }
     }
@@ -184,6 +227,65 @@ namespace Tritone.Tests
         public void OnDespawn()
         {
             DespawnCount++;
+        }
+    }
+
+    /// <summary>
+    /// Creates pool infrastructure for Unity component lifecycle tests.
+    /// </summary>
+    public sealed class PoolTestBootstrap : TritoneBootstrap
+    {
+        /// <summary>
+        /// Adds the pool module required by the test component.
+        /// </summary>
+        protected override void Configure(GameApplicationBuilder builder)
+        {
+            builder.UsePools();
+        }
+
+        /// <summary>
+        /// Starts the bootstrap explicitly in EditMode.
+        /// </summary>
+        public void StartForTest()
+        {
+            base.Awake();
+        }
+
+        /// <summary>
+        /// Stops the bootstrap explicitly in EditMode.
+        /// </summary>
+        public void StopForTest()
+        {
+            base.OnDestroy();
+        }
+    }
+
+    /// <summary>
+    /// Provides an empty typed view for pool lifecycle tests.
+    /// </summary>
+    public sealed class PoolTestView : UIView
+    {
+    }
+
+    /// <summary>
+    /// Exposes UIElement spawn and disable stages for pool lifecycle tests.
+    /// </summary>
+    public sealed class PoolTestElement : UIElement<PoolTestView>
+    {
+        /// <summary>
+        /// Spawns one component owned by the current UI enabled lifetime.
+        /// </summary>
+        public PoolTestComponent SpawnForTest(PoolTestComponent prefab)
+        {
+            return Spawn(prefab);
+        }
+
+        /// <summary>
+        /// Runs the UI disable cleanup stage explicitly in EditMode.
+        /// </summary>
+        public void DisableForTest()
+        {
+            base.OnDisable();
         }
     }
 }

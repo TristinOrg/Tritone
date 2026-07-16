@@ -40,7 +40,14 @@ namespace Tritone.Unity.UI
             }
             catch
             {
-                ReleaseBindings();
+                try
+                {
+                    ReleaseBindings();
+                }
+                finally
+                {
+                    ReleasePooledObjects();
+                }
                 throw;
             }
         }
@@ -56,7 +63,14 @@ namespace Tritone.Unity.UI
             }
             finally
             {
-                ReleaseBindings();
+                try
+                {
+                    ReleaseBindings();
+                }
+                finally
+                {
+                    ReleasePooledObjects();
+                }
             }
         }
 

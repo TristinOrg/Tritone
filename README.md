@@ -216,17 +216,17 @@ Rent and return plain C# objects directly from a `ModuleBase`:
 
 ```csharp
 var damageData = Rent<DamageData>();
-Return(damageData);
+Return(ref damageData);
 ```
 
 Spawn and despawn Unity Component or GameObject prefabs without prior pool registration:
 
 ```csharp
 var effect = Spawn(mDamageEffectPrefab, mEffectRoot);
-Despawn(effect);
+Despawn(ref effect);
 ```
 
-The first request creates the matching type or prefab pool. Objects left active are automatically returned when their owning module or `TritoneComponent` is released. Implement `IPoolable` only when an object needs spawn and despawn reset callbacks.
+The `ref` overload clears the caller's reference after a successful return. The first request creates the matching type or prefab pool. Objects left active are automatically returned when their owning module or `TritoneComponent` is released. `UIElement` also returns everything spawned during its current enabled lifetime when it closes, so temporary UI children do not require manual despawn calls. Implement `IPoolable` only when an object needs spawn and despawn reset callbacks.
 
 ## Asset quick start
 

@@ -89,6 +89,18 @@ namespace Tritone.Unity
         }
 
         /// <summary>
+        /// Returns one plain C# object and clears the caller's reference after a successful return.
+        /// </summary>
+        protected bool Return<T>(ref T instance) where T : class
+        {
+            if (instance == null || !Return(instance))
+                return false;
+
+            instance = null;
+            return true;
+        }
+
+        /// <summary>
         /// Spawns one GameObject or Component prefab below an optional parent.
         /// </summary>
         protected T Spawn<T>(T prefab, Transform parent = null) where T : UnityEngine.Object
@@ -115,6 +127,18 @@ namespace Tritone.Unity
         protected bool Despawn<T>(T instance) where T : UnityEngine.Object
         {
             return mPoolScope != null && mPoolScope.Despawn(instance);
+        }
+
+        /// <summary>
+        /// Returns one spawned Unity object and clears the caller's reference after a successful return.
+        /// </summary>
+        protected bool Despawn<T>(ref T instance) where T : UnityEngine.Object
+        {
+            if (instance == null || !Despawn(instance))
+                return false;
+
+            instance = null;
+            return true;
         }
 
         /// <summary>
@@ -223,12 +247,24 @@ namespace Tritone.Unity
         }
 
         /// <summary>
+        /// Returns every pooled object owned by the current component activity lifetime.
+        /// </summary>
+        protected void ReleasePooledObjects()
+        {
+            if (mPoolScope == null)
+                return;
+
+            mPoolScope.Dispose();
+            mPoolScope = null;
+        }
+
+        /// <summary>
         /// Releases retained listeners when Unity destroys this component.
         /// </summary>
         protected virtual void OnDestroy()
         {
             ReleaseBindings();
-            ReleasePoolScope();
+            ReleasePooledObjects();
             ReleaseAssetScope();
         }
 
@@ -245,18 +281,6 @@ namespace Tritone.Unity
                 throw new InvalidOperationException("No running Tritone bootstrap is available.");
             mPoolScope = application.Services.GetRequired<IPoolService>().CreateScope();
             return mPoolScope;
-        }
-
-        /// <summary>
-        /// Returns every pooled object owned by this component and releases its scope.
-        /// </summary>
-        private void ReleasePoolScope()
-        {
-            if (mPoolScope == null)
-                return;
-
-            mPoolScope.Dispose();
-            mPoolScope = null;
         }
 
         /// <summary>
