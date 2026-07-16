@@ -18,7 +18,9 @@ namespace Tritone.Kernel
         /// </summary>
         private readonly Dictionary<Type, SceneModuleRegistration> mSceneModules;
 
-        /// <summary>Stores the scene module entered immediately after persistent startup.</summary>
+        /// <summary>
+        /// Stores the scene module entered immediately after persistent startup.
+        /// </summary>
         private readonly Type mInitialSceneModuleType;
 
         /// <summary>
@@ -61,22 +63,34 @@ namespace Tritone.Kernel
         /// </summary>
         private int mStartedModuleCount;
 
-        /// <summary>Stores the currently active scene module.</summary>
+        /// <summary>
+        /// Stores the currently active scene module.
+        /// </summary>
         private IModule mActiveSceneModule;
 
-        /// <summary>Stores the active scene module type.</summary>
+        /// <summary>
+        /// Stores the active scene module type.
+        /// </summary>
         private Type mActiveSceneModuleType;
 
-        /// <summary>Stores the active scene module's optional pre-update interface.</summary>
+        /// <summary>
+        /// Stores the active scene module's optional pre-update interface.
+        /// </summary>
         private IPreUpdateSystem   mScenePreUpdateSystem;
 
-        /// <summary>Stores the active scene module's optional normal update interface.</summary>
+        /// <summary>
+        /// Stores the active scene module's optional normal update interface.
+        /// </summary>
         private IUpdateSystem      mSceneUpdateSystem;
 
-        /// <summary>Stores the active scene module's optional late-update interface.</summary>
+        /// <summary>
+        /// Stores the active scene module's optional late-update interface.
+        /// </summary>
         private ILateUpdateSystem  mSceneLateUpdateSystem;
 
-        /// <summary>Stores the active scene module's optional fixed-update interface.</summary>
+        /// <summary>
+        /// Stores the active scene module's optional fixed-update interface.
+        /// </summary>
         private IFixedUpdateSystem mSceneFixedUpdateSystem;
 
         /// <summary>

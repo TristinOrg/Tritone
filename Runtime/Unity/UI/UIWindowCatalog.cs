@@ -22,13 +22,19 @@ namespace Tritone.Unity.UI
     [Serializable]
     public sealed class UIWindowDefinition
     {
-        /// <summary>The prefab containing one UIWindow component.</summary>
+        /// <summary>
+        /// The prefab containing one UIWindow component.
+        /// </summary>
         public GameObject Prefab;
 
-        /// <summary>The visual layer that receives created instances.</summary>
+        /// <summary>
+        /// The visual layer that receives created instances.
+        /// </summary>
         public EUILayer Layer = EUILayer.Normal;
 
-        /// <summary>The lifetime that controls window availability.</summary>
+        /// <summary>
+        /// The lifetime that controls window availability.
+        /// </summary>
         public EUIWindowLifetime Lifetime = EUIWindowLifetime.Module;
     }
 }

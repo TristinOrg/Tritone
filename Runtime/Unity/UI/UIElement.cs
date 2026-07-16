@@ -85,7 +85,9 @@ namespace Tritone.Unity.UI
         /// </summary>
         protected virtual void OnRelease() { }
 
-        /// <summary>Binds a button click listener for the enabled lifetime.</summary>
+        /// <summary>
+        /// Binds a button click listener for the enabled lifetime.
+        /// </summary>
         protected void BindButton(Button button, UnityAction listener)
         {
             if (button == null)
@@ -96,7 +98,9 @@ namespace Tritone.Unity.UI
             AddBinding(new UnityEventBinding(button.onClick, listener));
         }
 
-        /// <summary>Binds a toggle value listener for the enabled lifetime.</summary>
+        /// <summary>
+        /// Binds a toggle value listener for the enabled lifetime.
+        /// </summary>
         protected void BindToggle(Toggle toggle, UnityAction<bool> listener)
         {
             if (toggle == null)
@@ -107,7 +111,9 @@ namespace Tritone.Unity.UI
             AddBinding(new UnityEventBinding<bool>(toggle.onValueChanged, listener));
         }
 
-        /// <summary>Binds a slider value listener for the enabled lifetime.</summary>
+        /// <summary>
+        /// Binds a slider value listener for the enabled lifetime.
+        /// </summary>
         protected void BindSlider(Slider slider, UnityAction<float> listener)
         {
             if (slider == null)
@@ -118,7 +124,9 @@ namespace Tritone.Unity.UI
             AddBinding(new UnityEventBinding<float>(slider.onValueChanged, listener));
         }
 
-        /// <summary>Binds a dropdown value listener for the enabled lifetime.</summary>
+        /// <summary>
+        /// Binds a dropdown value listener for the enabled lifetime.
+        /// </summary>
         protected void BindDropdown(Dropdown dropdown, UnityAction<int> listener)
         {
             if (dropdown == null)
@@ -129,7 +137,9 @@ namespace Tritone.Unity.UI
             AddBinding(new UnityEventBinding<int>(dropdown.onValueChanged, listener));
         }
 
-        /// <summary>Binds an input value listener for the enabled lifetime.</summary>
+        /// <summary>
+        /// Binds an input value listener for the enabled lifetime.
+        /// </summary>
         protected void BindInputValue(InputField input, UnityAction<string> listener)
         {
             if (input == null)
@@ -140,7 +150,9 @@ namespace Tritone.Unity.UI
             AddBinding(new UnityEventBinding<string>(input.onValueChanged, listener));
         }
 
-        /// <summary>Binds an input submission listener for the enabled lifetime.</summary>
+        /// <summary>
+        /// Binds an input submission listener for the enabled lifetime.
+        /// </summary>
         protected void BindInputEndEdit(InputField input, UnityAction<string> listener)
         {
             if (input == null)

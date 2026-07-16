@@ -75,7 +75,9 @@ namespace Tritone.Unity
             return application.Services.GetRequired<IUIService>();
         }
 
-        /// <summary>Binds a parameterless Tritone event.</summary>
+        /// <summary>
+        /// Binds a parameterless Tritone event.
+        /// </summary>
         /// <param name="eventSource">The event that owns the listener.</param>
         /// <param name="listener">The callback invoked when the event is published.</param>
         protected void BindEvent(Tritone.Events.Event eventSource, Action listener)
@@ -83,25 +85,33 @@ namespace Tritone.Unity
             AddBinding(eventSource?.Bind(listener) ?? throw new ArgumentNullException(nameof(eventSource)));
         }
 
-        /// <summary>Binds a one-parameter Tritone event.</summary>
+        /// <summary>
+        /// Binds a one-parameter Tritone event.
+        /// </summary>
         protected void BindEvent<T1>(Event<T1> eventSource, Action<T1> listener)
         {
             AddBinding(eventSource?.Bind(listener) ?? throw new ArgumentNullException(nameof(eventSource)));
         }
 
-        /// <summary>Binds a two-parameter Tritone event.</summary>
+        /// <summary>
+        /// Binds a two-parameter Tritone event.
+        /// </summary>
         protected void BindEvent<T1, T2>(Event<T1, T2> eventSource, Action<T1, T2> listener)
         {
             AddBinding(eventSource?.Bind(listener) ?? throw new ArgumentNullException(nameof(eventSource)));
         }
 
-        /// <summary>Binds a three-parameter Tritone event.</summary>
+        /// <summary>
+        /// Binds a three-parameter Tritone event.
+        /// </summary>
         protected void BindEvent<T1, T2, T3>(Event<T1, T2, T3> eventSource, Action<T1, T2, T3> listener)
         {
             AddBinding(eventSource?.Bind(listener) ?? throw new ArgumentNullException(nameof(eventSource)));
         }
 
-        /// <summary>Binds a four-parameter Tritone event.</summary>
+        /// <summary>
+        /// Binds a four-parameter Tritone event.
+        /// </summary>
         protected void BindEvent<T1, T2, T3, T4>(Event<T1, T2, T3, T4> eventSource,
                                                   Action<T1, T2, T3, T4> listener)
         {

@@ -12,13 +12,19 @@ namespace Tritone.Unity.UI
     /// </summary>
     public sealed class UIModule : ModuleBase, IUIService
     {
-        /// <summary>Maps concrete window types to their catalog and runtime state.</summary>
+        /// <summary>
+        /// Maps concrete window types to their catalog and runtime state.
+        /// </summary>
         private readonly Dictionary<Type, WindowRecord> mWindows = new();
 
-        /// <summary>Stores the scene UI layer root.</summary>
+        /// <summary>
+        /// Stores the scene UI layer root.
+        /// </summary>
         private readonly UIRoot                          mRoot;
 
-        /// <summary>Stores the fixed project window catalog.</summary>
+        /// <summary>
+        /// Stores the fixed project window catalog.
+        /// </summary>
         private readonly UIWindowCatalog                mCatalog;
 
         /// <summary>
@@ -234,13 +240,19 @@ namespace Tritone.Unity.UI
         {
             internal readonly UIWindowDefinition Definition;
 
-            /// <summary>Stores the cached window behavior.</summary>
+            /// <summary>
+            /// Stores the cached window behavior.
+            /// </summary>
             internal IUIWindow  Instance;
 
-            /// <summary>Stores the Unity object used for destruction-safe null checks.</summary>
+            /// <summary>
+            /// Stores the Unity object used for destruction-safe null checks.
+            /// </summary>
             internal GameObject InstanceObject;
 
-            /// <summary>Stores the number of active module owners.</summary>
+            /// <summary>
+            /// Stores the number of active module owners.
+            /// </summary>
             internal int        OwnerCount;
 
             internal WindowRecord(UIWindowDefinition definition)

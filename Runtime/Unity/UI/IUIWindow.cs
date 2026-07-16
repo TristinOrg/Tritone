@@ -7,13 +7,19 @@ namespace Tritone.Unity.UI
     /// </summary>
     public interface IUIWindow
     {
-        /// <summary>Gets the GameObject that owns the window.</summary>
+        /// <summary>
+        /// Gets the GameObject that owns the window.
+        /// </summary>
         GameObject GameObject { get; }
 
-        /// <summary>Activates the window.</summary>
+        /// <summary>
+        /// Activates the window.
+        /// </summary>
         void Open();
 
-        /// <summary>Deactivates the window.</summary>
+        /// <summary>
+        /// Deactivates the window.
+        /// </summary>
         void Close();
     }
 }

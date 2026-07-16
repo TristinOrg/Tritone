@@ -8,22 +8,34 @@ namespace Tritone.Unity.UI
     /// </summary>
     public sealed class UIRoot : MonoBehaviour
     {
-        /// <summary>Stores the background layer parent.</summary>
+        /// <summary>
+        /// Stores the background layer parent.
+        /// </summary>
         public RectTransform Background;
 
-        /// <summary>Stores the normal layer parent.</summary>
+        /// <summary>
+        /// Stores the normal layer parent.
+        /// </summary>
         public RectTransform Normal;
 
-        /// <summary>Stores the popup layer parent.</summary>
+        /// <summary>
+        /// Stores the popup layer parent.
+        /// </summary>
         public RectTransform Popup;
 
-        /// <summary>Stores the guide layer parent.</summary>
+        /// <summary>
+        /// Stores the guide layer parent.
+        /// </summary>
         public RectTransform Guide;
 
-        /// <summary>Stores the loading layer parent.</summary>
+        /// <summary>
+        /// Stores the loading layer parent.
+        /// </summary>
         public RectTransform Loading;
 
-        /// <summary>Stores the system layer parent.</summary>
+        /// <summary>
+        /// Stores the system layer parent.
+        /// </summary>
         public RectTransform System;
 
         /// <summary>

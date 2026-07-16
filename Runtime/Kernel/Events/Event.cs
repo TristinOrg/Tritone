@@ -51,10 +51,14 @@ namespace Tritone.Events
     /// <typeparam name="T1">The first payload type.</typeparam>
     public sealed class Event<T1> : IEventSource
     {
-        /// <summary>Stores all registered listeners.</summary>
+        /// <summary>
+        /// Stores all registered listeners.
+        /// </summary>
         private Action<T1> mListeners;
 
-        /// <summary>Registers one strongly typed listener.</summary>
+        /// <summary>
+        /// Registers one strongly typed listener.
+        /// </summary>
         /// <param name="listener">The callback invoked when published.</param>
         /// <returns>The removable listener binding.</returns>
         public EventBinding Bind(Action<T1> listener)
@@ -65,14 +69,18 @@ namespace Tritone.Events
             return new(this, listener);
         }
 
-        /// <summary>Immediately invokes all listeners with one value.</summary>
+        /// <summary>
+        /// Immediately invokes all listeners with one value.
+        /// </summary>
         /// <param name="value1">The first payload value.</param>
         public void Publish(T1 value1)
         {
             mListeners?.Invoke(value1);
         }
 
-        /// <summary>Removes every listener retained by this event.</summary>
+        /// <summary>
+        /// Removes every listener retained by this event.
+        /// </summary>
         public void Clear()
         {
             mListeners = null;
@@ -91,10 +99,14 @@ namespace Tritone.Events
     /// <typeparam name="T2">The second payload type.</typeparam>
     public sealed class Event<T1, T2> : IEventSource
     {
-        /// <summary>Stores all registered listeners.</summary>
+        /// <summary>
+        /// Stores all registered listeners.
+        /// </summary>
         private Action<T1, T2> mListeners;
 
-        /// <summary>Registers one strongly typed listener.</summary>
+        /// <summary>
+        /// Registers one strongly typed listener.
+        /// </summary>
         /// <param name="listener">The callback invoked when published.</param>
         /// <returns>The removable listener binding.</returns>
         public EventBinding Bind(Action<T1, T2> listener)
@@ -105,7 +117,9 @@ namespace Tritone.Events
             return new(this, listener);
         }
 
-        /// <summary>Immediately invokes all listeners with two values.</summary>
+        /// <summary>
+        /// Immediately invokes all listeners with two values.
+        /// </summary>
         /// <param name="value1">The first payload value.</param>
         /// <param name="value2">The second payload value.</param>
         public void Publish(T1 value1, T2 value2)
@@ -113,7 +127,9 @@ namespace Tritone.Events
             mListeners?.Invoke(value1, value2);
         }
 
-        /// <summary>Removes every listener retained by this event.</summary>
+        /// <summary>
+        /// Removes every listener retained by this event.
+        /// </summary>
         public void Clear()
         {
             mListeners = null;
@@ -133,10 +149,14 @@ namespace Tritone.Events
     /// <typeparam name="T3">The third payload type.</typeparam>
     public sealed class Event<T1, T2, T3> : IEventSource
     {
-        /// <summary>Stores all registered listeners.</summary>
+        /// <summary>
+        /// Stores all registered listeners.
+        /// </summary>
         private Action<T1, T2, T3> mListeners;
 
-        /// <summary>Registers one strongly typed listener.</summary>
+        /// <summary>
+        /// Registers one strongly typed listener.
+        /// </summary>
         /// <param name="listener">The callback invoked when published.</param>
         /// <returns>The removable listener binding.</returns>
         public EventBinding Bind(Action<T1, T2, T3> listener)
@@ -147,7 +167,9 @@ namespace Tritone.Events
             return new(this, listener);
         }
 
-        /// <summary>Immediately invokes all listeners with three values.</summary>
+        /// <summary>
+        /// Immediately invokes all listeners with three values.
+        /// </summary>
         /// <param name="value1">The first payload value.</param>
         /// <param name="value2">The second payload value.</param>
         /// <param name="value3">The third payload value.</param>
@@ -156,7 +178,9 @@ namespace Tritone.Events
             mListeners?.Invoke(value1, value2, value3);
         }
 
-        /// <summary>Removes every listener retained by this event.</summary>
+        /// <summary>
+        /// Removes every listener retained by this event.
+        /// </summary>
         public void Clear()
         {
             mListeners = null;
@@ -177,10 +201,14 @@ namespace Tritone.Events
     /// <typeparam name="T4">The fourth payload type.</typeparam>
     public sealed class Event<T1, T2, T3, T4> : IEventSource
     {
-        /// <summary>Stores all registered listeners.</summary>
+        /// <summary>
+        /// Stores all registered listeners.
+        /// </summary>
         private Action<T1, T2, T3, T4> mListeners;
 
-        /// <summary>Registers one strongly typed listener.</summary>
+        /// <summary>
+        /// Registers one strongly typed listener.
+        /// </summary>
         /// <param name="listener">The callback invoked when published.</param>
         /// <returns>The removable listener binding.</returns>
         public EventBinding Bind(Action<T1, T2, T3, T4> listener)
@@ -191,7 +219,9 @@ namespace Tritone.Events
             return new(this, listener);
         }
 
-        /// <summary>Immediately invokes all listeners with four values.</summary>
+        /// <summary>
+        /// Immediately invokes all listeners with four values.
+        /// </summary>
         /// <param name="value1">The first payload value.</param>
         /// <param name="value2">The second payload value.</param>
         /// <param name="value3">The third payload value.</param>
@@ -201,7 +231,9 @@ namespace Tritone.Events
             mListeners?.Invoke(value1, value2, value3, value4);
         }
 
-        /// <summary>Removes every listener retained by this event.</summary>
+        /// <summary>
+        /// Removes every listener retained by this event.
+        /// </summary>
         public void Clear()
         {
             mListeners = null;
