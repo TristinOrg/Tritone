@@ -257,3 +257,28 @@ ReleaseAsset(config);
 ```
 
 Every remaining reference is released automatically when its owning module stops or its `TritoneComponent` is destroyed. Implement `IAssetProvider` and pass it to `UseAssets(provider)` when replacing Resources with Addressables or another backend.
+
+## Local AssetBundle provider
+
+Compose bundle and asset registrations before building the application:
+
+```csharp
+AssetBundleRegistry registry = new();
+registry.AddBundle("core", "core.bundle")
+        .AddBundle("shared", "shared.bundle", "core")
+        .AddBundle("ui", "ui.bundle", "shared")
+        .AddAsset("UI/LoginWindow", "ui", "Assets/Game/UI/LoginWindow.prefab");
+
+var bundleRoot = Path.Combine(Application.persistentDataPath, "Bundles");
+var source     = new FileAssetBundleSource(bundleRoot);
+var provider   = new AssetBundleAssetProvider(registry, source);
+builder.UseAssets(provider);
+```
+
+Game modules continue using the same API:
+
+```csharp
+var prefab = await LoadAssetAsync<GameObject>("UI/LoginWindow");
+```
+
+The registry validates missing dependencies and cycles once, then precomputes a unique dependency-first load order. Assets share loaded bundles and in-flight bundle requests. Releasing the final asset unloads its root bundle and dependencies in reverse order. The registry becomes immutable after provider construction; feature code may compose registrations before that point without editing a central ScriptableObject. `FileAssetBundleSource` is the local first-stage source. A later remote source can implement `IAssetBundleSource` without changing AssetModule or gameplay calls.
