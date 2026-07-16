@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Tritone.Events;
 using Tritone.Kernel;
+using Tritone.Pooling;
 using Tritone.UI;
 using UnityEngine;
 
@@ -16,6 +17,9 @@ namespace Tritone.Unity
         /// Stores bindings owned by this component.
         /// </summary>
         private List<IDisposable> mBindings;
+
+        // Owns pooled objects borrowed by this Unity component.
+        private IPoolScope mPoolScope;
 
         /// <summary>
         /// Gets one registered application module.
@@ -61,6 +65,51 @@ namespace Tritone.Unity
                 throw new InvalidOperationException("No running Tritone bootstrap is available.");
 
             return application.SwitchModule<TModule>();
+        }
+
+        /// <summary>
+        /// Rents one plain C# object from a lazily created type pool.
+        /// </summary>
+        protected T Rent<T>() where T : class, new()
+        {
+            return GetPoolScope().Rent<T>();
+        }
+
+        /// <summary>
+        /// Returns one plain C# object owned by this component.
+        /// </summary>
+        protected bool Return<T>(T instance) where T : class
+        {
+            return mPoolScope != null && mPoolScope.Return(instance);
+        }
+
+        /// <summary>
+        /// Spawns one GameObject or Component prefab below an optional parent.
+        /// </summary>
+        protected T Spawn<T>(T prefab, Transform parent = null) where T : UnityEngine.Object
+        {
+            return GetPoolScope().Spawn(prefab, parent);
+        }
+
+        /// <summary>
+        /// Spawns one GameObject or Component prefab at a world transform.
+        /// </summary>
+        protected T Spawn<T>(T prefab, Vector3 position, Quaternion rotation) where T : UnityEngine.Object
+        {
+            var instance = Spawn(prefab);
+            var transform = instance is GameObject gameObject
+                ? gameObject.transform
+                : ((Component)(UnityEngine.Object)instance).transform;
+            transform.SetPositionAndRotation(position, rotation);
+            return instance;
+        }
+
+        /// <summary>
+        /// Returns one spawned Unity object owned by this component.
+        /// </summary>
+        protected bool Despawn<T>(T instance) where T : UnityEngine.Object
+        {
+            return mPoolScope != null && mPoolScope.Despawn(instance);
         }
 
         /// <summary>
@@ -150,6 +199,34 @@ namespace Tritone.Unity
         protected virtual void OnDestroy()
         {
             ReleaseBindings();
+            ReleasePoolScope();
+        }
+
+        /// <summary>
+        /// Gets or lazily creates the pool scope owned by this component.
+        /// </summary>
+        private IPoolScope GetPoolScope()
+        {
+            if (mPoolScope != null)
+                return mPoolScope;
+
+            var application = TritoneBootstrap.Current;
+            if (application == null)
+                throw new InvalidOperationException("No running Tritone bootstrap is available.");
+            mPoolScope = application.Services.GetRequired<IPoolService>().CreateScope();
+            return mPoolScope;
+        }
+
+        /// <summary>
+        /// Returns every pooled object owned by this component and releases its scope.
+        /// </summary>
+        private void ReleasePoolScope()
+        {
+            if (mPoolScope == null)
+                return;
+
+            mPoolScope.Dispose();
+            mPoolScope = null;
         }
     }
 }

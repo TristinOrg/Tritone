@@ -203,3 +203,27 @@ SwitchModule<BattleModule>();
 ```
 
 Switching stops and removes the previous scene module before configuring a fresh instance. Its timers, event bindings, and window ownership are released automatically. Data that must survive scene module changes should live in a persistent model module.
+
+## Pool quick start
+
+Enable shared lazy pools once without registering object types or prefabs:
+
+```csharp
+builder.UsePools();
+```
+
+Rent and return plain C# objects directly from a `ModuleBase`:
+
+```csharp
+var damageData = Rent<DamageData>();
+Return(damageData);
+```
+
+Spawn and despawn Unity Component or GameObject prefabs without prior pool registration:
+
+```csharp
+var effect = Spawn(mDamageEffectPrefab, mEffectRoot);
+Despawn(effect);
+```
+
+The first request creates the matching type or prefab pool. Objects left active are automatically returned when their owning module or `TritoneComponent` is released. Implement `IPoolable` only when an object needs spawn and despawn reset callbacks.

@@ -4,7 +4,8 @@
   "references": [
     "Tritone.Kernel",
     "Tritone.Diagnostics",
-    "Tritone.Timing"
+    "Tritone.Timing",
+    "Tritone.Unity"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"
@@ -13,5 +14,5 @@
     "Editor"
   ],
   "autoReferenced": false,
-  "noEngineReferences": true
+  "noEngineReferences": false
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Tritone.Events;
+using Tritone.Pooling;
 using Tritone.Timing;
 using Tritone.UI;
 
@@ -31,6 +32,9 @@ namespace Tritone.Kernel
         /// </summary>
         private IUIWindowScope mUIWindowScope;
 
+        // Owns every pooled object borrowed through this module's helper methods.
+        private IPoolScope mPoolScope;
+
         /// <summary>
         /// Gets the minimum severity accepted by this module.
         /// </summary>
@@ -58,6 +62,7 @@ namespace Tritone.Kernel
                 ReleaseTimerScope();
                 UnbindAllEvents();
                 ReleaseUIWindowScope();
+                ReleasePoolScope();
                 mServices = null;
                 Logger = NullModuleLogger.Instance;
                 throw;
@@ -86,6 +91,7 @@ namespace Tritone.Kernel
                 ReleaseTimerScope();
                 UnbindAllEvents();
                 ReleaseUIWindowScope();
+                ReleasePoolScope();
                 mServices = null;
                 Logger = NullModuleLogger.Instance;
             }
@@ -255,6 +261,38 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
+        /// Rents one plain C# object from a lazily created type pool.
+        /// </summary>
+        protected T Rent<T>() where T : class, new()
+        {
+            return GetPoolScope().Rent<T>();
+        }
+
+        /// <summary>
+        /// Returns one plain C# object owned by this module.
+        /// </summary>
+        protected bool Return<T>(T instance) where T : class
+        {
+            return mPoolScope != null && mPoolScope.Return(instance);
+        }
+
+        /// <summary>
+        /// Spawns one GameObject or Component prefab from a lazily created prefab pool.
+        /// </summary>
+        protected T Spawn<T>(T prefab, object parent = null) where T : class
+        {
+            return GetPoolScope().Spawn(prefab, parent);
+        }
+
+        /// <summary>
+        /// Returns one spawned Unity object owned by this module.
+        /// </summary>
+        protected bool Despawn<T>(T instance) where T : class
+        {
+            return mPoolScope != null && mPoolScope.Despawn(instance);
+        }
+
+        /// <summary>
         /// Configures services and dependencies required by the concrete module.
         /// </summary>
         /// <param name="services">The application-scoped service registry.</param>
@@ -356,6 +394,34 @@ namespace Tritone.Kernel
 
             mUIWindowScope.Dispose();
             mUIWindowScope = null;
+        }
+
+        /// <summary>
+        /// Gets or lazily creates the pool scope owned by this module.
+        /// </summary>
+        private IPoolScope GetPoolScope()
+        {
+            if (mPoolScope != null)
+                return mPoolScope;
+            if (mServices == null)
+                throw new InvalidOperationException("Pools can only be used during an active module lifecycle.");
+            if (!mServices.TryGet<IPoolService>(out var poolService))
+                throw new InvalidOperationException("Pool infrastructure is not configured. Call builder.UsePools() before adding game modules.");
+
+            mPoolScope = poolService.CreateScope();
+            return mPoolScope;
+        }
+
+        /// <summary>
+        /// Returns every pooled object owned by this module and releases its scope.
+        /// </summary>
+        private void ReleasePoolScope()
+        {
+            if (mPoolScope == null)
+                return;
+
+            mPoolScope.Dispose();
+            mPoolScope = null;
         }
     }
 }
