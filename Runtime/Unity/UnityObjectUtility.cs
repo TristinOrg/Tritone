@@ -1,7 +1,7 @@
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Tritone.Unity.Pooling
+namespace Tritone.Unity
 {
     /// <summary>
     /// Provides destruction that is safe in both play mode and EditMode tests.

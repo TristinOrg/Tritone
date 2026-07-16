@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace Tritone.UI
 {
@@ -19,6 +20,13 @@ namespace Tritone.UI
         /// <param name="windowType">The concrete window type.</param>
         /// <returns>The opened window instance.</returns>
         object OpenWindow(Type windowType);
+
+        /// <summary>
+        /// Opens one currently available window without blocking on asset loading.
+        /// </summary>
+        /// <param name="windowType">The concrete window type.</param>
+        /// <returns>A task containing the opened window instance.</returns>
+        Task<object> OpenWindowAsync(Type windowType);
 
         /// <summary>
         /// Closes one created window.

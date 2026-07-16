@@ -1,4 +1,5 @@
 using System;
+using Tritone.UI;
 using UnityEngine;
 
 namespace Tritone.Unity.UI
@@ -8,34 +9,22 @@ namespace Tritone.Unity.UI
     /// </summary>
     public sealed class UIRoot : MonoBehaviour
     {
-        /// <summary>
-        /// Stores the background layer parent.
-        /// </summary>
+        // Stores the background layer parent.
         public RectTransform Background;
 
-        /// <summary>
-        /// Stores the normal layer parent.
-        /// </summary>
+        // Stores the normal layer parent.
         public RectTransform Normal;
 
-        /// <summary>
-        /// Stores the popup layer parent.
-        /// </summary>
+        // Stores the popup layer parent.
         public RectTransform Popup;
 
-        /// <summary>
-        /// Stores the guide layer parent.
-        /// </summary>
+        // Stores the guide layer parent.
         public RectTransform Guide;
 
-        /// <summary>
-        /// Stores the loading layer parent.
-        /// </summary>
+        // Stores the loading layer parent.
         public RectTransform Loading;
 
-        /// <summary>
-        /// Stores the system layer parent.
-        /// </summary>
+        // Stores the system layer parent.
         public RectTransform System;
 
         /// <summary>

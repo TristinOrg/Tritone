@@ -51,6 +51,16 @@ namespace Tritone.Unity
         }
 
         /// <summary>
+        /// Opens one window asynchronously through its configured asset provider.
+        /// </summary>
+        /// <typeparam name="TWindow">The concrete window type.</typeparam>
+        /// <returns>A task containing the opened window instance.</returns>
+        protected async Task<TWindow> OpenWindowAsync<TWindow>() where TWindow : class
+        {
+            return (TWindow)await GetUIService().OpenWindowAsync(typeof(TWindow));
+        }
+
+        /// <summary>
         /// Closes one previously created window.
         /// </summary>
         protected bool CloseWindow<TWindow>() where TWindow : class

@@ -206,12 +206,18 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
-        /// Makes one catalogued window available for this module's lifetime.
+        /// Registers and owns one window without requiring a central catalog entry.
         /// </summary>
-        /// <typeparam name="TWindow">The concrete window type.</typeparam>
-        protected void AddWindow<TWindow>() where TWindow : class
+        /// <typeparam name="TWindow">The concrete window component type.</typeparam>
+        /// <param name="assetPath">The provider path used to load the window prefab.</param>
+        /// <param name="layer">The visual layer that receives the window.</param>
+        /// <param name="lifetime">The lifetime controlling availability and release.</param>
+        protected void AddWindow<TWindow>(string assetPath,
+                                          EUILayer layer = EUILayer.Normal,
+                                          EUIWindowLifetime lifetime = EUIWindowLifetime.Module)
+            where TWindow : class
         {
-            GetUIWindowScope().AddWindow(typeof(TWindow));
+            GetUIWindowScope().AddWindow(typeof(TWindow), assetPath, layer, lifetime);
         }
 
         /// <summary>
@@ -222,6 +228,16 @@ namespace Tritone.Kernel
         protected TWindow OpenWindow<TWindow>() where TWindow : class
         {
             return (TWindow)GetUIService().OpenWindow(typeof(TWindow));
+        }
+
+        /// <summary>
+        /// Opens one window asynchronously through its configured asset provider.
+        /// </summary>
+        /// <typeparam name="TWindow">The concrete window type.</typeparam>
+        /// <returns>A task containing the opened window instance.</returns>
+        protected async Task<TWindow> OpenWindowAsync<TWindow>() where TWindow : class
+        {
+            return (TWindow)await GetUIService().OpenWindowAsync(typeof(TWindow));
         }
 
         /// <summary>

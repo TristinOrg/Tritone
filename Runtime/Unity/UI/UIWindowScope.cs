@@ -9,7 +9,10 @@ namespace Tritone.Unity.UI
     /// </summary>
     internal sealed class UIWindowScope : IUIWindowScope
     {
+        // Stores unique window types owned by this scope.
         private readonly HashSet<Type> mWindowTypes = new();
+
+        // Stores the shared UI module until this scope is released.
         private UIModule               mUIModule;
 
         /// <summary>
@@ -22,24 +25,23 @@ namespace Tritone.Unity.UI
         }
 
         /// <inheritdoc />
-        public void AddWindow(Type windowType)
+        public void AddWindow(Type windowType,
+                              string assetPath,
+                              EUILayer layer,
+                              EUIWindowLifetime lifetime)
         {
-            if (mUIModule == null)
-                throw new ObjectDisposedException(nameof(UIWindowScope));
+            ThrowIfDisposed();
             if (windowType == null)
                 throw new ArgumentNullException(nameof(windowType));
-            if (!mWindowTypes.Add(windowType))
-                return;
 
-            try
+            if (mWindowTypes.Contains(windowType))
             {
-                mUIModule.AcquireWindow(windowType);
+                mUIModule.ValidateWindowDefinition(windowType, assetPath, layer, lifetime);
+                return;
             }
-            catch
-            {
-                mWindowTypes.Remove(windowType);
-                throw;
-            }
+
+            mUIModule.RegisterAndAcquireWindow(windowType, assetPath, layer, lifetime);
+            mWindowTypes.Add(windowType);
         }
 
         /// <summary>
@@ -54,6 +56,15 @@ namespace Tritone.Unity.UI
                 mUIModule.ReleaseWindow(windowType);
             mWindowTypes.Clear();
             mUIModule = null;
+        }
+
+        /// <summary>
+        /// Rejects registration after this scope has been released.
+        /// </summary>
+        private void ThrowIfDisposed()
+        {
+            if (mUIModule == null)
+                throw new ObjectDisposedException(nameof(UIWindowScope));
         }
     }
 }

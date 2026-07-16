@@ -1,5 +1,6 @@
 using System;
 using Tritone.Kernel;
+using Tritone.Unity.Assets;
 
 namespace Tritone.Unity.UI
 {
@@ -9,20 +10,19 @@ namespace Tritone.Unity.UI
     public static class GameApplicationBuilderExtensions
     {
         /// <summary>
-        /// Adds catalogued window management to the application.
+        /// Adds hot-update-friendly window management without a central catalog.
         /// </summary>
         /// <param name="builder">The application builder receiving UI infrastructure.</param>
         /// <param name="root">The scene UI layer root.</param>
-        /// <param name="catalog">The project window catalog.</param>
         /// <returns>The supplied builder for chained configuration.</returns>
         public static GameApplicationBuilder UseUI(this GameApplicationBuilder builder,
-                                                   UIRoot root,
-                                                   UIWindowCatalog catalog)
+                                                   UIRoot root)
         {
             if (builder == null)
                 throw new ArgumentNullException(nameof(builder));
 
-            return builder.AddModule(new UIModule(root, catalog));
+            return builder.AddModule(new UIModule(root), typeof(AssetModule));
         }
+
     }
 }

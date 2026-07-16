@@ -154,34 +154,40 @@ public sealed class ShopWindow : UIWindow<UIShopView>
 
 `UIElement<TView>` resolves the view once, binds listeners during `OnBindEvents`, and releases every Unity and Tritone listener when disabled. `ModuleBase` releases all of its bindings when the module stops.
 
-Create one `UIWindowCatalog` asset, assign each window prefab, layer, and lifetime, then configure the UI module:
+Enable assets and UI once in the bootstrap:
 
 ```csharp
 protected override void Configure(GameApplicationBuilder builder)
 {
-    builder.UseUI(mUIRoot, mWindowCatalog);
+    builder.UseAssets();
+    builder.UseUI(mUIRoot);
     builder.AddModule(new ShopModule());
 }
 ```
 
-Modules declare only the window types they own. Prefab and layer configuration remain in the catalog:
+Each module registers the windows it owns without modifying a central catalog:
 
 ```csharp
 public sealed class ShopModule : ModuleBase
 {
     protected override void OnConfigure(IServiceRegistry services)
     {
-        AddWindow<ShopWindow>();
+        AddWindow<ShopWindow>("UI/Shop/ShopWindow", EUILayer.Normal);
     }
 
     private void ShowShop()
     {
         OpenWindow<ShopWindow>();
     }
+
+    private async Task ShowShopAsync()
+    {
+        await OpenWindowAsync<ShopWindow>();
+    }
 }
 ```
 
-Module windows are available while at least one active module owns them. Releasing the final owner automatically closes and destroys the cached instance. Application windows remain available until the application stops.
+Module windows are available while at least one active module owns the matching definition. Repeated registrations must use the same path, layer, and lifetime. Releasing the final owner closes the window, destroys its cached instance, releases its prefab, and removes the definition so a later hot-update module can register a new path. Application windows remain available until the application stops.
 
 ## Scene module switching
 
@@ -189,7 +195,8 @@ Persistent infrastructure modules start with the application. Scene modules are 
 
 ```csharp
 builder.UseTimers();
-builder.UseUI(mUIRoot, mWindowCatalog);
+builder.UseAssets();
+builder.UseUI(mUIRoot);
 builder.AddSceneModule<LoginModule>();
 builder.AddSceneModule(() => new BattleModule(mBattleConfig));
 builder.UseInitialSceneModule<LoginModule>();
