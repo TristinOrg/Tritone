@@ -197,19 +197,21 @@ Persistent infrastructure modules start with the application. Scene modules are 
 builder.UseTimers();
 builder.UseAssets();
 builder.UseUI(mUIRoot);
+builder.UseScenes();
 builder.AddSceneModule<LoginModule>();
 builder.AddSceneModule(() => new BattleModule(mBattleConfig));
-builder.UseInitialSceneModule<LoginModule>();
 ```
 
-Switch from the application, a module, or a `TritoneComponent`:
+Load the target Unity scene and activate its module from a `ModuleBase` or `TritoneComponent`:
 
 ```csharp
-SwitchModule<LoginModule>();
-SwitchModule<BattleModule>();
+await SwitchSceneAsync<LoginModule>("Login", OnSceneProgress);
+await SwitchSceneAsync<BattleModule>("Battle");
 ```
 
-Switching stops and removes the previous scene module before configuring a fresh instance. Its timers, event bindings, and window ownership are released automatically. Data that must survive scene module changes should live in a persistent model module.
+The target scene loads additively before the previous module stops. Tritone then makes it active, creates its fresh scene module, and unloads the previous scene. Identical concurrent requests share one operation, while conflicting targets are rejected. A loading failure leaves the previous scene and module untouched; a module startup failure restores the previous scene and recreates its module.
+
+`TritoneBootstrap` automatically survives scene unloading. Scene module timers, event bindings, windows, pools, assets, and tables are released when that module stops. Data that must survive transitions should live in a persistent model module. Use `SwitchModule<TModule>()` only when changing logical modules without loading a Unity scene.
 
 ## Pool quick start
 

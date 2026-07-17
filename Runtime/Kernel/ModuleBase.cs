@@ -5,6 +5,7 @@ using Tritone.Assets;
 using Tritone.Content;
 using Tritone.Events;
 using Tritone.Pooling;
+using Tritone.Scenes;
 using Tritone.Tables;
 using Tritone.Timing;
 using Tritone.UI;
@@ -293,6 +294,27 @@ namespace Tritone.Kernel
                 throw new InvalidOperationException("Scene modules can only be switched during an active module lifecycle.");
 
             return (TModule)mServices.GetRequired<ISceneModuleService>().SwitchModule(typeof(TModule));
+        }
+
+        /// <summary>
+        /// Loads one Unity scene before activating its registered scene module.
+        /// </summary>
+        /// <typeparam name="TModule">The registered scene module type.</typeparam>
+        /// <param name="sceneName">The Unity scene name or path.</param>
+        /// <param name="progress">The optional normalized loading progress callback.</param>
+        /// <returns>A task containing the active scene module.</returns>
+        protected Task<TModule> SwitchSceneAsync<TModule>(string sceneName,
+                                                          Action<float> progress = null)
+            where TModule : class, IModule
+        {
+            if (mServices == null)
+                throw new InvalidOperationException(
+                    "Scenes can only be switched during an active module lifecycle.");
+            if (!mServices.TryGet<ISceneService>(out var sceneService))
+                throw new InvalidOperationException(
+                    "Scene infrastructure is not configured. Call builder.UseScenes() before adding game modules.");
+
+            return sceneService.SwitchAsync<TModule>(sceneName, progress);
         }
 
         /// <summary>

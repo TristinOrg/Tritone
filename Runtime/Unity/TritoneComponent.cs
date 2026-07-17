@@ -5,6 +5,7 @@ using Tritone.Assets;
 using Tritone.Events;
 using Tritone.Kernel;
 using Tritone.Pooling;
+using Tritone.Scenes;
 using Tritone.Tables;
 using Tritone.UI;
 using UnityEngine;
@@ -84,6 +85,25 @@ namespace Tritone.Unity
                 throw new InvalidOperationException("No running Tritone bootstrap is available.");
 
             return application.SwitchModule<TModule>();
+        }
+
+        /// <summary>
+        /// Loads one Unity scene before activating its registered scene module.
+        /// </summary>
+        /// <typeparam name="TModule">The registered scene module type.</typeparam>
+        /// <param name="sceneName">The Unity scene name or path.</param>
+        /// <param name="progress">The optional normalized loading progress callback.</param>
+        /// <returns>A task containing the active scene module.</returns>
+        protected Task<TModule> SwitchSceneAsync<TModule>(string sceneName,
+                                                          Action<float> progress = null)
+            where TModule : class, IModule
+        {
+            var application = TritoneBootstrap.Current;
+            if (application == null)
+                throw new InvalidOperationException("No running Tritone bootstrap is available.");
+
+            return application.Services.GetRequired<ISceneService>()
+                              .SwitchAsync<TModule>(sceneName, progress);
         }
 
         /// <summary>

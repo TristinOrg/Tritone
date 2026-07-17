@@ -60,6 +60,9 @@ namespace Tritone.Unity
         /// </summary>
         protected virtual void Awake()
         {
+            if (UnityEngine.Application.isPlaying)
+                DontDestroyOnLoad(gameObject);
+
             GameApplicationBuilder builder = new();
             Configure(builder);
 
