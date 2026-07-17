@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Tritone.Audio;
 using Tritone.Assets;
@@ -139,6 +140,22 @@ namespace Tritone.Kernel
         protected Task SendMessageAsync<T>(T message) where T : class
         {
             return GetNetworkService().SendAsync(message);
+        }
+
+        /// <summary>
+        /// Sends one request and awaits its correlated response.
+        /// </summary>
+        protected Task<TResponse> RequestAsync<TRequest, TResponse>(
+            TRequest request,
+            double timeoutSeconds = 10.0,
+            CancellationToken cancellationToken = default)
+            where TRequest : class, INetworkRequest
+            where TResponse : class, INetworkResponse
+        {
+            return GetNetworkScope().RequestAsync<TRequest, TResponse>(
+                request,
+                TimeSpan.FromSeconds(timeoutSeconds),
+                cancellationToken);
         }
 
         /// <summary>

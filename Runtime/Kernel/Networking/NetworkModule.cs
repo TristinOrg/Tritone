@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Tritone.Kernel;
 using Tritone.Messaging;
@@ -25,6 +26,12 @@ namespace Tritone.Networking
 
         // Stores callbacks grouped by their exact message type.
         private readonly Dictionary<Type, List<NetworkBinding>> mBindings = new();
+
+        // Stores pending request continuations by request identifier.
+        private readonly Dictionary<int, PendingRequest> mRequests = new();
+
+        // Produces positive request identifiers without reflection or random allocation.
+        private int mNextRequestId;
 
         public ENetworkState State => mTransport.State;
         public int Order => -900;
@@ -62,6 +69,40 @@ namespace Tritone.Networking
             return mTransport.SendAsync(mSerializer.Serialize(message));
         }
 
+        public async Task<TResponse> RequestAsync<TRequest, TResponse>(
+            TRequest request,
+            TimeSpan timeout,
+            CancellationToken cancellationToken)
+            where TRequest : class, INetworkRequest
+            where TResponse : class, INetworkResponse
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+            if (timeout <= TimeSpan.Zero)
+                throw new ArgumentOutOfRangeException(nameof(timeout));
+
+            var requestId = NextRequestId();
+            request.RequestId = requestId;
+            PendingRequest<TResponse> pending = new(requestId);
+            mRequests.Add(requestId, pending);
+            using (CancellationTokenSource timeoutSource = new(timeout))
+            using (CancellationTokenSource linkedSource =
+                   CancellationTokenSource.CreateLinkedTokenSource(timeoutSource.Token,
+                                                                   cancellationToken))
+            using (linkedSource.Token.Register(pending.Cancel))
+            {
+                try
+                {
+                    await SendAsync(request);
+                    return await pending.Task;
+                }
+                finally
+                {
+                    mRequests.Remove(requestId);
+                }
+            }
+        }
+
         public void Update(in FrameTime time)
         {
             while (true)
@@ -82,6 +123,7 @@ namespace Tritone.Networking
             mTransport.Received -= OnReceived;
             mTransport.Faulted  -= OnFaulted;
             mBindings.Clear();
+            CancelRequests();
             lock (mQueueLock)
                 mReceived.Clear();
             mTransport.Dispose();
@@ -121,10 +163,70 @@ namespace Tritone.Networking
 
         private void Dispatch(object message)
         {
+            if (message is INetworkResponse response &&
+                mRequests.TryGetValue(response.RequestId, out var request))
+            {
+                request.Complete(message);
+                return;
+            }
             if (!mBindings.TryGetValue(message.GetType(), out var bindings))
                 return;
             for (int i = bindings.Count - 1; i >= 0; i--)
                 bindings[i].Invoke(message);
+        }
+
+        private int NextRequestId()
+        {
+            do
+            {
+                mNextRequestId++;
+                if (mNextRequestId <= 0)
+                    mNextRequestId = 1;
+            }
+            while (mRequests.ContainsKey(mNextRequestId));
+            return mNextRequestId;
+        }
+
+        private void CancelRequests()
+        {
+            foreach (var request in mRequests.Values)
+                request.Cancel();
+            mRequests.Clear();
+        }
+    }
+
+    internal abstract class PendingRequest
+    {
+        internal abstract void Complete(object response);
+        internal abstract void Cancel();
+    }
+
+    internal sealed class PendingRequest<TResponse> : PendingRequest
+        where TResponse : class, INetworkResponse
+    {
+        private readonly TaskCompletionSource<TResponse> mCompletion = new();
+        private readonly int mRequestId;
+
+        internal Task<TResponse> Task => mCompletion.Task;
+
+        internal PendingRequest(int requestId)
+        {
+            mRequestId = requestId;
+        }
+
+        internal override void Complete(object response)
+        {
+            if (response is TResponse typedResponse)
+                mCompletion.TrySetResult(typedResponse);
+            else
+                mCompletion.TrySetException(
+                    new InvalidOperationException(
+                        $"Request '{mRequestId}' received an unexpected response type."));
+        }
+
+        internal override void Cancel()
+        {
+            mCompletion.TrySetCanceled();
         }
     }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Tritone.Kernel;
@@ -37,6 +38,34 @@ namespace Tritone.Tests
             Assert.IsTrue(transport.Disposed);
         }
 
+        [Test]
+        public void RequestAsync_CompletesMatchingResponse()
+        {
+            MessageSerializer serializer = new();
+            serializer.Register(1, new RequestCodec());
+            serializer.Register(2, new ResponseCodec());
+            TestTransport transport = new();
+            RequestConsumer consumer = new();
+            var application = new GameApplicationBuilder()
+                .UseNetwork(serializer, transport)
+                .AddModule(consumer)
+                .Build();
+            application.Start();
+
+            var requestTask = consumer.Request();
+            var request     = (TestRequest)serializer.Deserialize(transport.LastSent);
+            transport.Push(serializer.Serialize(new TestResponse
+            {
+                RequestId = request.RequestId,
+                Value     = 42
+            }));
+            FrameTime time = new(0.016, 0.016, 0.016, 0);
+            application.Update(in time);
+
+            Assert.AreEqual(42, requestTask.GetAwaiter().GetResult().Value);
+            application.Stop();
+        }
+
         private sealed class NetworkConsumer : ModuleBase
         {
             internal int Value;
@@ -55,6 +84,56 @@ namespace Tritone.Tests
         private sealed class Ping
         {
             internal int Value;
+        }
+
+        private sealed class RequestConsumer : ModuleBase
+        {
+            internal Task<TestResponse> Request()
+            {
+                return RequestAsync<TestRequest, TestResponse>(new TestRequest());
+            }
+        }
+
+        private sealed class TestRequest : INetworkRequest
+        {
+            public int RequestId { get; set; }
+        }
+
+        private sealed class TestResponse : INetworkResponse
+        {
+            public int RequestId { get; set; }
+            internal int Value;
+        }
+
+        private sealed class RequestCodec : IMessageCodec<TestRequest>
+        {
+            public void Write(MessageWriter writer, TestRequest message)
+            {
+                writer.WriteInt32(message.RequestId);
+            }
+
+            public TestRequest Read(MessageReader reader)
+            {
+                return new TestRequest { RequestId = reader.ReadInt32() };
+            }
+        }
+
+        private sealed class ResponseCodec : IMessageCodec<TestResponse>
+        {
+            public void Write(MessageWriter writer, TestResponse message)
+            {
+                writer.WriteInt32(message.RequestId);
+                writer.WriteInt32(message.Value);
+            }
+
+            public TestResponse Read(MessageReader reader)
+            {
+                return new TestResponse
+                {
+                    RequestId = reader.ReadInt32(),
+                    Value     = reader.ReadInt32()
+                };
+            }
         }
 
         private sealed class PingCodec : IMessageCodec<Ping>

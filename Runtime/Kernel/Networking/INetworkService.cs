@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Tritone.Networking
@@ -13,6 +14,11 @@ namespace Tritone.Networking
         Task ConnectAsync(string host, int port);
         Task DisconnectAsync();
         Task SendAsync<T>(T message) where T : class;
+        Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request,
+                                                         TimeSpan timeout,
+                                                         CancellationToken cancellationToken)
+            where TRequest : class, INetworkRequest
+            where TResponse : class, INetworkResponse;
     }
 
     /// <summary>
@@ -21,5 +27,10 @@ namespace Tritone.Networking
     public interface INetworkScope : IDisposable
     {
         void Bind<T>(Action<T> callback) where T : class;
+        Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request,
+                                                         TimeSpan timeout,
+                                                         CancellationToken cancellationToken = default)
+            where TRequest : class, INetworkRequest
+            where TResponse : class, INetworkResponse;
     }
 }
