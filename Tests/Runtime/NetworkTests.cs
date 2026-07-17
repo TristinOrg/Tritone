@@ -91,6 +91,32 @@ namespace Tritone.Tests
             application.Stop();
         }
 
+        [Test]
+        public void Session_ReconnectsUnexpectedDisconnectOnly()
+        {
+            MessageSerializer serializer = new();
+            TestTransport transport = new();
+            SessionConsumer consumer = new();
+            NetworkSessionOptions options = new();
+            options.UseReconnect(3, 0.0, 2.0, 1.0);
+            var application = new GameApplicationBuilder()
+                .UseNetwork(serializer, transport, options)
+                .AddModule(consumer)
+                .Build();
+            application.Start();
+            consumer.Connect().GetAwaiter().GetResult();
+
+            transport.CurrentState = ENetworkState.Disconnected;
+            FrameTime time = new(0.1, 0.1, 0.1, 0);
+            application.Update(in time);
+            Assert.AreEqual(2, transport.ConnectCount);
+
+            consumer.Disconnect().GetAwaiter().GetResult();
+            application.Update(in time);
+            Assert.AreEqual(2, transport.ConnectCount);
+            application.Stop();
+        }
+
         private sealed class NetworkConsumer : ModuleBase
         {
             internal int Value;
@@ -126,6 +152,16 @@ namespace Tritone.Tests
             protected override void OnStart()
             {
                 BindNetworkState(state => State = state);
+            }
+
+            internal Task Connect()
+            {
+                return ConnectNetworkAsync("localhost", 9000);
+            }
+
+            internal Task Disconnect()
+            {
+                return DisconnectNetworkAsync();
             }
         }
 
@@ -188,6 +224,7 @@ namespace Tritone.Tests
         {
             internal byte[] LastSent;
             internal bool Disposed;
+            internal int ConnectCount;
 
             internal ENetworkState CurrentState = ENetworkState.Connected;
 
@@ -197,6 +234,8 @@ namespace Tritone.Tests
 
             public Task ConnectAsync(string host, int port)
             {
+                ConnectCount++;
+                CurrentState = ENetworkState.Connected;
                 return Task.CompletedTask;
             }
 

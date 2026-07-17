@@ -8,6 +8,7 @@ namespace Tritone.Networking
         Disconnected,
         Connecting,
         Connected,
-        Disconnecting
+        Disconnecting,
+        Reconnecting
     }
 }

@@ -12,6 +12,9 @@ namespace Tritone.Networking
         // Creates the configured heartbeat behavior.
         private Func<IMessageSerializer, INetworkTransport, IHeartbeatSession> mHeartbeatFactory;
 
+        // Stores optional automatic reconnection behavior.
+        internal NetworkReconnectOptions Reconnect { get; private set; }
+
         /// <summary>
         /// Configures heartbeat request and response message types.
         /// </summary>
@@ -39,10 +42,55 @@ namespace Tritone.Networking
             return this;
         }
 
+        /// <summary>
+        /// Enables automatic reconnection with bounded exponential backoff.
+        /// </summary>
+        public NetworkSessionOptions UseReconnect(int maximumAttempts = 5,
+                                                 double initialDelaySeconds = 1.0,
+                                                 double delayMultiplier = 2.0,
+                                                 double maximumDelaySeconds = 15.0)
+        {
+            if (maximumAttempts <= 0)
+                throw new ArgumentOutOfRangeException(nameof(maximumAttempts));
+            if (initialDelaySeconds < 0.0)
+                throw new ArgumentOutOfRangeException(nameof(initialDelaySeconds));
+            if (delayMultiplier < 1.0)
+                throw new ArgumentOutOfRangeException(nameof(delayMultiplier));
+            if (maximumDelaySeconds < initialDelaySeconds)
+                throw new ArgumentOutOfRangeException(nameof(maximumDelaySeconds));
+            if (Reconnect != null)
+                throw new InvalidOperationException("Automatic reconnection is already configured.");
+
+            Reconnect = new NetworkReconnectOptions(maximumAttempts,
+                                                    initialDelaySeconds,
+                                                    delayMultiplier,
+                                                    maximumDelaySeconds);
+            return this;
+        }
+
         internal IHeartbeatSession CreateHeartbeat(IMessageSerializer serializer,
                                                    INetworkTransport transport)
         {
             return mHeartbeatFactory?.Invoke(serializer, transport);
+        }
+    }
+
+    internal sealed class NetworkReconnectOptions
+    {
+        internal int MaximumAttempts { get; }
+        internal double InitialDelay { get; }
+        internal double DelayMultiplier { get; }
+        internal double MaximumDelay { get; }
+
+        internal NetworkReconnectOptions(int maximumAttempts,
+                                         double initialDelay,
+                                         double delayMultiplier,
+                                         double maximumDelay)
+        {
+            MaximumAttempts = maximumAttempts;
+            InitialDelay    = initialDelay;
+            DelayMultiplier = delayMultiplier;
+            MaximumDelay    = maximumDelay;
         }
     }
 

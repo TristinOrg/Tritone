@@ -21,6 +21,9 @@ namespace Tritone.Networking
         // Manages optional protocol-specific heartbeat behavior.
         private readonly IHeartbeatSession mHeartbeat;
 
+        // Configures bounded automatic reconnection.
+        private readonly NetworkReconnectOptions mReconnect;
+
         // Protects frames received from a background transport thread.
         private readonly object mQueueLock = new();
 
@@ -36,7 +39,10 @@ namespace Tritone.Networking
         // Produces positive request identifiers without reflection or random allocation.
         private int mNextRequestId;
 
-        public ENetworkState State => mTransport.State;
+        public ENetworkState State =>
+            mReconnectPending || mReconnectRunning
+                ? ENetworkState.Reconnecting
+                : mTransport.State;
         public event Action<ENetworkState> StateChanged;
         public int Order => -900;
 
@@ -47,11 +53,22 @@ namespace Tritone.Networking
             mSerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
             mTransport  = transport ?? throw new ArgumentNullException(nameof(transport));
             mHeartbeat  = options?.CreateHeartbeat(mSerializer, mTransport);
-            mLastState  = mTransport.State;
+            mReconnect  = options?.Reconnect;
+            mLastState  = State;
         }
 
         // Stores the last state delivered to listeners.
         private ENetworkState mLastState;
+
+        // Stores the most recently requested endpoint.
+        private string mHost;
+        private int mPort;
+        private bool mManualDisconnect;
+        private bool mReconnectPending;
+        private bool mReconnectRunning;
+        private int mReconnectAttempts;
+        private double mReconnectElapsed;
+        private double mReconnectDelay;
 
         protected override void OnConfigure(IServiceRegistry services)
         {
@@ -65,14 +82,20 @@ namespace Tritone.Networking
             return new NetworkScope(this);
         }
 
-        public Task ConnectAsync(string host, int port)
+        public async Task ConnectAsync(string host, int port)
         {
-            return mTransport.ConnectAsync(host, port);
+            mHost             = host;
+            mPort             = port;
+            mManualDisconnect = false;
+            ResetReconnect();
+            await mTransport.ConnectAsync(host, port);
         }
 
-        public Task DisconnectAsync()
+        public async Task DisconnectAsync()
         {
-            return mTransport.DisconnectAsync();
+            mManualDisconnect = true;
+            ResetReconnect();
+            await mTransport.DisconnectAsync();
         }
 
         public Task SendAsync<T>(T message) where T : class
@@ -117,6 +140,7 @@ namespace Tritone.Networking
         public void Update(in FrameTime time)
         {
             NotifyState();
+            UpdateReconnect(time.UnscaledDeltaTime);
             mHeartbeat?.Update(time.UnscaledDeltaTime);
             while (true)
             {
@@ -137,6 +161,8 @@ namespace Tritone.Networking
             mTransport.Faulted  -= OnFaulted;
             mBindings.Clear();
             StateChanged = null;
+            mManualDisconnect = true;
+            ResetReconnect();
             CancelRequests();
             lock (mQueueLock)
                 mReceived.Clear();
@@ -173,6 +199,7 @@ namespace Tritone.Networking
         private void OnFaulted(Exception exception)
         {
             Logger.Error("Network transport failed.", exception);
+            BeginReconnect();
         }
 
         private void Dispatch(object message)
@@ -192,11 +219,71 @@ namespace Tritone.Networking
 
         private void NotifyState()
         {
-            var state = mTransport.State;
+            if (mTransport.State == ENetworkState.Disconnected &&
+                mLastState == ENetworkState.Connected)
+                BeginReconnect();
+            var state = State;
             if (state == mLastState)
                 return;
             mLastState = state;
             StateChanged?.Invoke(state);
+        }
+
+        private void BeginReconnect()
+        {
+            if (mReconnect == null ||
+                mManualDisconnect ||
+                string.IsNullOrEmpty(mHost) ||
+                mReconnectPending ||
+                mReconnectRunning)
+                return;
+            mReconnectPending = true;
+            mReconnectElapsed = 0.0;
+            mReconnectDelay   = mReconnect.InitialDelay;
+        }
+
+        private void UpdateReconnect(double deltaTime)
+        {
+            if (!mReconnectPending || mReconnectRunning)
+                return;
+            mReconnectElapsed += deltaTime;
+            if (mReconnectElapsed < mReconnectDelay)
+                return;
+            mReconnectPending = false;
+            mReconnectRunning = true;
+            _ = ReconnectAsync();
+        }
+
+        private async Task ReconnectAsync()
+        {
+            try
+            {
+                await mTransport.ConnectAsync(mHost, mPort);
+                ResetReconnect();
+            }
+            catch (Exception exception)
+            {
+                Logger.Error("Network reconnect attempt failed.", exception);
+                mReconnectAttempts++;
+                mReconnectRunning = false;
+                if (mReconnectAttempts >= mReconnect.MaximumAttempts)
+                    return;
+                mReconnectElapsed = 0.0;
+                mReconnectDelay   = Math.Min(
+                    mReconnect.MaximumDelay,
+                    mReconnect.InitialDelay *
+                    Math.Pow(mReconnect.DelayMultiplier, mReconnectAttempts));
+                mReconnectPending = true;
+            }
+        }
+
+        private void ResetReconnect()
+        {
+            mReconnectPending  = false;
+            mReconnectRunning  = false;
+            mReconnectAttempts = 0;
+            mReconnectElapsed  = 0.0;
+            mReconnectDelay    = 0.0;
         }
 
         private int NextRequestId()
