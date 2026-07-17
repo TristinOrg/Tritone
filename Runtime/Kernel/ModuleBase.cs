@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Tritone.Assets;
+using Tritone.Content;
 using Tritone.Events;
 using Tritone.Pooling;
 using Tritone.Timing;
@@ -40,6 +41,9 @@ namespace Tritone.Kernel
         // Owns every asset reference loaded through this module's helper methods.
         private IAssetScope mAssetScope;
 
+        // Owns content update cancellation for this module's lifetime.
+        private IContentUpdateScope mContentUpdateScope;
+
         /// <summary>
         /// Gets the minimum severity accepted by this module.
         /// </summary>
@@ -69,6 +73,7 @@ namespace Tritone.Kernel
                 ReleaseUIWindowScope();
                 ReleasePoolScope();
                 ReleaseAssetScope();
+                ReleaseContentUpdateScope();
                 mServices = null;
                 Logger = NullModuleLogger.Instance;
                 throw;
@@ -99,6 +104,7 @@ namespace Tritone.Kernel
                 ReleaseUIWindowScope();
                 ReleasePoolScope();
                 ReleaseAssetScope();
+                ReleaseContentUpdateScope();
                 mServices = null;
                 Logger = NullModuleLogger.Instance;
             }
@@ -364,6 +370,41 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
+        /// Checks, downloads, verifies, and activates the latest content through this module's lifetime.
+        /// </summary>
+        /// <param name="progress">The optional progress callback.</param>
+        /// <returns>A task containing the active content manifest and executed plan.</returns>
+        protected Task<ContentUpdateResult> UpdateContentAsync(
+            Action<ContentUpdateProgress> progress = null)
+        {
+            return GetContentUpdateScope().UpdateAsync(progress);
+        }
+
+        /// <summary>
+        /// Starts a callback-based content update without requiring async module lifecycle code.
+        /// </summary>
+        /// <param name="completed">The callback receiving the active content after success.</param>
+        /// <param name="progress">The optional update progress callback.</param>
+        /// <param name="failed">The optional failure callback; unhandled failures are logged.</param>
+        protected void StartContentUpdate(Action<ContentUpdateResult> completed,
+                                          Action<ContentUpdateProgress> progress = null,
+                                          Action<Exception> failed              = null)
+        {
+            if (completed == null)
+                throw new ArgumentNullException(nameof(completed));
+
+            _ = RunContentUpdateAsync(completed, progress, failed);
+        }
+
+        /// <summary>
+        /// Cancels the active content update owned by this module.
+        /// </summary>
+        protected void CancelContentUpdate()
+        {
+            mContentUpdateScope?.Cancel();
+        }
+
+        /// <summary>
         /// Configures services and dependencies required by the concrete module.
         /// </summary>
         /// <param name="services">The application-scoped service registry.</param>
@@ -521,6 +562,76 @@ namespace Tritone.Kernel
 
             mAssetScope.Dispose();
             mAssetScope = null;
+        }
+
+        /// <summary>
+        /// Gets or lazily creates content update cancellation owned by this module.
+        /// </summary>
+        /// <returns>The content update scope owned by this module.</returns>
+        private IContentUpdateScope GetContentUpdateScope()
+        {
+            if (mContentUpdateScope != null)
+                return mContentUpdateScope;
+            if (mServices == null)
+                throw new InvalidOperationException(
+                    "Content can only be updated during an active module lifecycle.");
+            if (!mServices.TryGet<IContentUpdateService>(out var updateService))
+                throw new InvalidOperationException(
+                    "Content update infrastructure is not configured. Call builder.UseContentAssets() before adding game modules.");
+
+            mContentUpdateScope = updateService.CreateScope();
+            return mContentUpdateScope;
+        }
+
+        /// <summary>
+        /// Cancels the active content update and releases its module-owned scope.
+        /// </summary>
+        private void ReleaseContentUpdateScope()
+        {
+            if (mContentUpdateScope == null)
+                return;
+
+            mContentUpdateScope.Dispose();
+            mContentUpdateScope = null;
+        }
+
+        /// <summary>
+        /// Awaits one callback-based content update and contains all asynchronous failures.
+        /// </summary>
+        /// <param name="completed">The success callback.</param>
+        /// <param name="progress">The optional progress callback.</param>
+        /// <param name="failed">The optional failure callback.</param>
+        /// <returns>A task that always observes the update operation.</returns>
+        private async Task RunContentUpdateAsync(Action<ContentUpdateResult> completed,
+                                                 Action<ContentUpdateProgress> progress,
+                                                 Action<Exception> failed)
+        {
+            try
+            {
+                var result = await UpdateContentAsync(progress);
+                completed.Invoke(result);
+            }
+            catch (OperationCanceledException)
+            {
+                // Module-owned cancellation is an expected lifecycle outcome.
+            }
+            catch (Exception exception)
+            {
+                if (failed != null)
+                {
+                    try
+                    {
+                        failed.Invoke(exception);
+                    }
+                    catch (Exception callbackException)
+                    {
+                        Logger.Error("Content update failure callback threw an exception.",
+                                     callbackException);
+                    }
+                }
+                else
+                    Logger.Error("Content update failed.", exception);
+            }
         }
     }
 }

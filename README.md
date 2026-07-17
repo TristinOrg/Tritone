@@ -309,7 +309,7 @@ var plan = ContentUpdatePlanner.CreatePlan(localManifest, remoteManifest);
 for (int i = 0, cnt = plan.Downloads.Count; i < cnt; i++)
 {
     var bundle = plan.Downloads[i];
-    // A later update executor downloads and verifies this file.
+    // The transactional updater downloads and verifies this file.
 }
 ```
 
@@ -320,3 +320,55 @@ var registry = remoteManifest.CreateAssetBundleRegistry();
 var provider = new AssetBundleAssetProvider(registry, source);
 builder.UseAssets(provider);
 ```
+
+## Transactional content updates
+
+Configure remote updates and local AssetBundle loading together. Do not also call `UseAssets`:
+
+```csharp
+var localRoot = Path.Combine(Application.persistentDataPath, "Content");
+
+ContentUpdateOptions options = new(
+    "https://cdn.example.com/Windows/content-manifest.json",
+    "https://cdn.example.com/Windows/",
+    localRoot);
+
+builder.UseContentAssets(options);
+builder.AddModule(new StartupModule());
+```
+
+Start the update from a normal module without writing `async void` or managing cancellation:
+
+```csharp
+public sealed class StartupModule : ModuleBase
+{
+    protected override void OnStart()
+    {
+        StartContentUpdate(OnContentReady,
+                           OnContentProgress,
+                           OnContentFailed);
+    }
+
+    private void OnContentReady(ContentUpdateResult result)
+    {
+        SwitchModule<LoginModule>();
+    }
+
+    private void OnContentProgress(ContentUpdateProgress progress)
+    {
+        Logger.Info(
+            $"Content: {progress.NormalizedProgress:P0}");
+    }
+
+    private void OnContentFailed(Exception exception)
+    {
+        Logger.Error("Content update failed.", exception);
+    }
+}
+```
+
+Use `await UpdateContentAsync(OnContentProgress)` instead when the caller already owns an asynchronous startup flow. Stopping the module automatically cancels its request. The shared updater serializes concurrent checks, streams downloads directly to temporary files, verifies exact size and lowercase SHA-256, and only then enters its non-cancellable commit stage.
+
+The transaction keeps backups and creation markers beneath `.tritone-update`. A failed verification leaves active files untouched. A failed commit restores every replaced or removed file and the previous manifest. If the process terminates during commit, the next update check recovers the unfinished transaction before contacting the server. An update gate rejects the operation while old assets are loaded or loading, blocks new loads during the transaction, and activates the new manifest only after every bundle operation succeeds.
+
+The installed manifest is loaded during application construction, so an existing verified version remains available when the remote check fails. Run content updates before loading content assets; changing files on disk cannot replace AssetBundles or prefab instances that are already in memory.

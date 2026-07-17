@@ -58,8 +58,11 @@ namespace Tritone.Tests
 
             var plan = ContentUpdatePlanner.CreatePlan(localManifest, remoteManifest);
 
-            Assert.IsFalse(plan.HasChanges);
+            Assert.IsTrue(plan.HasChanges);
+            Assert.IsTrue(plan.ManifestChanged);
             Assert.AreEqual(0, plan.DownloadBytes);
+            Assert.AreEqual(0, plan.Downloads.Count);
+            Assert.AreEqual(0, plan.ObsoleteFiles.Count);
         }
 
         /// <summary>

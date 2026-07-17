@@ -33,8 +33,11 @@ namespace Tritone.Content
         // Gets the total number of bytes expected across required downloads.
         public long DownloadBytes { get; }
 
-        // Gets whether any local file operation is required.
-        public bool HasChanges => mDownloads.Length > 0 || mObsoleteFiles.Length > 0;
+        // Gets whether active manifest metadata differs from the installed manifest.
+        public bool ManifestChanged { get; }
+
+        // Gets whether files or active manifest metadata must change.
+        public bool HasChanges => ManifestChanged || mDownloads.Length > 0 || mObsoleteFiles.Length > 0;
 
         /// <summary>
         /// Initializes one immutable content update plan.
@@ -43,10 +46,12 @@ namespace Tritone.Content
         /// <param name="downloads">The bundles that must be downloaded.</param>
         /// <param name="obsoleteFiles">The local files that become obsolete.</param>
         /// <param name="downloadBytes">The total expected download size in bytes.</param>
+        /// <param name="manifestChanged">Whether the remote manifest differs from the installed manifest.</param>
         internal ContentUpdatePlan(ContentManifest targetManifest,
                                    ContentBundle[] downloads,
                                    string[] obsoleteFiles,
-                                   long downloadBytes)
+                                   long downloadBytes,
+                                   bool manifestChanged)
         {
             TargetManifest         = targetManifest;
             mDownloads             = downloads;
@@ -54,6 +59,7 @@ namespace Tritone.Content
             mReadOnlyDownloads     = Array.AsReadOnly(mDownloads);
             mReadOnlyObsoleteFiles = Array.AsReadOnly(mObsoleteFiles);
             DownloadBytes          = downloadBytes;
+            ManifestChanged        = manifestChanged;
         }
     }
 }
