@@ -258,6 +258,59 @@ ReleaseAsset(config);
 
 Every remaining reference is released automatically when its owning module stops or its `TritoneComponent` is destroyed. Implement `IAssetProvider` and pass it to `UseAssets(provider)` when replacing Resources with Addressables or another backend.
 
+## Configuration table quick start
+
+Enable tables after configuring either Resources or content-managed assets:
+
+```csharp
+builder.UseAssets();
+builder.UseTables();
+```
+
+Describe a row with its stable primary key:
+
+```csharp
+[Serializable]
+public sealed class RoleRow : ITableRow<int>
+{
+    public int    Id;
+    public string Name;
+
+    public int Key => Id;
+}
+```
+
+Store the rows in a UTF-8 JSON `TextAsset`:
+
+```json
+{
+  "Rows": [
+    { "Id": 1001, "Name": "Tristin" },
+    { "Id": 1002, "Name": "Aigis" }
+  ]
+}
+```
+
+Load and query the table directly from any `ModuleBase`:
+
+```csharp
+var roles  = LoadTable<int, RoleRow>("Tables/Roles");
+var tristin = roles.Get(1001);
+
+if (roles.TryGet(1002, out var aigis))
+    Logger.Info(aigis.Name);
+```
+
+Asynchronous loading uses the same ownership model:
+
+```csharp
+var roles = await LoadTableAsync<int, RoleRow>("Tables/Roles");
+```
+
+The first load deserializes and indexes the rows once. Repeated loads share the parsed table, and concurrent asynchronous requests join one operation. Primary-key lookup is constant time, while `GetAt(index)` supports allocation-free source-order traversal. Duplicate keys fail immediately during indexing.
+
+Manual release is optional. `ReleaseTable(ref roles)` releases one owned reference and clears the caller. Any remaining tables and their underlying `TextAsset` references are released automatically when the owning module stops. Pass a custom `ITableDeserializer` to `UseTables(deserializer)` when switching from readable JSON to a generated binary format; gameplay loading and lookup code stays unchanged.
+
 ## Local AssetBundle provider
 
 Compose bundle and asset registrations before building the application:

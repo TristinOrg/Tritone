@@ -5,6 +5,7 @@ using Tritone.Assets;
 using Tritone.Content;
 using Tritone.Events;
 using Tritone.Pooling;
+using Tritone.Tables;
 using Tritone.Timing;
 using Tritone.UI;
 
@@ -41,6 +42,9 @@ namespace Tritone.Kernel
         // Owns every asset reference loaded through this module's helper methods.
         private IAssetScope mAssetScope;
 
+        // Owns every configuration table loaded through this module's helper methods.
+        private ITableScope mTableScope;
+
         // Owns content update cancellation for this module's lifetime.
         private IContentUpdateScope mContentUpdateScope;
 
@@ -72,6 +76,7 @@ namespace Tritone.Kernel
                 UnbindAllEvents();
                 ReleaseUIWindowScope();
                 ReleasePoolScope();
+                ReleaseTableScope();
                 ReleaseAssetScope();
                 ReleaseContentUpdateScope();
                 mServices = null;
@@ -103,6 +108,7 @@ namespace Tritone.Kernel
                 UnbindAllEvents();
                 ReleaseUIWindowScope();
                 ReleasePoolScope();
+                ReleaseTableScope();
                 ReleaseAssetScope();
                 ReleaseContentUpdateScope();
                 mServices = null;
@@ -370,6 +376,62 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
+        /// Loads, indexes, and owns one strongly typed configuration table.
+        /// </summary>
+        /// <typeparam name="TKey">The row key type.</typeparam>
+        /// <typeparam name="TRow">The configuration row type.</typeparam>
+        /// <param name="path">The asset-provider path of the configuration file.</param>
+        /// <returns>The loaded and indexed table.</returns>
+        protected Table<TKey, TRow> LoadTable<TKey, TRow>(string path)
+            where TRow : ITableRow<TKey>
+        {
+            return GetTableScope().Load<TKey, TRow>(path);
+        }
+
+        /// <summary>
+        /// Loads, indexes, and owns one strongly typed configuration table asynchronously.
+        /// </summary>
+        /// <typeparam name="TKey">The row key type.</typeparam>
+        /// <typeparam name="TRow">The configuration row type.</typeparam>
+        /// <param name="path">The asset-provider path of the configuration file.</param>
+        /// <returns>A task containing the loaded and indexed table.</returns>
+        protected Task<Table<TKey, TRow>> LoadTableAsync<TKey, TRow>(string path)
+            where TRow : ITableRow<TKey>
+        {
+            return GetTableScope().LoadAsync<TKey, TRow>(path);
+        }
+
+        /// <summary>
+        /// Releases one table reference owned by this module before the module stops.
+        /// </summary>
+        /// <typeparam name="TKey">The row key type.</typeparam>
+        /// <typeparam name="TRow">The configuration row type.</typeparam>
+        /// <param name="table">The loaded table to release.</param>
+        /// <returns>True when this module owned and released the table; otherwise, false.</returns>
+        protected bool ReleaseTable<TKey, TRow>(Table<TKey, TRow> table)
+            where TRow : ITableRow<TKey>
+        {
+            return mTableScope != null && mTableScope.Release(table);
+        }
+
+        /// <summary>
+        /// Releases one owned table and clears the caller's reference after success.
+        /// </summary>
+        /// <typeparam name="TKey">The row key type.</typeparam>
+        /// <typeparam name="TRow">The configuration row type.</typeparam>
+        /// <param name="table">The loaded table reference to release and clear.</param>
+        /// <returns>True when this module owned and released the table; otherwise, false.</returns>
+        protected bool ReleaseTable<TKey, TRow>(ref Table<TKey, TRow> table)
+            where TRow : ITableRow<TKey>
+        {
+            if (table == null || !ReleaseTable(table))
+                return false;
+
+            table = null;
+            return true;
+        }
+
+        /// <summary>
         /// Checks, downloads, verifies, and activates the latest content through this module's lifetime.
         /// </summary>
         /// <param name="progress">The optional progress callback.</param>
@@ -562,6 +624,37 @@ namespace Tritone.Kernel
 
             mAssetScope.Dispose();
             mAssetScope = null;
+        }
+
+        /// <summary>
+        /// Gets or lazily creates the table scope owned by this module.
+        /// </summary>
+        /// <returns>The module-owned table scope.</returns>
+        private ITableScope GetTableScope()
+        {
+            if (mTableScope != null)
+                return mTableScope;
+            if (mServices == null)
+                throw new InvalidOperationException(
+                    "Tables can only be loaded during an active module lifecycle.");
+            if (!mServices.TryGet<ITableService>(out var tableService))
+                throw new InvalidOperationException(
+                    "Table infrastructure is not configured. Call builder.UseTables() before adding game modules.");
+
+            mTableScope = tableService.CreateScope();
+            return mTableScope;
+        }
+
+        /// <summary>
+        /// Releases every table reference owned by this module and its scope.
+        /// </summary>
+        private void ReleaseTableScope()
+        {
+            if (mTableScope == null)
+                return;
+
+            mTableScope.Dispose();
+            mTableScope = null;
         }
 
         /// <summary>

@@ -5,6 +5,7 @@ using Tritone.Assets;
 using Tritone.Events;
 using Tritone.Kernel;
 using Tritone.Pooling;
+using Tritone.Tables;
 using Tritone.UI;
 using UnityEngine;
 
@@ -25,6 +26,9 @@ namespace Tritone.Unity
 
         // Owns asset references loaded by this Unity component.
         private IAssetScope mAssetScope;
+
+        // Owns configuration tables loaded by this Unity component.
+        private ITableScope mTableScope;
 
         /// <summary>
         /// Gets one registered application module.
@@ -176,6 +180,62 @@ namespace Tritone.Unity
         }
 
         /// <summary>
+        /// Loads, indexes, and owns one strongly typed configuration table.
+        /// </summary>
+        /// <typeparam name="TKey">The row key type.</typeparam>
+        /// <typeparam name="TRow">The configuration row type.</typeparam>
+        /// <param name="path">The asset-provider path of the configuration file.</param>
+        /// <returns>The loaded and indexed table.</returns>
+        protected Table<TKey, TRow> LoadTable<TKey, TRow>(string path)
+            where TRow : ITableRow<TKey>
+        {
+            return GetTableScope().Load<TKey, TRow>(path);
+        }
+
+        /// <summary>
+        /// Loads, indexes, and owns one strongly typed configuration table asynchronously.
+        /// </summary>
+        /// <typeparam name="TKey">The row key type.</typeparam>
+        /// <typeparam name="TRow">The configuration row type.</typeparam>
+        /// <param name="path">The asset-provider path of the configuration file.</param>
+        /// <returns>A task containing the loaded and indexed table.</returns>
+        protected Task<Table<TKey, TRow>> LoadTableAsync<TKey, TRow>(string path)
+            where TRow : ITableRow<TKey>
+        {
+            return GetTableScope().LoadAsync<TKey, TRow>(path);
+        }
+
+        /// <summary>
+        /// Releases one table reference owned by this component.
+        /// </summary>
+        /// <typeparam name="TKey">The row key type.</typeparam>
+        /// <typeparam name="TRow">The configuration row type.</typeparam>
+        /// <param name="table">The loaded table to release.</param>
+        /// <returns>True when this component owned and released the table; otherwise, false.</returns>
+        protected bool ReleaseTable<TKey, TRow>(Table<TKey, TRow> table)
+            where TRow : ITableRow<TKey>
+        {
+            return mTableScope != null && mTableScope.Release(table);
+        }
+
+        /// <summary>
+        /// Releases one owned table and clears the caller's reference after success.
+        /// </summary>
+        /// <typeparam name="TKey">The row key type.</typeparam>
+        /// <typeparam name="TRow">The configuration row type.</typeparam>
+        /// <param name="table">The loaded table reference to release and clear.</param>
+        /// <returns>True when this component owned and released the table; otherwise, false.</returns>
+        protected bool ReleaseTable<TKey, TRow>(ref Table<TKey, TRow> table)
+            where TRow : ITableRow<TKey>
+        {
+            if (table == null || !ReleaseTable(table))
+                return false;
+
+            table = null;
+            return true;
+        }
+
+        /// <summary>
         /// Gets the configured application UI service.
         /// </summary>
         private static IUIService GetUIService()
@@ -275,6 +335,7 @@ namespace Tritone.Unity
         {
             ReleaseBindings();
             ReleasePooledObjects();
+            ReleaseTableScope();
             ReleaseAssetScope();
         }
 
@@ -318,6 +379,34 @@ namespace Tritone.Unity
 
             mAssetScope.Dispose();
             mAssetScope = null;
+        }
+
+        /// <summary>
+        /// Gets or lazily creates the table scope owned by this component.
+        /// </summary>
+        /// <returns>The component-owned table scope.</returns>
+        private ITableScope GetTableScope()
+        {
+            if (mTableScope != null)
+                return mTableScope;
+
+            var application = TritoneBootstrap.Current;
+            if (application == null)
+                throw new InvalidOperationException("No running Tritone bootstrap is available.");
+            mTableScope = application.Services.GetRequired<ITableService>().CreateScope();
+            return mTableScope;
+        }
+
+        /// <summary>
+        /// Releases every table reference owned by this component and its scope.
+        /// </summary>
+        private void ReleaseTableScope()
+        {
+            if (mTableScope == null)
+                return;
+
+            mTableScope.Dispose();
+            mTableScope = null;
         }
     }
 }
