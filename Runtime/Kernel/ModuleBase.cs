@@ -8,6 +8,7 @@ using Tritone.Events;
 using Tritone.Pooling;
 using Tritone.Saves;
 using Tritone.Scenes;
+using Tritone.Settings;
 using Tritone.Tables;
 using Tritone.Timing;
 using Tritone.UI;
@@ -60,6 +61,11 @@ namespace Tritone.Kernel
         /// Gets the logger automatically bound to the concrete module type.
         /// </summary>
         protected IModuleLogger Logger { get; private set; } = NullModuleLogger.Instance;
+
+        /// <summary>
+        /// Gets the configured typed settings service.
+        /// </summary>
+        protected ISettingsService Settings => GetSettingsService();
 
         /// <summary>
         /// Creates the module logger and invokes module-specific configuration.
@@ -739,6 +745,21 @@ namespace Tritone.Kernel
                 throw new InvalidOperationException(
                     "Save infrastructure is not configured. Call builder.UseSaves() before adding game modules.");
             return saveService;
+        }
+
+        /// <summary>
+        /// Gets the configured typed settings service.
+        /// </summary>
+        /// <returns>The application settings service.</returns>
+        private ISettingsService GetSettingsService()
+        {
+            if (mServices == null)
+                throw new InvalidOperationException(
+                    "Settings can only be used during an active module lifecycle.");
+            if (!mServices.TryGet<ISettingsService>(out var settingsService))
+                throw new InvalidOperationException(
+                    "Settings infrastructure is not configured. Call builder.UseSettings() before adding game modules.");
+            return settingsService;
         }
 
         /// <summary>
