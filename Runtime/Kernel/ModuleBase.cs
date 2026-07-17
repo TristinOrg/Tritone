@@ -6,6 +6,7 @@ using Tritone.Assets;
 using Tritone.Content;
 using Tritone.Events;
 using Tritone.Pooling;
+using Tritone.Saves;
 using Tritone.Scenes;
 using Tritone.Tables;
 using Tritone.Timing;
@@ -376,6 +377,50 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
+        /// Atomically writes one strongly typed save slot.
+        /// </summary>
+        /// <typeparam name="T">The save data type.</typeparam>
+        /// <param name="slot">The caller-defined slot name.</param>
+        /// <param name="value">The complete save data.</param>
+        protected void Save<T>(string slot, T value) where T : class
+        {
+            GetSaveService().Save(slot, value);
+        }
+
+        /// <summary>
+        /// Loads one required strongly typed save slot.
+        /// </summary>
+        /// <typeparam name="T">The save data type.</typeparam>
+        /// <param name="slot">The caller-defined slot name.</param>
+        /// <returns>The loaded save data.</returns>
+        protected T LoadSave<T>(string slot) where T : class
+        {
+            return GetSaveService().Load<T>(slot);
+        }
+
+        /// <summary>
+        /// Attempts to load one optional strongly typed save slot.
+        /// </summary>
+        /// <typeparam name="T">The save data type.</typeparam>
+        /// <param name="slot">The caller-defined slot name.</param>
+        /// <param name="value">The loaded value when found; otherwise, null.</param>
+        /// <returns>True when the slot was loaded; otherwise, false.</returns>
+        protected bool TryLoadSave<T>(string slot, out T value) where T : class
+        {
+            return GetSaveService().TryLoad(slot, out value);
+        }
+
+        /// <summary>
+        /// Deletes one local save slot.
+        /// </summary>
+        /// <param name="slot">The caller-defined slot name.</param>
+        /// <returns>True when any slot data was deleted; otherwise, false.</returns>
+        protected bool DeleteSave(string slot)
+        {
+            return GetSaveService().Delete(slot);
+        }
+
+        /// <summary>
         /// Rents one plain C# object from a lazily created type pool.
         /// </summary>
         protected T Rent<T>() where T : class, new()
@@ -679,6 +724,21 @@ namespace Tritone.Kernel
                 throw new InvalidOperationException(
                     "Audio infrastructure is not configured. Call builder.UseAudio() before adding game modules.");
             return audioService;
+        }
+
+        /// <summary>
+        /// Gets the configured local save service.
+        /// </summary>
+        /// <returns>The application save service.</returns>
+        private ISaveService GetSaveService()
+        {
+            if (mServices == null)
+                throw new InvalidOperationException(
+                    "Saves can only be used during an active module lifecycle.");
+            if (!mServices.TryGet<ISaveService>(out var saveService))
+                throw new InvalidOperationException(
+                    "Save infrastructure is not configured. Call builder.UseSaves() before adding game modules.");
+            return saveService;
         }
 
         /// <summary>
