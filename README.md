@@ -318,6 +318,29 @@ Every remaining reference is released automatically when its owning module stops
 
 ## Configuration table quick start
 
+Create `Assets/Tritone/Tables.json` and run `Tritone/Generate/Tables` to generate
+strongly typed rows without manually maintaining boilerplate:
+
+```json
+{
+  "Namespace": "Game.Tables",
+  "OutputPath": "Assets/Generated/Tritone/Tables",
+  "Tables": [
+    {
+      "Name": "Role",
+      "Path": "Tables/Roles",
+      "Fields": [
+        { "Name": "Id", "Type": "int", "Key": true },
+        { "Name": "Name", "Type": "string", "Key": false }
+      ]
+    }
+  ]
+}
+```
+
+Generated files are rewritten only when their contents change. Removed table
+definitions also remove their former generated source files.
+
 Enable tables after configuring either Resources or content-managed assets:
 
 ```csharp

@@ -39,5 +39,19 @@ namespace Tritone.Editor.CodeGeneration
                     throw new InvalidDataException($"{label} '{value}' is not a valid C# identifier.");
             }
         }
+
+        /// <summary>
+        /// Validates one dot-separated C# namespace.
+        /// </summary>
+        /// <param name="value">The namespace to validate.</param>
+        /// <param name="label">The schema label used in validation errors.</param>
+        internal static void ValidateNamespace(string value, string label)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new InvalidDataException($"{label} is required.");
+            var parts = value.Split('.');
+            for (int i = 0, cnt = parts.Length; i < cnt; i++)
+                ValidateIdentifier(parts[i], label);
+        }
     }
 }
