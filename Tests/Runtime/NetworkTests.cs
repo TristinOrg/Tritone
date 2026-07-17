@@ -141,7 +141,7 @@ namespace Tritone.Tests
         {
             internal Task<TestResponse> Request()
             {
-                return RequestAsync<TestRequest, TestResponse>(new TestRequest());
+                return RequestAsync(new TestRequest());
             }
         }
 
@@ -165,7 +165,7 @@ namespace Tritone.Tests
             }
         }
 
-        private sealed class TestRequest : INetworkRequest
+        private sealed class TestRequest : INetworkRequest<TestResponse>
         {
             public int RequestId { get; set; }
         }

@@ -392,6 +392,58 @@ The first load deserializes and indexes the rows once. Repeated loads share the 
 
 Manual release is optional. `ReleaseTable(ref roles)` releases one owned reference and clears the caller. Any remaining tables and their underlying `TextAsset` references are released automatically when the owning module stops. Pass a custom `ITableDeserializer` to `UseTables(deserializer)` when switching from readable JSON to a generated binary format; gameplay loading and lookup code stays unchanged.
 
+## Network message generation
+
+Create `Assets/Tritone/Network.json` and run
+`Tritone/Generate/Network Messages`:
+
+```json
+{
+  "Namespace": "Game.Network",
+  "OutputPath": "Assets/Generated/Tritone/Network",
+  "Messages": [
+    {
+      "Id": 1001,
+      "Name": "LoginRequest",
+      "Kind": "Request",
+      "Response": "LoginResponse",
+      "Fields": [
+        { "Name": "Account", "Type": "string" }
+      ]
+    },
+    {
+      "Id": 1002,
+      "Name": "LoginResponse",
+      "Kind": "Response",
+      "Fields": [
+        { "Name": "Token", "Type": "string" }
+      ]
+    }
+  ]
+}
+```
+
+Register every generated codec once:
+
+```csharp
+MessageSerializer serializer = new();
+NetworkMessages.Register(serializer);
+```
+
+Generated request relationships let modules infer the response type:
+
+```csharp
+LoginResponse response = await RequestAsync(
+    new LoginRequest { Account = "Tristin" });
+```
+
+Message IDs, duplicate names, request-response relationships, and supported
+field types are validated before output. Supported network field types are
+`bool`, `byte[]`, `float`, `int`, and `string`.
+
+Run `Tritone/Generate/All` when both schemas are present to update tables and
+network messages with a single Unity asset refresh.
+
 ## Local AssetBundle provider
 
 Compose bundle and asset registrations before building the application:

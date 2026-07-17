@@ -78,6 +78,19 @@ namespace Tritone.Networking
             return RequestLinkedAsync<TRequest, TResponse>(request, timeout, cancellationToken);
         }
 
+        public Task<TResponse> RequestAsync<TResponse>(
+            INetworkRequest<TResponse> request,
+            TimeSpan timeout,
+            CancellationToken cancellationToken = default)
+            where TResponse : class, INetworkResponse
+        {
+            if (mModule == null)
+                throw new ObjectDisposedException(nameof(NetworkScope));
+            if (!cancellationToken.CanBeCanceled)
+                return mModule.RequestAsync(request, timeout, mCancellation.Token);
+            return RequestLinkedAsync(request, timeout, cancellationToken);
+        }
+
         private async Task<TResponse> RequestLinkedAsync<TRequest, TResponse>(
             TRequest request,
             TimeSpan timeout,
@@ -91,6 +104,18 @@ namespace Tritone.Networking
                 return await mModule.RequestAsync<TRequest, TResponse>(request,
                                                                        timeout,
                                                                        linkedSource.Token);
+        }
+
+        private async Task<TResponse> RequestLinkedAsync<TResponse>(
+            INetworkRequest<TResponse> request,
+            TimeSpan timeout,
+            CancellationToken cancellationToken)
+            where TResponse : class, INetworkResponse
+        {
+            using (CancellationTokenSource linkedSource =
+                   CancellationTokenSource.CreateLinkedTokenSource(mCancellation.Token,
+                                                                   cancellationToken))
+                return await mModule.RequestAsync(request, timeout, linkedSource.Token);
         }
     }
 }

@@ -110,6 +110,24 @@ namespace Tritone.Networking
             where TRequest : class, INetworkRequest
             where TResponse : class, INetworkResponse
         {
+            return await RequestCoreAsync<TResponse>(request, timeout, cancellationToken);
+        }
+
+        public Task<TResponse> RequestAsync<TResponse>(
+            INetworkRequest<TResponse> request,
+            TimeSpan timeout,
+            CancellationToken cancellationToken)
+            where TResponse : class, INetworkResponse
+        {
+            return RequestCoreAsync<TResponse>(request, timeout, cancellationToken);
+        }
+
+        private async Task<TResponse> RequestCoreAsync<TResponse>(
+            INetworkRequest request,
+            TimeSpan timeout,
+            CancellationToken cancellationToken)
+            where TResponse : class, INetworkResponse
+        {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
             if (timeout <= TimeSpan.Zero)
@@ -127,7 +145,7 @@ namespace Tritone.Networking
             {
                 try
                 {
-                    await SendAsync(request);
+                    await mTransport.SendAsync(mSerializer.SerializeObject(request));
                     return await pending.Task;
                 }
                 finally

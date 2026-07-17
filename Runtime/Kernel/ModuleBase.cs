@@ -167,6 +167,21 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
+        /// Sends one generated request and infers its declared response type.
+        /// </summary>
+        protected Task<TResponse> RequestAsync<TResponse>(
+            INetworkRequest<TResponse> request,
+            double timeoutSeconds = 10.0,
+            CancellationToken cancellationToken = default)
+            where TResponse : class, INetworkResponse
+        {
+            return GetNetworkScope().RequestAsync(
+                request,
+                TimeSpan.FromSeconds(timeoutSeconds),
+                cancellationToken);
+        }
+
+        /// <summary>
         /// Connects the configured network transport.
         /// </summary>
         protected Task ConnectNetworkAsync(string host, int port)

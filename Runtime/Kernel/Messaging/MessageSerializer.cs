@@ -28,10 +28,20 @@ namespace Tritone.Messaging
 
         public byte[] Serialize<T>(T message) where T : class
         {
+            return Serialize(message, typeof(T));
+        }
+
+        public byte[] SerializeObject(object message)
+        {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-            if (!mByType.TryGetValue(typeof(T), out var adapter))
-                throw new InvalidOperationException($"Message '{typeof(T).FullName}' is not registered.");
+            return Serialize(message, message.GetType());
+        }
+
+        private byte[] Serialize(object message, Type messageType)
+        {
+            if (!mByType.TryGetValue(messageType, out var adapter))
+                throw new InvalidOperationException($"Message '{messageType.FullName}' is not registered.");
             MessageWriter writer = new();
             writer.WriteInt32(adapter.TypeId);
             adapter.Write(writer, message);

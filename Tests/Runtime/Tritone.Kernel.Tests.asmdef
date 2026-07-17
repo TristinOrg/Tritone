@@ -6,7 +6,8 @@
     "Tritone.Diagnostics",
     "Tritone.Content",
     "Tritone.Timing",
-    "Tritone.Unity"
+    "Tritone.Unity",
+    "Tritone.Editor"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

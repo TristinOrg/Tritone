@@ -12,6 +12,15 @@ namespace Tritone.Networking
     }
 
     /// <summary>
+    /// Declares the response type expected by one generated request message.
+    /// </summary>
+    /// <typeparam name="TResponse">The correlated response message type.</typeparam>
+    public interface INetworkRequest<TResponse> : INetworkRequest
+        where TResponse : class, INetworkResponse
+    {
+    }
+
+    /// <summary>
     /// Identifies a response correlated with one request.
     /// </summary>
     public interface INetworkResponse

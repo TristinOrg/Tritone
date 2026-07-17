@@ -7,6 +7,7 @@ namespace Tritone.Messaging
     {
         void Register<T>(int typeId, IMessageCodec<T> codec) where T : class;
         byte[] Serialize<T>(T message) where T : class;
+        byte[] SerializeObject(object message);
         object Deserialize(byte[] frame);
         bool TryGetMessageType(int typeId, out System.Type messageType);
     }

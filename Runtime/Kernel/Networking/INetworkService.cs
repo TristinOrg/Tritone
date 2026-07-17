@@ -20,6 +20,10 @@ namespace Tritone.Networking
                                                          CancellationToken cancellationToken)
             where TRequest : class, INetworkRequest
             where TResponse : class, INetworkResponse;
+        Task<TResponse> RequestAsync<TResponse>(INetworkRequest<TResponse> request,
+                                               TimeSpan timeout,
+                                               CancellationToken cancellationToken)
+            where TResponse : class, INetworkResponse;
     }
 
     /// <summary>
@@ -33,6 +37,10 @@ namespace Tritone.Networking
                                                          TimeSpan timeout,
                                                          CancellationToken cancellationToken = default)
             where TRequest : class, INetworkRequest
+            where TResponse : class, INetworkResponse;
+        Task<TResponse> RequestAsync<TResponse>(INetworkRequest<TResponse> request,
+                                               TimeSpan timeout,
+                                               CancellationToken cancellationToken = default)
             where TResponse : class, INetworkResponse;
     }
 }
