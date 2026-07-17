@@ -10,6 +10,7 @@ namespace Tritone.Networking
     public interface INetworkService
     {
         ENetworkState State { get; }
+        event Action<ENetworkState> StateChanged;
         INetworkScope CreateScope();
         Task ConnectAsync(string host, int port);
         Task DisconnectAsync();
@@ -27,6 +28,7 @@ namespace Tritone.Networking
     public interface INetworkScope : IDisposable
     {
         void Bind<T>(Action<T> callback) where T : class;
+        void BindState(Action<ENetworkState> callback);
         Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request,
                                                          TimeSpan timeout,
                                                          CancellationToken cancellationToken = default)

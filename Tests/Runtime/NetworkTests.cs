@@ -66,6 +66,31 @@ namespace Tritone.Tests
             application.Stop();
         }
 
+        [Test]
+        public void Session_SendsHeartbeatAndPublishesState()
+        {
+            MessageSerializer serializer = new();
+            serializer.Register(1, new PingCodec());
+            TestTransport transport = new();
+            SessionConsumer consumer = new();
+            NetworkSessionOptions options = new();
+            options.UseHeartbeat<Ping, Ping>(() => new Ping { Value = 1 }, 0.5, 1.5);
+            var application = new GameApplicationBuilder()
+                .UseNetwork(serializer, transport, options)
+                .AddModule(consumer)
+                .Build();
+            application.Start();
+
+            FrameTime time = new(0.6, 0.6, 0.6, 0);
+            application.Update(in time);
+            Assert.AreEqual(1, ((Ping)serializer.Deserialize(transport.LastSent)).Value);
+
+            transport.CurrentState = ENetworkState.Disconnected;
+            application.Update(in time);
+            Assert.AreEqual(ENetworkState.Disconnected, consumer.State);
+            application.Stop();
+        }
+
         private sealed class NetworkConsumer : ModuleBase
         {
             internal int Value;
@@ -91,6 +116,16 @@ namespace Tritone.Tests
             internal Task<TestResponse> Request()
             {
                 return RequestAsync<TestRequest, TestResponse>(new TestRequest());
+            }
+        }
+
+        private sealed class SessionConsumer : ModuleBase
+        {
+            internal ENetworkState State = ENetworkState.Connected;
+
+            protected override void OnStart()
+            {
+                BindNetworkState(state => State = state);
             }
         }
 
@@ -154,7 +189,9 @@ namespace Tritone.Tests
             internal byte[] LastSent;
             internal bool Disposed;
 
-            public ENetworkState State => ENetworkState.Connected;
+            internal ENetworkState CurrentState = ENetworkState.Connected;
+
+            public ENetworkState State => CurrentState;
             public event Action<byte[]> Received;
             public event Action<Exception> Faulted;
 
@@ -171,6 +208,7 @@ namespace Tritone.Tests
 
             public Task DisconnectAsync()
             {
+                CurrentState = ENetworkState.Disconnected;
                 return Task.CompletedTask;
             }
 

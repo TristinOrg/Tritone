@@ -14,6 +14,9 @@ namespace Tritone.Networking
         private readonly List<NetworkBinding> mBindings = new();
         private readonly CancellationTokenSource mCancellation = new();
 
+        // Stores state callbacks owned by this scope.
+        private readonly List<Action<ENetworkState>> mStateCallbacks = new();
+
         internal NetworkScope(NetworkModule module)
         {
             mModule = module;
@@ -34,15 +37,28 @@ namespace Tritone.Networking
             mModule.Add(binding);
         }
 
+        public void BindState(Action<ENetworkState> callback)
+        {
+            if (mModule == null)
+                throw new ObjectDisposedException(nameof(NetworkScope));
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
+            mStateCallbacks.Add(callback);
+            mModule.StateChanged += callback;
+        }
+
         public void Dispose()
         {
             if (mModule == null)
                 return;
             for (int i = mBindings.Count - 1; i >= 0; i--)
                 mModule.Remove(mBindings[i]);
+            for (int i = mStateCallbacks.Count - 1; i >= 0; i--)
+                mModule.StateChanged -= mStateCallbacks[i];
             mCancellation.Cancel();
             mCancellation.Dispose();
             mBindings.Clear();
+            mStateCallbacks.Clear();
             mModule = null;
         }
 

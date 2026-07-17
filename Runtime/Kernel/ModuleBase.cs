@@ -135,6 +135,14 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
+        /// Binds network state changes for this module lifetime.
+        /// </summary>
+        protected void BindNetworkState(Action<ENetworkState> callback)
+        {
+            GetNetworkScope().BindState(callback);
+        }
+
+        /// <summary>
         /// Sends one registered typed network message.
         /// </summary>
         protected Task SendMessageAsync<T>(T message) where T : class

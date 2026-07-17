@@ -18,6 +18,9 @@ namespace Tritone.Networking
         // Performs the replaceable physical transport work.
         private readonly INetworkTransport mTransport;
 
+        // Manages optional protocol-specific heartbeat behavior.
+        private readonly IHeartbeatSession mHeartbeat;
+
         // Protects frames received from a background transport thread.
         private readonly object mQueueLock = new();
 
@@ -34,13 +37,21 @@ namespace Tritone.Networking
         private int mNextRequestId;
 
         public ENetworkState State => mTransport.State;
+        public event Action<ENetworkState> StateChanged;
         public int Order => -900;
 
-        public NetworkModule(IMessageSerializer serializer, INetworkTransport transport)
+        public NetworkModule(IMessageSerializer serializer,
+                             INetworkTransport transport,
+                             NetworkSessionOptions options = null)
         {
             mSerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
             mTransport  = transport ?? throw new ArgumentNullException(nameof(transport));
+            mHeartbeat  = options?.CreateHeartbeat(mSerializer, mTransport);
+            mLastState  = mTransport.State;
         }
+
+        // Stores the last state delivered to listeners.
+        private ENetworkState mLastState;
 
         protected override void OnConfigure(IServiceRegistry services)
         {
@@ -105,6 +116,8 @@ namespace Tritone.Networking
 
         public void Update(in FrameTime time)
         {
+            NotifyState();
+            mHeartbeat?.Update(time.UnscaledDeltaTime);
             while (true)
             {
                 byte[] frame;
@@ -123,6 +136,7 @@ namespace Tritone.Networking
             mTransport.Received -= OnReceived;
             mTransport.Faulted  -= OnFaulted;
             mBindings.Clear();
+            StateChanged = null;
             CancelRequests();
             lock (mQueueLock)
                 mReceived.Clear();
@@ -163,6 +177,7 @@ namespace Tritone.Networking
 
         private void Dispatch(object message)
         {
+            mHeartbeat?.Observe(message);
             if (message is INetworkResponse response &&
                 mRequests.TryGetValue(response.RequestId, out var request))
             {
@@ -173,6 +188,15 @@ namespace Tritone.Networking
                 return;
             for (int i = bindings.Count - 1; i >= 0; i--)
                 bindings[i].Invoke(message);
+        }
+
+        private void NotifyState()
+        {
+            var state = mTransport.State;
+            if (state == mLastState)
+                return;
+            mLastState = state;
+            StateChanged?.Invoke(state);
         }
 
         private int NextRequestId()
