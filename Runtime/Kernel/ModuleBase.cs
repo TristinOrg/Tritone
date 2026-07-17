@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Tritone.Audio;
 using Tritone.Assets;
 using Tritone.Content;
 using Tritone.Events;
@@ -318,6 +319,63 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
+        /// Starts looping background music by asset path.
+        /// </summary>
+        /// <param name="path">The audio clip asset path.</param>
+        protected void PlayMusic(string path)
+        {
+            GetAudioService().PlayMusic(path);
+        }
+
+        /// <summary>
+        /// Loads and starts looping background music asynchronously.
+        /// </summary>
+        /// <param name="path">The audio clip asset path.</param>
+        /// <returns>A task completed after playback starts.</returns>
+        protected Task PlayMusicAsync(string path)
+        {
+            return GetAudioService().PlayMusicAsync(path);
+        }
+
+        /// <summary>
+        /// Stops the active background music.
+        /// </summary>
+        protected void StopMusic()
+        {
+            GetAudioService().StopMusic();
+        }
+
+        /// <summary>
+        /// Plays one sound effect by asset path.
+        /// </summary>
+        /// <param name="path">The audio clip asset path.</param>
+        /// <returns>A handle that can stop the sound.</returns>
+        protected AudioHandle PlaySound(string path)
+        {
+            return GetAudioService().PlaySound(path);
+        }
+
+        /// <summary>
+        /// Loads and plays one sound effect asynchronously.
+        /// </summary>
+        /// <param name="path">The audio clip asset path.</param>
+        /// <returns>A task containing a handle that can stop the sound.</returns>
+        protected Task<AudioHandle> PlaySoundAsync(string path)
+        {
+            return GetAudioService().PlaySoundAsync(path);
+        }
+
+        /// <summary>
+        /// Stops one active sound effect.
+        /// </summary>
+        /// <param name="handle">The sound playback handle.</param>
+        /// <returns>True when an active sound was stopped; otherwise, false.</returns>
+        protected bool StopSound(AudioHandle handle)
+        {
+            return GetAudioService().StopSound(handle);
+        }
+
+        /// <summary>
         /// Rents one plain C# object from a lazily created type pool.
         /// </summary>
         protected T Rent<T>() where T : class, new()
@@ -606,6 +664,21 @@ namespace Tritone.Kernel
 
             mPoolScope = poolService.CreateScope();
             return mPoolScope;
+        }
+
+        /// <summary>
+        /// Gets the configured shared audio service.
+        /// </summary>
+        /// <returns>The application audio service.</returns>
+        private IAudioService GetAudioService()
+        {
+            if (mServices == null)
+                throw new InvalidOperationException(
+                    "Audio can only be used during an active module lifecycle.");
+            if (!mServices.TryGet<IAudioService>(out var audioService))
+                throw new InvalidOperationException(
+                    "Audio infrastructure is not configured. Call builder.UseAudio() before adding game modules.");
+            return audioService;
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Tritone.Audio;
 using Tritone.Assets;
 using Tritone.Events;
 using Tritone.Kernel;
@@ -104,6 +105,25 @@ namespace Tritone.Unity
 
             return application.Services.GetRequired<ISceneService>()
                               .SwitchAsync<TModule>(sceneName, progress);
+        }
+
+        /// <summary>
+        /// Starts looping background music by asset path.
+        /// </summary>
+        /// <param name="path">The audio clip asset path.</param>
+        protected void PlayMusic(string path)
+        {
+            GetAudioService().PlayMusic(path);
+        }
+
+        /// <summary>
+        /// Plays one sound effect by asset path.
+        /// </summary>
+        /// <param name="path">The audio clip asset path.</param>
+        /// <returns>A handle that can stop the sound.</returns>
+        protected AudioHandle PlaySound(string path)
+        {
+            return GetAudioService().PlaySound(path);
         }
 
         /// <summary>
@@ -265,6 +285,18 @@ namespace Tritone.Unity
                 throw new InvalidOperationException("No running Tritone bootstrap is available.");
 
             return application.Services.GetRequired<IUIService>();
+        }
+
+        /// <summary>
+        /// Gets the configured application audio service.
+        /// </summary>
+        /// <returns>The shared audio service.</returns>
+        private static IAudioService GetAudioService()
+        {
+            var application = TritoneBootstrap.Current;
+            if (application == null)
+                throw new InvalidOperationException("No running Tritone bootstrap is available.");
+            return application.Services.GetRequired<IAudioService>();
         }
 
         /// <summary>
