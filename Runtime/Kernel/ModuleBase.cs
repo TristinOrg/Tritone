@@ -7,6 +7,7 @@ using Tritone.Content;
 using Tritone.Events;
 using Tritone.Input;
 using Tritone.Localization;
+using Tritone.Networking;
 using Tritone.Pooling;
 using Tritone.Saves;
 using Tritone.Scenes;
@@ -56,6 +57,9 @@ namespace Tritone.Kernel
 
         // Owns input callbacks bound through this module.
         private IInputScope mInputScope;
+
+        // Owns network callbacks bound through this module.
+        private INetworkScope mNetworkScope;
 
         /// <summary>
         /// Gets the minimum severity accepted by this module.
@@ -122,6 +126,38 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
+        /// Binds one typed network message for this module lifetime.
+        /// </summary>
+        protected void BindMessage<T>(Action<T> callback) where T : class
+        {
+            GetNetworkScope().Bind(callback);
+        }
+
+        /// <summary>
+        /// Sends one registered typed network message.
+        /// </summary>
+        protected Task SendMessageAsync<T>(T message) where T : class
+        {
+            return GetNetworkService().SendAsync(message);
+        }
+
+        /// <summary>
+        /// Connects the configured network transport.
+        /// </summary>
+        protected Task ConnectNetworkAsync(string host, int port)
+        {
+            return GetNetworkService().ConnectAsync(host, port);
+        }
+
+        /// <summary>
+        /// Disconnects the configured network transport.
+        /// </summary>
+        protected Task DisconnectNetworkAsync()
+        {
+            return GetNetworkService().DisconnectAsync();
+        }
+
+        /// <summary>
         /// Creates the module logger and invokes module-specific configuration.
         /// </summary>
         /// <param name="context">The immutable application infrastructure available to this module.</param>
@@ -143,6 +179,7 @@ namespace Tritone.Kernel
                 ReleaseAssetScope();
                 ReleaseContentUpdateScope();
                 ReleaseInputScope();
+                ReleaseNetworkScope();
                 mServices = null;
                 Logger = NullModuleLogger.Instance;
                 throw;
@@ -176,6 +213,7 @@ namespace Tritone.Kernel
                 ReleaseAssetScope();
                 ReleaseContentUpdateScope();
                 ReleaseInputScope();
+                ReleaseNetworkScope();
                 mServices = null;
                 Logger = NullModuleLogger.Instance;
             }
@@ -857,6 +895,30 @@ namespace Tritone.Kernel
                 return;
             mInputScope.Dispose();
             mInputScope = null;
+        }
+
+        private INetworkService GetNetworkService()
+        {
+            if (mServices == null ||
+                !mServices.TryGet<INetworkService>(out var networkService))
+                throw new InvalidOperationException(
+                    "Networking is not configured. Call builder.UseNetwork() before using messages.");
+            return networkService;
+        }
+
+        private INetworkScope GetNetworkScope()
+        {
+            if (mNetworkScope == null)
+                mNetworkScope = GetNetworkService().CreateScope();
+            return mNetworkScope;
+        }
+
+        private void ReleaseNetworkScope()
+        {
+            if (mNetworkScope == null)
+                return;
+            mNetworkScope.Dispose();
+            mNetworkScope = null;
         }
 
         /// <summary>
