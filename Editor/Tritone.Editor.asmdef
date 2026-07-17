@@ -1,0 +1,12 @@
+{
+  "name": "Tritone.Editor",
+  "rootNamespace": "Tritone.Editor",
+  "references": [
+    "Tritone.Kernel"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": true,
+  "noEngineReferences": false
+}
