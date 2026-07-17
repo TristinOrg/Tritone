@@ -5,6 +5,7 @@ using Tritone.Audio;
 using Tritone.Assets;
 using Tritone.Content;
 using Tritone.Events;
+using Tritone.Input;
 using Tritone.Localization;
 using Tritone.Pooling;
 using Tritone.Saves;
@@ -53,6 +54,9 @@ namespace Tritone.Kernel
         // Owns content update cancellation for this module's lifetime.
         private IContentUpdateScope mContentUpdateScope;
 
+        // Owns input callbacks bound through this module.
+        private IInputScope mInputScope;
+
         /// <summary>
         /// Gets the minimum severity accepted by this module.
         /// </summary>
@@ -100,6 +104,24 @@ namespace Tritone.Kernel
         }
 
         /// <summary>
+        /// Binds one named button-down callback for this module lifetime.
+        /// </summary>
+        protected void BindInput(string action, Action callback)
+        {
+            GetInputScope().BindButton(action, callback);
+        }
+
+        /// <summary>
+        /// Binds one named axis callback for this module lifetime.
+        /// </summary>
+        protected void BindInputAxis(string action,
+                                     Action<float> callback,
+                                     float deadZone = 0.001f)
+        {
+            GetInputScope().BindAxis(action, callback, deadZone);
+        }
+
+        /// <summary>
         /// Creates the module logger and invokes module-specific configuration.
         /// </summary>
         /// <param name="context">The immutable application infrastructure available to this module.</param>
@@ -120,6 +142,7 @@ namespace Tritone.Kernel
                 ReleaseTableScope();
                 ReleaseAssetScope();
                 ReleaseContentUpdateScope();
+                ReleaseInputScope();
                 mServices = null;
                 Logger = NullModuleLogger.Instance;
                 throw;
@@ -152,6 +175,7 @@ namespace Tritone.Kernel
                 ReleaseTableScope();
                 ReleaseAssetScope();
                 ReleaseContentUpdateScope();
+                ReleaseInputScope();
                 mServices = null;
                 Logger = NullModuleLogger.Instance;
             }
@@ -807,6 +831,32 @@ namespace Tritone.Kernel
                 throw new InvalidOperationException(
                     "Localization is not configured. Call builder.UseLocalization() before adding game modules.");
             return localizationService;
+        }
+
+        /// <summary>
+        /// Gets or creates the input scope owned by this module.
+        /// </summary>
+        private IInputScope GetInputScope()
+        {
+            if (mInputScope != null)
+                return mInputScope;
+            if (mServices == null ||
+                !mServices.TryGet<IInputService>(out var inputService))
+                throw new InvalidOperationException(
+                    "Input is not configured. Call builder.UseInput() before binding actions.");
+            mInputScope = inputService.CreateScope();
+            return mInputScope;
+        }
+
+        /// <summary>
+        /// Releases every input callback owned by this module.
+        /// </summary>
+        private void ReleaseInputScope()
+        {
+            if (mInputScope == null)
+                return;
+            mInputScope.Dispose();
+            mInputScope = null;
         }
 
         /// <summary>
