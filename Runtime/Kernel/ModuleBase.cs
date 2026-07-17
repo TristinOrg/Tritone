@@ -5,6 +5,7 @@ using Tritone.Audio;
 using Tritone.Assets;
 using Tritone.Content;
 using Tritone.Events;
+using Tritone.Localization;
 using Tritone.Pooling;
 using Tritone.Saves;
 using Tritone.Scenes;
@@ -66,6 +67,37 @@ namespace Tritone.Kernel
         /// Gets the configured typed settings service.
         /// </summary>
         protected ISettingsService Settings => GetSettingsService();
+
+        /// <summary>
+        /// Gets localized text or returns its key when missing.
+        /// </summary>
+        /// <param name="key">The stable localization key.</param>
+        /// <returns>The active localized text.</returns>
+        protected string Localize(string key)
+        {
+            return GetLocalizationService().Get(key);
+        }
+
+        /// <summary>
+        /// Formats localized text with supplied arguments.
+        /// </summary>
+        /// <param name="key">The stable localization key.</param>
+        /// <param name="arguments">The format arguments.</param>
+        /// <returns>The formatted localized text.</returns>
+        protected string Localize(string key, params object[] arguments)
+        {
+            return GetLocalizationService().Format(key, arguments);
+        }
+
+        /// <summary>
+        /// Loads and activates one localization language asynchronously.
+        /// </summary>
+        /// <param name="language">The target language identifier.</param>
+        /// <returns>A task completed after the language is active.</returns>
+        protected Task SetLanguageAsync(string language)
+        {
+            return GetLocalizationService().SetLanguageAsync(language);
+        }
 
         /// <summary>
         /// Creates the module logger and invokes module-specific configuration.
@@ -760,6 +792,21 @@ namespace Tritone.Kernel
                 throw new InvalidOperationException(
                     "Settings infrastructure is not configured. Call builder.UseSettings() before adding game modules.");
             return settingsService;
+        }
+
+        /// <summary>
+        /// Gets the configured localization service.
+        /// </summary>
+        /// <returns>The application localization service.</returns>
+        private ILocalizationService GetLocalizationService()
+        {
+            if (mServices == null)
+                throw new InvalidOperationException(
+                    "Localization can only be used during an active module lifecycle.");
+            if (!mServices.TryGet<ILocalizationService>(out var localizationService))
+                throw new InvalidOperationException(
+                    "Localization is not configured. Call builder.UseLocalization() before adding game modules.");
+            return localizationService;
         }
 
         /// <summary>

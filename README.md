@@ -237,6 +237,62 @@ Despawn(ref effect);
 
 The `ref` overload clears the caller's reference after a successful return. The first request creates the matching type or prefab pool. Objects left active are automatically returned when their owning module or `TritoneComponent` is released. `UIElement` also returns everything spawned during its current enabled lifetime when it closes, so temporary UI children do not require manual despawn calls. Implement `IPoolable` only when an object needs spawn and despawn reset callbacks.
 
+## Basic experience services
+
+Configure the four optional services once:
+
+```csharp
+builder.UseAssets();
+builder.UseAudio();
+builder.UseSaves();
+builder.UseSettings();
+builder.UseTables();
+builder.UseLocalization("en");
+```
+
+Use audio directly from a module or Tritone component:
+
+```csharp
+PlayMusic("Audio/Music/Login");
+var click = PlaySound("Audio/SFX/Click");
+StopSound(click);
+```
+
+Save strongly typed data atomically:
+
+```csharp
+Save("slot1", playerSave);
+
+if (TryLoadSave<PlayerSave>("slot1", out var loaded))
+    ApplySave(loaded);
+```
+
+Settings remain in memory until `Settings.Save()` or application shutdown:
+
+```csharp
+Settings.SetFloat("MusicVolume", 0.8f);
+Settings.SetBool("Muted", false);
+Settings.SetString("Language", "zh-CN");
+```
+
+Localization reads one hot-updateable JSON table per language from
+`Localization/{language}`:
+
+```csharp
+var title = Localize("UI.Login.Title");
+await SetLanguageAsync("zh-CN");
+```
+
+Each localization file uses the same table JSON shape:
+
+```json
+{
+  "Rows": [
+    { "Id": "UI.Login.Title", "Text": "Login" }
+  ]
+}
+```
+
 ## Asset quick start
 
 Enable asset management with the built-in Unity Resources provider:
