@@ -6,6 +6,7 @@
     "Tritone.Diagnostics",
     "Tritone.Content",
     "Tritone.Timing",
+    "Tritone.Tweening",
     "Tritone.Unity",
     "Tritone.Editor"
   ],

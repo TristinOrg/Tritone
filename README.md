@@ -248,6 +248,52 @@ configures and release all systems, entities, and components after that module
 stops. Entity systems initialize in stable order, update before normal modules,
 and shut down in reverse order.
 
+## Tween and sequence quick start
+
+Enable the shared tween scheduler once:
+
+```csharp
+builder.UseTweens();
+```
+
+Tween any numeric target through a module-owned setter:
+
+```csharp
+Tween(
+    0.0f,
+    1.0f,
+    0.25,
+    value => mCanvasGroup.alpha = value,
+    ETweenEase.OutCubic);
+```
+
+The scheduler is independent of Unity types, so the same API can animate UI,
+Transforms, audio values, model data, or pure simulation state. Cache method
+group delegates on frequently created tweens when avoiding caller-side closure
+allocations matters.
+
+Build an immutable sequence outside per-frame paths and reuse it:
+
+```csharp
+TweenSequence sequence = new TweenSequenceBuilder()
+    .Append(0.0f, 1.0f, 0.2, SetAlpha, ETweenEase.OutQuad)
+    .AppendDelay(0.1)
+    .AppendCallback(OnShown)
+    .Build();
+
+TweenHandle handle = PlayTweenSequence(sequence);
+PauseTween(handle);
+ResumeTween(handle);
+CancelTween(handle);
+```
+
+Sequences carry unused frame time across step boundaries and support finite or
+infinite loops. Scaled and unscaled clocks are available. Scheduling during a
+tween callback begins on the next application update, preventing recursive
+same-frame execution. Setter and completion failures are isolated to their own
+tween. Every active tween is automatically cancelled when its owning module or
+scene module stops.
+
 ## Timer quick start
 
 Register the shared timer scheduler once:

@@ -8,6 +8,7 @@ using Tritone.Networking;
 using Tritone.Models;
 using Tritone.Flows;
 using Tritone.Entities;
+using Tritone.Tweening;
 using Tritone.Settings;
 using Tritone.Tables;
 using Tritone.Timing;
@@ -96,6 +97,47 @@ namespace Tritone.Kernel
         /// Gets the entity world owned by the active scene module.
         /// </summary>
         protected EntityWorld SceneEntities => Context.Entities.Scene;
+
+        /// <summary>
+        /// Plays one module-owned numeric tween.
+        /// </summary>
+        protected TweenHandle Tween(float from,
+                                    float to,
+                                    double duration,
+                                    Action<float> setter,
+                                    ETweenEase ease         = ETweenEase.Linear,
+                                    ETimerTimeMode timeMode = ETimerTimeMode.Scaled,
+                                    Action completed        = null)
+        {
+            return Context.Tweens.Play(from,
+                                       to,
+                                       duration,
+                                       setter,
+                                       ease,
+                                       timeMode,
+                                       completed);
+        }
+
+        /// <summary>
+        /// Plays one module-owned immutable tween sequence.
+        /// </summary>
+        protected TweenHandle PlayTweenSequence(
+            TweenSequence sequence,
+            int loops                       = 1,
+            ETimerTimeMode timeMode         = ETimerTimeMode.Scaled,
+            Action completed                = null)
+        {
+            return Context.Tweens.Play(sequence, loops, timeMode, completed);
+        }
+
+        /// <summary>Pauses one module-owned tween.</summary>
+        protected bool PauseTween(TweenHandle handle) => Context.Tweens.Pause(handle);
+
+        /// <summary>Resumes one module-owned tween.</summary>
+        protected bool ResumeTween(TweenHandle handle) => Context.Tweens.Resume(handle);
+
+        /// <summary>Cancels one module-owned tween.</summary>
+        protected bool CancelTween(TweenHandle handle) => Context.Tweens.Cancel(handle);
 
         /// <summary>
         /// Creates the module logger and invokes module-specific configuration.

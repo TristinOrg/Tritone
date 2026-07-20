@@ -29,6 +29,7 @@ namespace Tritone.Kernel
         private ModelCapability mModels;
         private FlowCapability mFlows;
         private EntityCapability mEntities;
+        private TweenCapability mTweens;
 
         /// <summary>
         /// Initializes one independently owned module context.
@@ -147,6 +148,11 @@ namespace Tritone.Kernel
         /// Gets application and active scene entity worlds.
         /// </summary>
         public EntityCapability Entities => mEntities ??= new EntityCapability(this);
+
+        /// <summary>
+        /// Gets module-owned tween and sequence operations.
+        /// </summary>
+        public TweenCapability Tweens => mTweens ??= new TweenCapability(this);
 
         /// <summary>
         /// Creates and stores the logger for one concrete module.

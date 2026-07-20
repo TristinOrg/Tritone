@@ -1,0 +1,9 @@
+{
+  "name": "Tritone.Tweening",
+  "rootNamespace": "Tritone.Tweening",
+  "references": [
+    "Tritone.Kernel"
+  ],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}
