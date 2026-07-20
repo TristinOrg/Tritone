@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Tritone.Models;
 using Tritone.Flows;
+using Tritone.Entities;
 
 namespace Tritone.Kernel
 {
@@ -29,6 +30,21 @@ namespace Tritone.Kernel
         /// Stores explicit factories for application flows.
         /// </summary>
         private readonly List<FlowRegistration> mFlows = new();
+
+        /// <summary>
+        /// Stores explicit component registrations for entity worlds.
+        /// </summary>
+        private readonly List<ComponentRegistration> mEntityComponents = new();
+
+        /// <summary>
+        /// Stores explicit system registrations for entity worlds.
+        /// </summary>
+        private readonly List<EntitySystemRegistration> mEntitySystems = new();
+
+        /// <summary>
+        /// Stores the reserved capacity for each fresh entity world.
+        /// </summary>
+        private int mEntityInitialCapacity = 64;
 
         /// <summary>
         /// Stores the application logger factory or the default no-op implementation.
@@ -100,6 +116,78 @@ namespace Tritone.Kernel
             where TFlow : class, IFlow, new()
         {
             return AddFlow(() => new TFlow());
+        }
+
+        /// <summary>
+        /// Configures the reserved capacity used by fresh entity worlds.
+        /// </summary>
+        /// <param name="initialCapacity">The positive initial entity capacity.</param>
+        /// <returns>This builder so additional configuration can be chained.</returns>
+        public GameApplicationBuilder UseEntities(int initialCapacity = 64)
+        {
+            ThrowIfBuilt();
+            if (initialCapacity < 1)
+                throw new ArgumentOutOfRangeException(nameof(initialCapacity));
+            mEntityInitialCapacity = initialCapacity;
+            return this;
+        }
+
+        /// <summary>
+        /// Registers one application-world component type.
+        /// </summary>
+        public GameApplicationBuilder AddApplicationComponent<T>()
+            where T : struct, IEntityComponent
+        {
+            return AddComponent<T>(EEntityWorldLifetime.Application);
+        }
+
+        /// <summary>
+        /// Registers one scene-world component type.
+        /// </summary>
+        public GameApplicationBuilder AddSceneComponent<T>()
+            where T : struct, IEntityComponent
+        {
+            return AddComponent<T>(EEntityWorldLifetime.Scene);
+        }
+
+        /// <summary>
+        /// Registers an application-world entity system using its parameterless constructor.
+        /// </summary>
+        public GameApplicationBuilder AddApplicationEntitySystem<TSystem>()
+            where TSystem : class, IEntitySystem, new()
+        {
+            return AddApplicationEntitySystem(() => new TSystem());
+        }
+
+        /// <summary>
+        /// Registers an application-world entity system factory.
+        /// </summary>
+        /// <param name="factory">The factory creating one system per application world.</param>
+        public GameApplicationBuilder AddApplicationEntitySystem<TSystem>(
+            Func<TSystem> factory)
+            where TSystem : class, IEntitySystem
+        {
+            return AddEntitySystem(factory, EEntityWorldLifetime.Application);
+        }
+
+        /// <summary>
+        /// Registers a scene-world entity system using its parameterless constructor.
+        /// </summary>
+        public GameApplicationBuilder AddSceneEntitySystem<TSystem>()
+            where TSystem : class, IEntitySystem, new()
+        {
+            return AddSceneEntitySystem(() => new TSystem());
+        }
+
+        /// <summary>
+        /// Registers a scene-world entity system factory.
+        /// </summary>
+        /// <param name="factory">The factory creating one system per scene world.</param>
+        public GameApplicationBuilder AddSceneEntitySystem<TSystem>(
+            Func<TSystem> factory)
+            where TSystem : class, IEntitySystem
+        {
+            return AddEntitySystem(factory, EEntityWorldLifetime.Scene);
         }
 
         /// <summary>
@@ -246,6 +334,9 @@ namespace Tritone.Kernel
                                        mSceneModules.ToArray(),
                                        mModels.ToArray(),
                                        mFlows.ToArray(),
+                                       mEntityComponents.ToArray(),
+                                       mEntitySystems.ToArray(),
+                                       mEntityInitialCapacity,
                                        mInitialSceneModuleType,
                                        mLoggerFactory);
         }
@@ -275,6 +366,61 @@ namespace Tritone.Kernel
             }
 
             mModels.Add(new ModelRegistration(modelType, factory, lifetime));
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one unique component registration for a world lifetime.
+        /// </summary>
+        private GameApplicationBuilder AddComponent<T>(
+            EEntityWorldLifetime lifetime)
+            where T : struct, IEntityComponent
+        {
+            ThrowIfBuilt();
+            var componentType = typeof(T);
+            for (int i = 0, cnt = mEntityComponents.Count; i < cnt; i++)
+            {
+                if (mEntityComponents[i].ComponentType == componentType &&
+                    mEntityComponents[i].Lifetime == lifetime)
+                {
+                    throw new InvalidOperationException(
+                        $"Component '{componentType.FullName}' is already registered for '{lifetime}'.");
+                }
+            }
+
+            mEntityComponents.Add(new ComponentRegistration(
+                componentType,
+                lifetime,
+                capacity => new ComponentStore<T>(capacity)));
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one unique entity system registration for a world lifetime.
+        /// </summary>
+        private GameApplicationBuilder AddEntitySystem<TSystem>(
+            Func<TSystem> factory,
+            EEntityWorldLifetime lifetime)
+            where TSystem : class, IEntitySystem
+        {
+            ThrowIfBuilt();
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
+            var systemType = typeof(TSystem);
+            for (int i = 0, cnt = mEntitySystems.Count; i < cnt; i++)
+            {
+                if (mEntitySystems[i].SystemType == systemType &&
+                    mEntitySystems[i].Lifetime == lifetime)
+                {
+                    throw new InvalidOperationException(
+                        $"Entity system '{systemType.FullName}' is already registered for '{lifetime}'.");
+                }
+            }
+
+            mEntitySystems.Add(new EntitySystemRegistration(
+                systemType,
+                lifetime,
+                factory));
             return this;
         }
 

@@ -191,6 +191,63 @@ cancelled entry disposes the incomplete target and re-enters the previous flow.
 The active flow updates before normal module updates and exits automatically
 when the application stops.
 
+## Entity world quick start
+
+Register struct component data and ordered systems explicitly for the world
+lifetime that owns them:
+
+```csharp
+builder.UseEntities(initialCapacity: 256);
+builder.AddApplicationComponent<PlayerIdentity>();
+builder.AddSceneComponent<Position>();
+builder.AddSceneComponent<Velocity>();
+builder.AddSceneEntitySystem<MovementSystem>();
+```
+
+Component data remains plain value types:
+
+```csharp
+public struct Position : IEntityComponent
+{
+    public float X;
+    public float Y;
+}
+```
+
+Create entities and mutate components by reference:
+
+```csharp
+EntityWorld world = Context.Entities.Scene;
+EntityId entity = world.Create();
+world.Add(entity, new Position { X = 10.0f });
+
+ref Position position = ref world.Get<Position>(entity);
+position.X += 5.0f;
+```
+
+Queries are lightweight structs. Indexed traversal does not allocate an
+enumerator and exposes component references directly:
+
+```csharp
+var query = world.Query<Position, Velocity>();
+for (int i = 0, cnt = query.CandidateCount; i < cnt; i++)
+{
+    if (!query.TryGetEntity(i, out var entity))
+        continue;
+
+    ref Position position = ref query.GetFirst(entity);
+    ref Velocity velocity = ref query.GetSecond(entity);
+    position.X += velocity.X;
+}
+```
+
+`EntityId` contains a slot index and generation, so a destroyed identifier
+cannot access a later entity that reuses the same slot. Application worlds
+survive scene changes. Scene worlds are created before their scene module
+configures and release all systems, entities, and components after that module
+stops. Entity systems initialize in stable order, update before normal modules,
+and shut down in reverse order.
+
 ## Timer quick start
 
 Register the shared timer scheduler once:

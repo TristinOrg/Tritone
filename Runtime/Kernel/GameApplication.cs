@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Tritone.Models;
 using Tritone.Flows;
+using Tritone.Entities;
 
 namespace Tritone.Kernel
 {
@@ -64,6 +65,11 @@ namespace Tritone.Kernel
         private readonly FlowService mFlowService;
 
         /// <summary>
+        /// Stores and owns application and scene entity worlds.
+        /// </summary>
+        private readonly EntityService mEntityService;
+
+        /// <summary>
         /// Stores the logger factory owned by this application.
         /// </summary>
         private readonly IModuleLoggerFactory mLoggerFactory;
@@ -113,12 +119,18 @@ namespace Tritone.Kernel
         /// <param name="sceneModules">The scene module factories available for dynamic activation.</param>
         /// <param name="models">The explicit model factories and ownership lifetimes.</param>
         /// <param name="flows">The explicit application flow factories.</param>
+        /// <param name="entityComponents">The explicit entity component registrations.</param>
+        /// <param name="entitySystems">The explicit entity system registrations.</param>
+        /// <param name="entityInitialCapacity">The reserved capacity for fresh entity worlds.</param>
         /// <param name="initialSceneModuleType">The optional scene module entered after startup.</param>
         /// <param name="loggerFactory">The factory used to create and own module loggers.</param>
         internal GameApplication(ModuleRegistration[] modules,
                                  SceneModuleRegistration[] sceneModules,
                                  ModelRegistration[] models,
                                  FlowRegistration[] flows,
+                                 ComponentRegistration[] entityComponents,
+                                 EntitySystemRegistration[] entitySystems,
+                                 int entityInitialCapacity,
                                  Type initialSceneModuleType,
                                  IModuleLoggerFactory loggerFactory)
         {
@@ -129,6 +141,10 @@ namespace Tritone.Kernel
                 models ?? throw new ArgumentNullException(nameof(models)));
             mFlowService            = new FlowService(
                 flows ?? throw new ArgumentNullException(nameof(flows)));
+            mEntityService          = new EntityService(
+                entityComponents ?? throw new ArgumentNullException(nameof(entityComponents)),
+                entitySystems ?? throw new ArgumentNullException(nameof(entitySystems)),
+                entityInitialCapacity);
             mSceneModules           = new(sceneModules?.Length ?? 0);
             mInitialSceneModuleType = initialSceneModuleType;
 
@@ -181,6 +197,8 @@ namespace Tritone.Kernel
                 mServices.AddSingleton<ISceneModuleService>(this);
                 mServices.AddSingleton<IModelService>(mModelService);
                 mServices.AddSingleton<IFlowService>(mFlowService);
+                mServices.AddSingleton<IEntityService>(mEntityService);
+                mEntityService.Start();
                 for (int i = 0, cnt = mModules.Length; i < cnt; i++)
                     mServices.AddSingleton(mModules[i].ModuleType, mModules[i].Module);
                 for (int i = 0, cnt = mModules.Length; i < cnt; i++)
@@ -242,6 +260,7 @@ namespace Tritone.Kernel
                 mScenePreUpdateSystem?.PreUpdate(in time);
 
             mFlowService.Update(in time);
+            mEntityService.Update(in time);
 
             var sceneUpdated = false;
             for (int i = 0, cnt = mUpdateSystems.Length; i < cnt; i++)
@@ -336,6 +355,7 @@ namespace Tritone.Kernel
             try
             {
                 mModelService.BeginScene();
+                mEntityService.BeginScene();
                 module.Configure(context);
                 configured = true;
                 module.Start();
@@ -369,6 +389,16 @@ namespace Tritone.Kernel
                 try
                 {
                     mModelService.EndScene();
+                }
+                catch (Exception exception)
+                {
+                    cleanupException = cleanupException == null
+                        ? exception
+                        : new AggregateException(cleanupException, exception);
+                }
+                try
+                {
+                    mEntityService.EndScene();
                 }
                 catch (Exception exception)
                 {
@@ -411,7 +441,14 @@ namespace Tritone.Kernel
                     }
                     finally
                     {
-                        mServices.RemoveRuntime(moduleType, module);
+                        try
+                        {
+                            mEntityService.EndScene();
+                        }
+                        finally
+                        {
+                            mServices.RemoveRuntime(moduleType, module);
+                        }
                     }
                 }
             }
@@ -528,6 +565,15 @@ namespace Tritone.Kernel
             catch (Exception exception)
             {
                 errors = new List<Exception> { exception };
+            }
+            try
+            {
+                mEntityService.Dispose();
+            }
+            catch (Exception exception)
+            {
+                errors ??= new List<Exception>();
+                errors.Add(exception);
             }
             try
             {

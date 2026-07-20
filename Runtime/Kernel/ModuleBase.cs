@@ -7,6 +7,7 @@ using Tritone.Events;
 using Tritone.Networking;
 using Tritone.Models;
 using Tritone.Flows;
+using Tritone.Entities;
 using Tritone.Settings;
 using Tritone.Tables;
 using Tritone.Timing;
@@ -85,6 +86,16 @@ namespace Tritone.Kernel
         {
             Context.Flows.Exit();
         }
+
+        /// <summary>
+        /// Gets the entity world that survives scene module changes.
+        /// </summary>
+        protected EntityWorld ApplicationEntities => Context.Entities.Application;
+
+        /// <summary>
+        /// Gets the entity world owned by the active scene module.
+        /// </summary>
+        protected EntityWorld SceneEntities => Context.Entities.Scene;
 
         /// <summary>
         /// Creates the module logger and invokes module-specific configuration.

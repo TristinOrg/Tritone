@@ -28,6 +28,7 @@ namespace Tritone.Kernel
         private NetworkCapability mNetwork;
         private ModelCapability mModels;
         private FlowCapability mFlows;
+        private EntityCapability mEntities;
 
         /// <summary>
         /// Initializes one independently owned module context.
@@ -141,6 +142,11 @@ namespace Tritone.Kernel
         /// Gets application flow transition operations.
         /// </summary>
         public FlowCapability Flows => mFlows ??= new FlowCapability(this);
+
+        /// <summary>
+        /// Gets application and active scene entity worlds.
+        /// </summary>
+        public EntityCapability Entities => mEntities ??= new EntityCapability(this);
 
         /// <summary>
         /// Creates and stores the logger for one concrete module.
