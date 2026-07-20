@@ -294,6 +294,39 @@ same-frame execution. Setter and completion failures are isolated to their own
 tween. Every active tween is automatically cancelled when its owning module or
 scene module stops.
 
+## Runtime diagnostics quick start
+
+Configure sampled runtime state and a fixed recent-log buffer. Additional sinks
+can continue forwarding the same events to the Unity Console:
+
+```csharp
+builder.UseRuntimeDiagnostics(
+    ELogLevel.Debug,
+    logCapacity: 256,
+    sampleWindow: 0.5,
+    new UnityLogSink());
+```
+
+Read the latest allocation-free snapshot from code:
+
+```csharp
+var diagnostics = application.Services.GetRequired<IRuntimeDiagnosticsService>();
+var snapshot = diagnostics.Snapshot;
+
+Logger.Info($"FPS: {snapshot.FramesPerSecond:F1}");
+Logger.Info($"Scene entities: {snapshot.SceneEntities}");
+```
+
+The snapshot reports application state, active scene module, active flow,
+application and scene entity counts, FPS, average/minimum/maximum frame time,
+and frame index. Recent log events are retained in chronological order by a
+fixed-capacity ring buffer and overwrite the oldest event when full.
+
+Add `RuntimeDiagnosticsOverlay` to the bootstrap GameObject for an optional
+runtime IMGUI panel. Press F3 by default to toggle it. The panel is deliberately
+separate from the diagnostic service: projects can replace it with their own UI
+without changing logging or sampling infrastructure.
+
 ## Timer quick start
 
 Register the shared timer scheduler once:

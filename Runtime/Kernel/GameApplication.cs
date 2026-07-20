@@ -194,6 +194,7 @@ namespace Tritone.Kernel
             try
             {
                 // Register modules first so configuration can resolve concrete module dependencies.
+                mServices.AddSingleton<GameApplication>(this);
                 mServices.AddSingleton<ISceneModuleService>(this);
                 mServices.AddSingleton<IModelService>(mModelService);
                 mServices.AddSingleton<IFlowService>(mFlowService);
