@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Tritone.Models;
+using Tritone.Flows;
 
 namespace Tritone.Kernel
 {
@@ -58,6 +59,11 @@ namespace Tritone.Kernel
         private readonly ModelService mModelService;
 
         /// <summary>
+        /// Stores and owns the single active application flow.
+        /// </summary>
+        private readonly FlowService mFlowService;
+
+        /// <summary>
         /// Stores the logger factory owned by this application.
         /// </summary>
         private readonly IModuleLoggerFactory mLoggerFactory;
@@ -106,11 +112,13 @@ namespace Tritone.Kernel
         /// <param name="modules">The modules in dependency-safe startup order.</param>
         /// <param name="sceneModules">The scene module factories available for dynamic activation.</param>
         /// <param name="models">The explicit model factories and ownership lifetimes.</param>
+        /// <param name="flows">The explicit application flow factories.</param>
         /// <param name="initialSceneModuleType">The optional scene module entered after startup.</param>
         /// <param name="loggerFactory">The factory used to create and own module loggers.</param>
         internal GameApplication(ModuleRegistration[] modules,
                                  SceneModuleRegistration[] sceneModules,
                                  ModelRegistration[] models,
+                                 FlowRegistration[] flows,
                                  Type initialSceneModuleType,
                                  IModuleLoggerFactory loggerFactory)
         {
@@ -119,6 +127,8 @@ namespace Tritone.Kernel
             mLoggerFactory          = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             mModelService           = new ModelService(
                 models ?? throw new ArgumentNullException(nameof(models)));
+            mFlowService            = new FlowService(
+                flows ?? throw new ArgumentNullException(nameof(flows)));
             mSceneModules           = new(sceneModules?.Length ?? 0);
             mInitialSceneModuleType = initialSceneModuleType;
 
@@ -170,6 +180,7 @@ namespace Tritone.Kernel
                 // Register modules first so configuration can resolve concrete module dependencies.
                 mServices.AddSingleton<ISceneModuleService>(this);
                 mServices.AddSingleton<IModelService>(mModelService);
+                mServices.AddSingleton<IFlowService>(mFlowService);
                 for (int i = 0, cnt = mModules.Length; i < cnt; i++)
                     mServices.AddSingleton(mModules[i].ModuleType, mModules[i].Module);
                 for (int i = 0, cnt = mModules.Length; i < cnt; i++)
@@ -229,6 +240,8 @@ namespace Tritone.Kernel
             }
             if (!scenePreUpdated)
                 mScenePreUpdateSystem?.PreUpdate(in time);
+
+            mFlowService.Update(in time);
 
             var sceneUpdated = false;
             for (int i = 0, cnt = mUpdateSystems.Length; i < cnt; i++)
@@ -510,11 +523,20 @@ namespace Tritone.Kernel
             List<Exception> errors = null;
             try
             {
-                mModelService.Dispose();
+                mFlowService.Dispose();
             }
             catch (Exception exception)
             {
                 errors = new List<Exception> { exception };
+            }
+            try
+            {
+                mModelService.Dispose();
+            }
+            catch (Exception exception)
+            {
+                errors ??= new List<Exception>();
+                errors.Add(exception);
             }
             try
             {

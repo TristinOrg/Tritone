@@ -6,6 +6,7 @@ using Tritone.Content;
 using Tritone.Events;
 using Tritone.Networking;
 using Tritone.Models;
+using Tritone.Flows;
 using Tritone.Settings;
 using Tritone.Tables;
 using Tritone.Timing;
@@ -62,6 +63,27 @@ namespace Tritone.Kernel
         protected bool ResetModel<TModel>() where TModel : class, IModel
         {
             return Context.Models.Reset<TModel>();
+        }
+
+        /// <summary>
+        /// Switches to one explicitly registered application flow.
+        /// </summary>
+        /// <typeparam name="TFlow">The concrete registered flow type.</typeparam>
+        /// <param name="cancellationToken">Cancels entry before the target becomes active.</param>
+        /// <returns>A task containing the active target flow.</returns>
+        protected Task<TFlow> SwitchFlowAsync<TFlow>(
+            CancellationToken cancellationToken = default)
+            where TFlow : class, IFlow
+        {
+            return Context.Flows.SwitchAsync<TFlow>(cancellationToken);
+        }
+
+        /// <summary>
+        /// Exits and releases the active application flow.
+        /// </summary>
+        protected void ExitFlow()
+        {
+            Context.Flows.Exit();
         }
 
         /// <summary>

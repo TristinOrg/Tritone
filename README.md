@@ -143,6 +143,54 @@ instances, so stopping one module cannot invalidate state still used elsewhere.
 Initialization failures dispose the incomplete instance and leave registration
 available for a later retry.
 
+## Game flow quick start
+
+Register application flows explicitly:
+
+```csharp
+builder.AddFlow(() => new LoginFlow(mLoginConfig));
+builder.AddFlow<LobbyFlow>();
+builder.AddFlow<BattleFlow>();
+```
+
+A flow owns one high-level application stage:
+
+```csharp
+public sealed class LoginFlow : IFlow
+{
+    public async Task EnterAsync(CancellationToken cancellationToken)
+    {
+        await LoadLoginDataAsync(cancellationToken);
+    }
+
+    public void Update(in FrameTime time)
+    {
+    }
+
+    public void Exit()
+    {
+    }
+
+    public void Dispose()
+    {
+    }
+}
+```
+
+Switch from a module through its capability or compatibility facade:
+
+```csharp
+await Context.Flows.SwitchAsync<LoginFlow>(cancellationToken);
+await SwitchFlowAsync<BattleFlow>(cancellationToken);
+```
+
+Only one flow is active at a time. Identical concurrent requests share the
+running transition, while conflicting targets are rejected. The current flow
+exits before the target enters, but is retained until entry succeeds. Failed or
+cancelled entry disposes the incomplete target and re-enters the previous flow.
+The active flow updates before normal module updates and exits automatically
+when the application stops.
+
 ## Timer quick start
 
 Register the shared timer scheduler once:

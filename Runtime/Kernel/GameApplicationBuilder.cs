@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Tritone.Models;
+using Tritone.Flows;
 
 namespace Tritone.Kernel
 {
@@ -23,6 +24,11 @@ namespace Tritone.Kernel
         /// Stores explicit model factories and their ownership lifetimes.
         /// </summary>
         private readonly List<ModelRegistration> mModels = new();
+
+        /// <summary>
+        /// Stores explicit factories for application flows.
+        /// </summary>
+        private readonly List<FlowRegistration> mFlows = new();
 
         /// <summary>
         /// Stores the application logger factory or the default no-op implementation.
@@ -83,6 +89,42 @@ namespace Tritone.Kernel
             where TModel : class, IModel, new()
         {
             return AddApplicationModel(() => new TModel());
+        }
+
+        /// <summary>
+        /// Registers an application flow using its parameterless constructor.
+        /// </summary>
+        /// <typeparam name="TFlow">The concrete flow type.</typeparam>
+        /// <returns>This builder so additional configuration can be chained.</returns>
+        public GameApplicationBuilder AddFlow<TFlow>()
+            where TFlow : class, IFlow, new()
+        {
+            return AddFlow(() => new TFlow());
+        }
+
+        /// <summary>
+        /// Registers a factory that creates a fresh flow for each successful transition.
+        /// </summary>
+        /// <typeparam name="TFlow">The concrete flow type.</typeparam>
+        /// <param name="factory">The explicit flow factory.</param>
+        /// <returns>This builder so additional configuration can be chained.</returns>
+        public GameApplicationBuilder AddFlow<TFlow>(Func<TFlow> factory)
+            where TFlow : class, IFlow
+        {
+            ThrowIfBuilt();
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
+
+            var flowType = typeof(TFlow);
+            for (int i = 0, cnt = mFlows.Count; i < cnt; i++)
+            {
+                if (mFlows[i].FlowType == flowType)
+                    throw new InvalidOperationException(
+                        $"Flow '{flowType.FullName}' is already registered.");
+            }
+
+            mFlows.Add(new FlowRegistration(flowType, factory));
+            return this;
         }
 
         /// <summary>
@@ -203,6 +245,7 @@ namespace Tritone.Kernel
             return new GameApplication(modules,
                                        mSceneModules.ToArray(),
                                        mModels.ToArray(),
+                                       mFlows.ToArray(),
                                        mInitialSceneModuleType,
                                        mLoggerFactory);
         }
