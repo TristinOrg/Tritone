@@ -91,6 +91,58 @@ Context.Events.Bind(player.Events.HealthChanged, OnHealthChanged);
 
 Unused capabilities are created lazily and allocate no domain-specific scope.
 
+## Model and state quick start
+
+Register shared state with an explicit factory and ownership lifetime:
+
+```csharp
+builder.AddApplicationModel<PlayerModel>();
+builder.AddSceneModel(() => new BattleModel(mBattleRules));
+```
+
+Models implement a deterministic lifecycle without depending on Unity:
+
+```csharp
+public sealed class PlayerModel : IModel
+{
+    public readonly Event<int> LevelChanged = new();
+
+    public int Level { get; private set; }
+
+    public void Initialize()
+    {
+        Level = 1;
+    }
+
+    public void Reset()
+    {
+        Level = 1;
+        LevelChanged.Clear();
+    }
+
+    public void Dispose()
+    {
+        LevelChanged.Clear();
+    }
+}
+```
+
+Resolve a model directly from a module capability or use the compatibility
+facade:
+
+```csharp
+var player = Context.Models.Get<PlayerModel>();
+var battle = GetModel<BattleModel>();
+```
+
+Models are created only on first access and shared by concrete registered type.
+Application models survive scene changes and release in reverse creation order
+when the application stops. Scene models require an active scene module and are
+released before the next scene module starts. Consumers never own shared model
+instances, so stopping one module cannot invalidate state still used elsewhere.
+Initialization failures dispose the incomplete instance and leave registration
+available for a later retry.
+
 ## Timer quick start
 
 Register the shared timer scheduler once:

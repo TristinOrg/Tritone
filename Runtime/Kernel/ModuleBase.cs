@@ -5,6 +5,7 @@ using Tritone.Audio;
 using Tritone.Content;
 using Tritone.Events;
 using Tritone.Networking;
+using Tritone.Models;
 using Tritone.Settings;
 using Tritone.Tables;
 using Tritone.Timing;
@@ -42,6 +43,26 @@ namespace Tritone.Kernel
         /// Gets the configured typed settings service.
         /// </summary>
         protected ISettingsService Settings => Context.Settings.Service;
+
+        /// <summary>
+        /// Gets or lazily creates one registered shared state model.
+        /// </summary>
+        /// <typeparam name="TModel">The concrete registered model type.</typeparam>
+        /// <returns>The shared model instance for its configured lifetime.</returns>
+        protected TModel GetModel<TModel>() where TModel : class, IModel
+        {
+            return Context.Models.Get<TModel>();
+        }
+
+        /// <summary>
+        /// Resets one created shared state model.
+        /// </summary>
+        /// <typeparam name="TModel">The concrete registered model type.</typeparam>
+        /// <returns>True when the model had been created and was reset; otherwise, false.</returns>
+        protected bool ResetModel<TModel>() where TModel : class, IModel
+        {
+            return Context.Models.Reset<TModel>();
+        }
 
         /// <summary>
         /// Creates the module logger and invokes module-specific configuration.

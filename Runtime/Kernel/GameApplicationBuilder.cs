@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Tritone.Models;
 
 namespace Tritone.Kernel
 {
@@ -17,6 +18,11 @@ namespace Tritone.Kernel
         /// Stores factories for scene modules that are created only when activated.
         /// </summary>
         private readonly List<SceneModuleRegistration> mSceneModules = new();
+
+        /// <summary>
+        /// Stores explicit model factories and their ownership lifetimes.
+        /// </summary>
+        private readonly List<ModelRegistration> mModels = new();
 
         /// <summary>
         /// Stores the application logger factory or the default no-op implementation.
@@ -66,6 +72,52 @@ namespace Tritone.Kernel
 
             mModules.Add(new ModuleRegistration(module, dependencies ?? Array.Empty<Type>()));
             return this;
+        }
+
+        /// <summary>
+        /// Registers an application model using its parameterless constructor.
+        /// </summary>
+        /// <typeparam name="TModel">The concrete model type.</typeparam>
+        /// <returns>This builder so additional configuration can be chained.</returns>
+        public GameApplicationBuilder AddApplicationModel<TModel>()
+            where TModel : class, IModel, new()
+        {
+            return AddApplicationModel(() => new TModel());
+        }
+
+        /// <summary>
+        /// Registers an application model factory.
+        /// </summary>
+        /// <typeparam name="TModel">The concrete model type.</typeparam>
+        /// <param name="factory">The factory invoked when the model is first requested.</param>
+        /// <returns>This builder so additional configuration can be chained.</returns>
+        public GameApplicationBuilder AddApplicationModel<TModel>(Func<TModel> factory)
+            where TModel : class, IModel
+        {
+            return AddModel(factory, EModelLifetime.Application);
+        }
+
+        /// <summary>
+        /// Registers a scene model using its parameterless constructor.
+        /// </summary>
+        /// <typeparam name="TModel">The concrete model type.</typeparam>
+        /// <returns>This builder so additional configuration can be chained.</returns>
+        public GameApplicationBuilder AddSceneModel<TModel>()
+            where TModel : class, IModel, new()
+        {
+            return AddSceneModel(() => new TModel());
+        }
+
+        /// <summary>
+        /// Registers a scene model factory.
+        /// </summary>
+        /// <typeparam name="TModel">The concrete model type.</typeparam>
+        /// <param name="factory">The factory invoked once per scene lifetime on first access.</param>
+        /// <returns>This builder so additional configuration can be chained.</returns>
+        public GameApplicationBuilder AddSceneModel<TModel>(Func<TModel> factory)
+            where TModel : class, IModel
+        {
+            return AddModel(factory, EModelLifetime.Scene);
         }
 
         /// <summary>
@@ -150,8 +202,37 @@ namespace Tritone.Kernel
             mBuilt = true;
             return new GameApplication(modules,
                                        mSceneModules.ToArray(),
+                                       mModels.ToArray(),
                                        mInitialSceneModuleType,
                                        mLoggerFactory);
+        }
+
+        /// <summary>
+        /// Adds one unique model registration.
+        /// </summary>
+        /// <typeparam name="TModel">The concrete model type.</typeparam>
+        /// <param name="factory">The explicit model factory.</param>
+        /// <param name="lifetime">The ownership lifetime for created instances.</param>
+        /// <returns>This builder so additional configuration can be chained.</returns>
+        private GameApplicationBuilder AddModel<TModel>(
+            Func<TModel> factory,
+            EModelLifetime lifetime)
+            where TModel : class, IModel
+        {
+            ThrowIfBuilt();
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
+
+            var modelType = typeof(TModel);
+            for (int i = 0, cnt = mModels.Count; i < cnt; i++)
+            {
+                if (mModels[i].ModelType == modelType)
+                    throw new InvalidOperationException(
+                        $"Model '{modelType.FullName}' is already registered.");
+            }
+
+            mModels.Add(new ModelRegistration(modelType, factory, lifetime));
+            return this;
         }
 
         /// <summary>

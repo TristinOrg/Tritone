@@ -26,6 +26,7 @@ namespace Tritone.Kernel
         private ContentCapability mContent;
         private InputCapability mInput;
         private NetworkCapability mNetwork;
+        private ModelCapability mModels;
 
         /// <summary>
         /// Initializes one independently owned module context.
@@ -129,6 +130,11 @@ namespace Tritone.Kernel
         /// Gets module-owned networking operations.
         /// </summary>
         public NetworkCapability Network => mNetwork ??= new NetworkCapability(this);
+
+        /// <summary>
+        /// Gets shared application and scene state models.
+        /// </summary>
+        public ModelCapability Models => mModels ??= new ModelCapability(this);
 
         /// <summary>
         /// Creates and stores the logger for one concrete module.

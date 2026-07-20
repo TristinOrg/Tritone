@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Tritone.Models;
 
 namespace Tritone.Kernel
 {
@@ -52,8 +53,9 @@ namespace Tritone.Kernel
         private readonly ServiceRegistry mServices = new();
 
         /// <summary>
-        /// Stores immutable infrastructure passed to every module during configuration.
+        /// Stores and owns all lazily created application and scene models.
         /// </summary>
+        private readonly ModelService mModelService;
 
         /// <summary>
         /// Stores the logger factory owned by this application.
@@ -103,16 +105,20 @@ namespace Tritone.Kernel
         /// </summary>
         /// <param name="modules">The modules in dependency-safe startup order.</param>
         /// <param name="sceneModules">The scene module factories available for dynamic activation.</param>
+        /// <param name="models">The explicit model factories and ownership lifetimes.</param>
         /// <param name="initialSceneModuleType">The optional scene module entered after startup.</param>
         /// <param name="loggerFactory">The factory used to create and own module loggers.</param>
         internal GameApplication(ModuleRegistration[] modules,
                                  SceneModuleRegistration[] sceneModules,
+                                 ModelRegistration[] models,
                                  Type initialSceneModuleType,
                                  IModuleLoggerFactory loggerFactory)
         {
             mModules                = modules ?? throw new ArgumentNullException(nameof(modules));
             mModuleContexts         = new ModuleContext[mModules.Length];
             mLoggerFactory          = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+            mModelService           = new ModelService(
+                models ?? throw new ArgumentNullException(nameof(models)));
             mSceneModules           = new(sceneModules?.Length ?? 0);
             mInitialSceneModuleType = initialSceneModuleType;
 
@@ -163,6 +169,7 @@ namespace Tritone.Kernel
             {
                 // Register modules first so configuration can resolve concrete module dependencies.
                 mServices.AddSingleton<ISceneModuleService>(this);
+                mServices.AddSingleton<IModelService>(mModelService);
                 for (int i = 0, cnt = mModules.Length; i < cnt; i++)
                     mServices.AddSingleton(mModules[i].ModuleType, mModules[i].Module);
                 for (int i = 0, cnt = mModules.Length; i < cnt; i++)
@@ -315,6 +322,7 @@ namespace Tritone.Kernel
             mServices.AddRuntime(moduleType, module);
             try
             {
+                mModelService.BeginScene();
                 module.Configure(context);
                 configured = true;
                 module.Start();
@@ -338,6 +346,16 @@ namespace Tritone.Kernel
                 try
                 {
                     context.Release();
+                }
+                catch (Exception exception)
+                {
+                    cleanupException = cleanupException == null
+                        ? exception
+                        : new AggregateException(cleanupException, exception);
+                }
+                try
+                {
+                    mModelService.EndScene();
                 }
                 catch (Exception exception)
                 {
@@ -374,7 +392,14 @@ namespace Tritone.Kernel
                 }
                 finally
                 {
-                    mServices.RemoveRuntime(moduleType, module);
+                    try
+                    {
+                        mModelService.EndScene();
+                    }
+                    finally
+                    {
+                        mServices.RemoveRuntime(moduleType, module);
+                    }
                 }
             }
         }
@@ -482,15 +507,29 @@ namespace Tritone.Kernel
         /// <returns>The disposal exception when infrastructure cleanup failed; otherwise, null.</returns>
         private Exception DisposeInfrastructure()
         {
+            List<Exception> errors = null;
             try
             {
-                mLoggerFactory.Dispose();
-                return null;
+                mModelService.Dispose();
             }
             catch (Exception exception)
             {
-                return exception;
+                errors = new List<Exception> { exception };
             }
+            try
+            {
+                mLoggerFactory.Dispose();
+            }
+            catch (Exception exception)
+            {
+                errors ??= new List<Exception>();
+                errors.Add(exception);
+            }
+            return errors == null
+                ? null
+                : new AggregateException(
+                    "Application infrastructure failed to release.",
+                    errors);
         }
 
         /// <summary>
