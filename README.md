@@ -62,6 +62,35 @@ public sealed class GameBootstrap : TritoneBootstrap
 
 Attach `GameBootstrap` to one GameObject in the startup scene and enter Play Mode.
 
+## Module context and capabilities
+
+Each module receives an independent `ModuleContext`. The context composes
+feature capabilities and one generic `ModuleScope`:
+
+```text
+ModuleBase
+    -> ModuleContext
+        -> Assets / Timers / UI / Network / other capabilities
+            -> Service contracts
+            -> ModuleScope ownership
+```
+
+`ModuleBase` keeps familiar helpers such as `LoadAsset`, `SetTimer`, and
+`BindMessage` as compatibility facades. Their implementation and ownership now
+live in focused capabilities. New framework features should follow the same
+boundary: service contracts provide shared behavior, capabilities adapt that
+behavior for a module, and the module scope releases acquired resources.
+
+Modules may also use a capability explicitly when that makes a dependency
+clearer:
+
+```csharp
+var prefab = await Context.Assets.LoadAsync<GameObject>("Characters/Player");
+Context.Events.Bind(player.Events.HealthChanged, OnHealthChanged);
+```
+
+Unused capabilities are created lazily and allocate no domain-specific scope.
+
 ## Timer quick start
 
 Register the shared timer scheduler once:

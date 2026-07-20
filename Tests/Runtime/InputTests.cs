@@ -40,7 +40,7 @@ namespace Tritone.Tests
             protected override void OnStart()
             {
                 BindInput("Jump", OnJump);
-                BindInputAxis("Move", OnMove);
+                Context.Input.BindAxis("Move", OnMove, 0.001f);
             }
 
             private void OnJump()

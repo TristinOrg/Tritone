@@ -13,6 +13,9 @@ namespace Tritone.Kernel
         /// </summary>
         private readonly ModuleRegistration[] mModules;
 
+        // Stores independently owned contexts parallel to persistent modules.
+        private readonly ModuleContext[] mModuleContexts;
+
         /// <summary>
         /// Maps registered scene module types to fresh-instance factories.
         /// </summary>
@@ -51,7 +54,6 @@ namespace Tritone.Kernel
         /// <summary>
         /// Stores immutable infrastructure passed to every module during configuration.
         /// </summary>
-        private readonly ModuleContext mModuleContext;
 
         /// <summary>
         /// Stores the logger factory owned by this application.
@@ -67,6 +69,9 @@ namespace Tritone.Kernel
         /// Stores the currently active scene module.
         /// </summary>
         private IModule mActiveSceneModule;
+
+        // Stores the independently owned context of the active scene module.
+        private ModuleContext mActiveSceneModuleContext;
 
         /// <summary>
         /// Stores the active scene module type.
@@ -106,8 +111,8 @@ namespace Tritone.Kernel
                                  IModuleLoggerFactory loggerFactory)
         {
             mModules                = modules ?? throw new ArgumentNullException(nameof(modules));
+            mModuleContexts         = new ModuleContext[mModules.Length];
             mLoggerFactory          = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
-            mModuleContext          = new(mServices, mLoggerFactory);
             mSceneModules           = new(sceneModules?.Length ?? 0);
             mInitialSceneModuleType = initialSceneModuleType;
 
@@ -133,6 +138,15 @@ namespace Tritone.Kernel
         /// </summary>
         public IServiceRegistry Services => mServices;
 
+        /// <summary>
+        /// Creates one independently owned context for a module lifecycle.
+        /// </summary>
+        /// <returns>A fresh module context sharing only application services.</returns>
+        private ModuleContext CreateModuleContext()
+        {
+            return new ModuleContext(mServices, mLoggerFactory);
+        }
+
         /// <inheritdoc />
         public Type ActiveModuleType => mActiveSceneModuleType;
 
@@ -152,7 +166,11 @@ namespace Tritone.Kernel
                 for (int i = 0, cnt = mModules.Length; i < cnt; i++)
                     mServices.AddSingleton(mModules[i].ModuleType, mModules[i].Module);
                 for (int i = 0, cnt = mModules.Length; i < cnt; i++)
-                    mModules[i].Module.Configure(mModuleContext);
+                {
+                    var context       = CreateModuleContext();
+                    mModuleContexts[i] = context;
+                    mModules[i].Module.Configure(context);
+                }
 
                 mServices.Seal();
                 for (int i = 0, cnt = mModules.Length; i < cnt; i++)
@@ -293,13 +311,14 @@ namespace Tritone.Kernel
                 throw new InvalidOperationException($"Scene module factory for '{moduleType.FullName}' returned an invalid instance.");
 
             var configured = false;
+            var context    = CreateModuleContext();
             mServices.AddRuntime(moduleType, module);
             try
             {
-                module.Configure(mModuleContext);
+                module.Configure(context);
                 configured = true;
                 module.Start();
-                SetActiveSceneModule(moduleType, module);
+                SetActiveSceneModule(moduleType, module, context);
                 return module;
             }
             catch (Exception startupException)
@@ -316,6 +335,16 @@ namespace Tritone.Kernel
                         cleanupException = exception;
                     }
                 }
+                try
+                {
+                    context.Release();
+                }
+                catch (Exception exception)
+                {
+                    cleanupException = cleanupException == null
+                        ? exception
+                        : new AggregateException(cleanupException, exception);
+                }
                 mServices.RemoveRuntime(moduleType, module);
                 if (cleanupException != null)
                     throw new AggregateException("Scene module startup and cleanup failed.", startupException, cleanupException);
@@ -329,16 +358,24 @@ namespace Tritone.Kernel
             if (mActiveSceneModule == null)
                 return;
 
-            var module     = mActiveSceneModule;
-            var moduleType = mActiveSceneModuleType;
-            SetActiveSceneModule(null, null);
+            var module      = mActiveSceneModule;
+            var moduleType  = mActiveSceneModuleType;
+            var context     = mActiveSceneModuleContext;
+            SetActiveSceneModule(null, null, null);
             try
             {
                 module.Stop();
             }
             finally
             {
-                mServices.RemoveRuntime(moduleType, module);
+                try
+                {
+                    context?.Release();
+                }
+                finally
+                {
+                    mServices.RemoveRuntime(moduleType, module);
+                }
             }
         }
 
@@ -417,6 +454,23 @@ namespace Tritone.Kernel
             }
             mStartedModuleCount = 0;
 
+            for (int i = mModuleContexts.Length - 1; i >= 0; i--)
+            {
+                var context = mModuleContexts[i];
+                if (context == null)
+                    continue;
+                try
+                {
+                    context.Release();
+                }
+                catch (Exception exception)
+                {
+                    errors ??= new();
+                    errors.Add(exception);
+                }
+                mModuleContexts[i] = null;
+            }
+
             return errors == null
                 ? null
                 : new AggregateException("One or more modules failed to stop.", errors);
@@ -442,10 +496,13 @@ namespace Tritone.Kernel
         /// <summary>
         /// Updates the active scene module and caches its optional update interfaces.
         /// </summary>
-        private void SetActiveSceneModule(Type moduleType, IModule module)
+        private void SetActiveSceneModule(Type moduleType,
+                                          IModule module,
+                                          ModuleContext context)
         {
             mActiveSceneModuleType  = moduleType;
             mActiveSceneModule      = module;
+            mActiveSceneModuleContext = context;
             mScenePreUpdateSystem   = module as IPreUpdateSystem;
             mSceneUpdateSystem      = module as IUpdateSystem;
             mSceneLateUpdateSystem  = module as ILateUpdateSystem;
