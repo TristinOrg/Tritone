@@ -117,6 +117,111 @@ namespace Tritone.Tests
             application.Stop();
         }
 
+        /// <summary>
+        /// Verifies that connect completes only after a compatible protocol response arrives.
+        /// </summary>
+        [Test]
+        public void Session_CompletesProtocolHandshakeBeforeConnectReturns()
+        {
+            MessageSerializer serializer = new();
+            TestTransport transport = new();
+            var protocol = new NetworkProtocolDescriptor("game", 1, 2, 1, "schema-v2");
+            transport.HandshakeProtocol = protocol;
+            NetworkSessionOptions options = new();
+            options.UseProtocolHandshake(in protocol);
+            var application = new GameApplicationBuilder()
+                .UseNetwork(serializer, transport, options)
+                .Build();
+            application.Start();
+
+            application.Services.GetRequired<INetworkService>().ConnectAsync("localhost", 9000).GetAwaiter().GetResult();
+
+            Assert.AreEqual(1, transport.HandshakeCount);
+            Assert.AreEqual(ENetworkState.Connected, transport.State);
+            application.Stop();
+        }
+
+        /// <summary>
+        /// Verifies that an incompatible authoritative response disconnects and reports its reason.
+        /// </summary>
+        [Test]
+        public void Session_RejectsIncompatibleProtocolAndDisconnects()
+        {
+            MessageSerializer serializer = new();
+            TestTransport transport = new();
+            var localProtocol = new NetworkProtocolDescriptor("game", 1, 2, 1, "schema-v2");
+            transport.HandshakeProtocol = new NetworkProtocolDescriptor("game", 2, 0, 0, "schema-v3");
+            NetworkSessionOptions options = new();
+            options.UseProtocolHandshake(in localProtocol);
+            var application = new GameApplicationBuilder()
+                .UseNetwork(serializer, transport, options)
+                .Build();
+            application.Start();
+
+            NetworkProtocolHandshakeException failure = null;
+            try
+            {
+                application.Services.GetRequired<INetworkService>().ConnectAsync("localhost", 9000).GetAwaiter().GetResult();
+                Assert.Fail("An incompatible protocol should reject the connection.");
+            }
+            catch (NetworkProtocolHandshakeException exception)
+            {
+                failure = exception;
+            }
+
+            Assert.AreEqual(ENetworkProtocolCompatibility.MajorVersionMismatch, failure?.Compatibility);
+            Assert.AreEqual(ENetworkState.Disconnected, transport.State);
+            application.Stop();
+        }
+
+        /// <summary>
+        /// Verifies the shared client hello and authoritative server response frame contract.
+        /// </summary>
+        [Test]
+        public void HandshakeFrames_RoundTripServerDecision()
+        {
+            var clientProtocol = new NetworkProtocolDescriptor("game", 1, 2, 1, "client-schema");
+            var serverProtocol = new NetworkProtocolDescriptor("game", 1, 3, 2, "server-schema");
+            var hello = NetworkProtocolHandshakeFrame.CreateHello(in clientProtocol);
+
+            Assert.IsTrue(NetworkProtocolHandshakeFrame.IsFrame(hello));
+            Assert.IsTrue(NetworkProtocolHandshakeFrame.TryReadHello(hello, out var restoredClient));
+            Assert.AreEqual(clientProtocol, restoredClient);
+
+            var responseFrame = NetworkProtocolHandshakeFrame.CreateResponse(in serverProtocol, in restoredClient);
+            Assert.IsTrue(NetworkProtocolHandshakeFrame.TryReadResponse(responseFrame, out var response));
+            Assert.AreEqual(serverProtocol, response.RemoteProtocol);
+            Assert.AreEqual(ENetworkProtocolCompatibility.Compatible, response.Compatibility);
+        }
+
+        /// <summary>
+        /// Verifies that automatic reconnection validates the replacement transport session again.
+        /// </summary>
+        [Test]
+        public void Session_ReconnectRunsProtocolHandshakeAgain()
+        {
+            MessageSerializer serializer = new();
+            TestTransport transport = new();
+            var protocol = new NetworkProtocolDescriptor("game", 1, 2, 1, "schema-v2");
+            transport.HandshakeProtocol = protocol;
+            NetworkSessionOptions options = new();
+            options.UseProtocolHandshake(in protocol).UseReconnect(2, 0.0);
+            var application = new GameApplicationBuilder()
+                .UseNetwork(serializer, transport, options)
+                .Build();
+            application.Start();
+            var service = application.Services.GetRequired<INetworkService>();
+            service.ConnectAsync("localhost", 9000).GetAwaiter().GetResult();
+
+            transport.CurrentState = ENetworkState.Disconnected;
+            FrameTime time = new(0.1, 0.1, 0.1, 0);
+            application.Update(in time);
+
+            Assert.AreEqual(2, transport.HandshakeCount);
+            Assert.AreEqual(ENetworkState.Connected, service.State);
+            application.Stop();
+        }
+
         private sealed class NetworkConsumer : ModuleBase
         {
             internal int Value;
@@ -226,6 +331,16 @@ namespace Tritone.Tests
             internal bool Disposed;
             internal int ConnectCount;
 
+            /// <summary>
+            /// Stores the number of client hello frames answered by the test peer.
+            /// </summary>
+            internal int HandshakeCount;
+
+            /// <summary>
+            /// Stores the authoritative protocol advertised by the test peer.
+            /// </summary>
+            internal NetworkProtocolDescriptor HandshakeProtocol;
+
             internal ENetworkState CurrentState = ENetworkState.Connected;
 
             public ENetworkState State => CurrentState;
@@ -242,6 +357,11 @@ namespace Tritone.Tests
             public Task SendAsync(byte[] frame)
             {
                 LastSent = frame;
+                if (HandshakeProtocol.IsValid && NetworkProtocolHandshakeFrame.TryReadHello(frame, out var clientProtocol))
+                {
+                    HandshakeCount++;
+                    Push(NetworkProtocolHandshakeFrame.CreateResponse(in HandshakeProtocol, in clientProtocol));
+                }
                 return Task.CompletedTask;
             }
 

@@ -24,6 +24,16 @@ namespace Tritone.Networking
         // Configures bounded automatic reconnection.
         private readonly NetworkReconnectOptions mReconnect;
 
+        /// <summary>
+        /// Validates every new transport connection before application traffic begins.
+        /// </summary>
+        private readonly INetworkConnectionHandshake mHandshake;
+
+        /// <summary>
+        /// Cancels connection validation when the module stops.
+        /// </summary>
+        private readonly CancellationTokenSource mLifetimeCancellation = new();
+
         // Protects frames received from a background transport thread.
         private readonly object mQueueLock = new();
 
@@ -40,7 +50,9 @@ namespace Tritone.Networking
         private int mNextRequestId;
 
         public ENetworkState State =>
-            mReconnectPending || mReconnectRunning
+            mHandshakeRunning
+                ? ENetworkState.Handshaking
+                : mReconnectPending || mReconnectRunning
                 ? ENetworkState.Reconnecting
                 : mTransport.State;
         public event Action<ENetworkState> StateChanged;
@@ -54,6 +66,7 @@ namespace Tritone.Networking
             mTransport  = transport ?? throw new ArgumentNullException(nameof(transport));
             mHeartbeat  = options?.CreateHeartbeat(mSerializer, mTransport);
             mReconnect  = options?.Reconnect;
+            mHandshake  = options?.Handshake;
             mLastState  = State;
         }
 
@@ -69,6 +82,16 @@ namespace Tritone.Networking
         private int mReconnectAttempts;
         private double mReconnectElapsed;
         private double mReconnectDelay;
+
+        /// <summary>
+        /// Stores whether connection validation is currently executing.
+        /// </summary>
+        private bool mHandshakeRunning;
+
+        /// <summary>
+        /// Stores whether the current transport connection passed validation.
+        /// </summary>
+        private bool mHandshakeComplete;
 
         protected override void OnConfigure(IServiceRegistry services)
         {
@@ -88,7 +111,17 @@ namespace Tritone.Networking
             mPort             = port;
             mManualDisconnect = false;
             ResetReconnect();
-            await mTransport.ConnectAsync(host, port);
+            mHandshakeComplete = false;
+            try
+            {
+                await mTransport.ConnectAsync(host, port);
+                await ExecuteHandshakeAsync();
+            }
+            catch
+            {
+                await mTransport.DisconnectAsync();
+                throw;
+            }
         }
 
         public async Task DisconnectAsync()
@@ -100,6 +133,7 @@ namespace Tritone.Networking
 
         public Task SendAsync<T>(T message) where T : class
         {
+            EnsureHandshakeComplete();
             return mTransport.SendAsync(mSerializer.Serialize(message));
         }
 
@@ -132,6 +166,7 @@ namespace Tritone.Networking
                 throw new ArgumentNullException(nameof(request));
             if (timeout <= TimeSpan.Zero)
                 throw new ArgumentOutOfRangeException(nameof(timeout));
+            EnsureHandshakeComplete();
 
             var requestId = NextRequestId();
             request.RequestId = requestId;
@@ -177,6 +212,7 @@ namespace Tritone.Networking
         {
             mTransport.Received -= OnReceived;
             mTransport.Faulted  -= OnFaulted;
+            mLifetimeCancellation.Cancel();
             mBindings.Clear();
             StateChanged = null;
             mManualDisconnect = true;
@@ -185,6 +221,7 @@ namespace Tritone.Networking
             lock (mQueueLock)
                 mReceived.Clear();
             mTransport.Dispose();
+            mLifetimeCancellation.Dispose();
         }
 
         internal void Add(NetworkBinding binding)
@@ -208,7 +245,7 @@ namespace Tritone.Networking
 
         private void OnReceived(byte[] frame)
         {
-            if (frame == null)
+            if (frame == null || (mHandshake != null && mHandshake.IsControlFrame(frame)))
                 return;
             lock (mQueueLock)
                 mReceived.Enqueue(frame);
@@ -239,7 +276,10 @@ namespace Tritone.Networking
         {
             if (mTransport.State == ENetworkState.Disconnected &&
                 mLastState == ENetworkState.Connected)
+            {
+                mHandshakeComplete = false;
                 BeginReconnect();
+            }
             var state = State;
             if (state == mLastState)
                 return;
@@ -277,11 +317,20 @@ namespace Tritone.Networking
             try
             {
                 await mTransport.ConnectAsync(mHost, mPort);
+                mHandshakeComplete = false;
+                await ExecuteHandshakeAsync();
                 ResetReconnect();
+            }
+            catch (NetworkProtocolHandshakeException exception)
+            {
+                Logger.Error("Network reconnect protocol handshake failed.", exception);
+                mReconnectRunning = false;
+                await mTransport.DisconnectAsync();
             }
             catch (Exception exception)
             {
                 Logger.Error("Network reconnect attempt failed.", exception);
+                await mTransport.DisconnectAsync();
                 mReconnectAttempts++;
                 mReconnectRunning = false;
                 if (mReconnectAttempts >= mReconnect.MaximumAttempts)
@@ -302,6 +351,39 @@ namespace Tritone.Networking
             mReconnectAttempts = 0;
             mReconnectElapsed  = 0.0;
             mReconnectDelay    = 0.0;
+        }
+
+        /// <summary>
+        /// Executes optional connection validation and marks application traffic as available.
+        /// </summary>
+        /// <returns>A task that completes when connection validation succeeds.</returns>
+        private async Task ExecuteHandshakeAsync()
+        {
+            if (mHandshake == null)
+            {
+                mHandshakeComplete = true;
+                return;
+            }
+
+            mHandshakeRunning = true;
+            try
+            {
+                await mHandshake.ExecuteAsync(mTransport, mLifetimeCancellation.Token);
+                mHandshakeComplete = true;
+            }
+            finally
+            {
+                mHandshakeRunning = false;
+            }
+        }
+
+        /// <summary>
+        /// Rejects application traffic until the configured connection handshake succeeds.
+        /// </summary>
+        private void EnsureHandshakeComplete()
+        {
+            if (mHandshake != null && !mHandshakeComplete)
+                throw new InvalidOperationException("Network application traffic is unavailable before the connection handshake completes.");
         }
 
         private int NextRequestId()

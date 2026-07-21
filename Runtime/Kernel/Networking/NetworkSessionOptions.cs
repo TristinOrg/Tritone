@@ -12,6 +12,11 @@ namespace Tritone.Networking
         // Creates the configured heartbeat behavior.
         private Func<IMessageSerializer, INetworkTransport, IHeartbeatSession> mHeartbeatFactory;
 
+        /// <summary>
+        /// Stores optional connection validation executed after transport connection.
+        /// </summary>
+        internal INetworkConnectionHandshake Handshake { get; private set; }
+
         // Stores optional automatic reconnection behavior.
         internal NetworkReconnectOptions Reconnect { get; private set; }
 
@@ -65,6 +70,40 @@ namespace Tritone.Networking
                                                     initialDelaySeconds,
                                                     delayMultiplier,
                                                     maximumDelaySeconds);
+            return this;
+        }
+
+        /// <summary>
+        /// Enables generated protocol exchange before application messages may be sent.
+        /// </summary>
+        /// <param name="protocol">The local generated protocol descriptor.</param>
+        /// <param name="timeoutSeconds">The maximum server response wait duration.</param>
+        /// <returns>This session options instance.</returns>
+        public NetworkSessionOptions UseProtocolHandshake(in NetworkProtocolDescriptor protocol,
+                                                          double timeoutSeconds = 10.0)
+        {
+            if (Handshake != null)
+                throw new InvalidOperationException("A connection handshake is already configured.");
+            if (timeoutSeconds <= 0.0)
+                throw new ArgumentOutOfRangeException(nameof(timeoutSeconds));
+
+            Handshake = new NetworkProtocolHandshake(in protocol, TimeSpan.FromSeconds(timeoutSeconds));
+            return this;
+        }
+
+        /// <summary>
+        /// Enables one custom transport connection handshake.
+        /// </summary>
+        /// <param name="handshake">The connection validation strategy.</param>
+        /// <returns>This session options instance.</returns>
+        public NetworkSessionOptions UseHandshake(INetworkConnectionHandshake handshake)
+        {
+            if (handshake == null)
+                throw new ArgumentNullException(nameof(handshake));
+            if (Handshake != null)
+                throw new InvalidOperationException("A connection handshake is already configured.");
+
+            Handshake = handshake;
             return this;
         }
 

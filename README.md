@@ -709,6 +709,29 @@ if (compatibility != ENetworkProtocolCompatibility.Compatible)
 
 Major versions must match. Each peer's minor version must fall within the other peer's declared compatibility range. Equal version numbers must also have the same deterministic SHA-256 schema fingerprint, which catches wire changes made without incrementing the protocol version.
 
+Enable automatic validation after the transport connects and before gameplay traffic is available:
+
+```csharp
+var options = new NetworkSessionOptions()
+    .UseProtocolHandshake(in NetworkMessages.Protocol, timeoutSeconds: 10.0)
+    .UseReconnect();
+builder.UseTcpNetwork(serializer, options: options);
+```
+
+The client sends a framework-owned control frame after every initial connection and reconnect. `ConnectAsync` completes only after the server accepts the protocol. Incompatible peers throw `NetworkProtocolHandshakeException` and are disconnected. Application messages and requests are rejected until validation succeeds.
+
+A Tritone-compatible server handles the same frame without depending on Unity:
+
+```csharp
+if (NetworkProtocolHandshakeFrame.TryReadHello(frame, out var clientProtocol))
+{
+    var response = NetworkProtocolHandshakeFrame.CreateResponse(in ServerProtocol, in clientProtocol);
+    await connection.SendAsync(response);
+}
+```
+
+Use `UseHandshake(customHandshake)` when authentication or platform tickets must be composed into a project-specific connection validation strategy.
+
 Generated request relationships let modules infer the response type:
 
 ```csharp
