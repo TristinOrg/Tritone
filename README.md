@@ -605,6 +605,18 @@ ReleaseAsset(config);
 
 Every remaining reference is released automatically when its owning module stops or its `TritoneComponent` is destroyed. Implement `IAssetProvider` and pass it to `UseAssets(provider)` when replacing Resources with Addressables or another backend.
 
+Enable Addressables loading, remote catalog updates, and dependency preloads together:
+
+```csharp
+builder.UseAddressableAssets();
+var catalogs = application.Services.GetRequired<IAddressablesCatalogService>();
+await catalogs.UpdateCatalogsAsync(cancellationToken);
+var downloads = application.Services.GetRequired<IAddressablesDownloadService>();
+await downloads.DownloadAsync("startup", OnDownloadProgress, cancellationToken);
+```
+
+Preloads skip cached content, report byte progress with a readonly struct, and release every Addressables operation handle.
+
 ## Configuration table quick start
 
 Create `Assets/Tritone/Tables.json` and run `Tritone/Generate/Tables` to generate

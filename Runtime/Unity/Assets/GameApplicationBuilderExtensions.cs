@@ -24,7 +24,7 @@ namespace Tritone.Unity.Assets
         /// <returns>The same builder for fluent configuration.</returns>
         public static GameApplicationBuilder UseAddressableAssets(this GameApplicationBuilder builder)
         {
-            return UseAddressableAssets(builder, new UnityAddressablesCatalogBackend());
+            return UseAddressableAssets(builder, new UnityAddressablesCatalogBackend(), new UnityAddressablesDownloadBackend());
         }
 
         /// <summary>
@@ -35,12 +35,27 @@ namespace Tritone.Unity.Assets
         /// <returns>The same builder for fluent configuration.</returns>
         public static GameApplicationBuilder UseAddressableAssets(this GameApplicationBuilder builder, IAddressablesCatalogBackend catalogBackend)
         {
+            return UseAddressableAssets(builder, catalogBackend, new UnityAddressablesDownloadBackend());
+        }
+
+        /// <summary>
+        /// Adds Addressables assets, remote catalogs, and dependency preloads with replaceable backends.
+        /// </summary>
+        /// <param name="builder">The application builder receiving the asset modules.</param>
+        /// <param name="catalogBackend">The backend executing remote catalog operations.</param>
+        /// <param name="downloadBackend">The backend executing dependency cache operations.</param>
+        /// <returns>The same builder for fluent configuration.</returns>
+        public static GameApplicationBuilder UseAddressableAssets(this GameApplicationBuilder builder, IAddressablesCatalogBackend catalogBackend, IAddressablesDownloadBackend downloadBackend)
+        {
             if (builder == null)
                 throw new ArgumentNullException(nameof(builder));
             if (catalogBackend == null)
                 throw new ArgumentNullException(nameof(catalogBackend));
+            if (downloadBackend == null)
+                throw new ArgumentNullException(nameof(downloadBackend));
 
             builder.AddModule(new AddressablesCatalogModule(catalogBackend));
+            builder.AddModule(new AddressablesDownloadModule(downloadBackend));
             return UseAssets(builder, new AddressablesAssetProvider());
         }
 
