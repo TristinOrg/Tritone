@@ -80,15 +80,21 @@ namespace Tritone.Tests
                 Path.Combine(mOutputPath, "NetworkMessages.Generated.cs"));
             StringAssert.Contains("LoginRequestId = 1001", registry);
             StringAssert.Contains("serializer.Register", registry);
+            StringAssert.Contains("NetworkProtocolDescriptor Protocol", registry);
+            StringAssert.Contains("\"game-main\", 2, 3, 1", registry);
         }
 
         private NetworkSchema CreateNetworkSchema()
         {
             return new NetworkSchema
             {
-                Namespace  = "Game.Network",
-                OutputPath = mOutputPath,
-                Messages   = new[]
+                ProtocolId          = "game-main",
+                MajorVersion        = 2,
+                MinorVersion        = 3,
+                MinimumMinorVersion = 1,
+                Namespace           = "Game.Network",
+                OutputPath          = mOutputPath,
+                Messages            = new[]
                 {
                     new NetworkMessageDefinition
                     {

@@ -8,6 +8,26 @@ namespace Tritone.Editor.CodeGeneration
     [Serializable]
     internal sealed class NetworkSchema
     {
+        /// <summary>
+        /// Stores the stable protocol family identifier exchanged by peers.
+        /// </summary>
+        public string ProtocolId;
+
+        /// <summary>
+        /// Stores the breaking protocol version.
+        /// </summary>
+        public int MajorVersion;
+
+        /// <summary>
+        /// Stores the current backward-compatible protocol version.
+        /// </summary>
+        public int MinorVersion;
+
+        /// <summary>
+        /// Stores the oldest remote minor version accepted by this schema.
+        /// </summary>
+        public int MinimumMinorVersion;
+
         // Stores the namespace used by generated message types.
         public string Namespace;
 

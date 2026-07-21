@@ -664,6 +664,10 @@ Create `Assets/Tritone/Network.json` and run
 
 ```json
 {
+  "ProtocolId": "game-main",
+  "MajorVersion": 1,
+  "MinorVersion": 2,
+  "MinimumMinorVersion": 1,
   "Namespace": "Game.Network",
   "OutputPath": "Assets/Generated/Tritone/Network",
   "Messages": [
@@ -694,6 +698,16 @@ Register every generated codec once:
 MessageSerializer serializer = new();
 NetworkMessages.Register(serializer);
 ```
+
+Exchange the generated descriptor during the connection or login handshake and reject incompatible peers before sending gameplay messages:
+
+```csharp
+var compatibility = NetworkMessages.Protocol.EvaluateCompatibility(in remoteProtocol);
+if (compatibility != ENetworkProtocolCompatibility.Compatible)
+    throw new InvalidOperationException($"Network protocol rejected: {compatibility}");
+```
+
+Major versions must match. Each peer's minor version must fall within the other peer's declared compatibility range. Equal version numbers must also have the same deterministic SHA-256 schema fingerprint, which catches wire changes made without incrementing the protocol version.
 
 Generated request relationships let modules infer the response type:
 
