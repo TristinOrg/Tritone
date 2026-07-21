@@ -1,0 +1,13 @@
+{
+  "name": "Tritone.PlayMode.Tests",
+  "rootNamespace": "Tritone.PlayMode.Tests",
+  "references": [
+    "Tritone.Kernel",
+    "Tritone.Unity"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "autoReferenced": false,
+  "noEngineReferences": false
+}

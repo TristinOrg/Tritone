@@ -1,0 +1,52 @@
+name: Unity Package
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: unity-package-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    name: Package structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate package
+        shell: pwsh
+        run: ./.ci/Validate-Package.ps1
+
+  tests:
+    name: ${{ matrix.testMode }} tests
+    needs: package
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        testMode: [EditMode, PlayMode]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Unity tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: .ci/TestProject
+          unityVersion: 2022.3.62f1
+          testMode: ${{ matrix.testMode }}
+          artifactsPath: test-results/${{ matrix.testMode }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: ${{ matrix.testMode }} test results
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.testMode }}-test-results
+          path: test-results/${{ matrix.testMode }}
+          if-no-files-found: warn

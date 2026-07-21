@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="137" result="Passed" total="137" passed="137" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-07-21 08:53:43Z" end-time="2026-07-21 08:53:50Z" duration="6.1960379">
+  <test-suite type="TestSuite" id="1180" name="TestProject" fullname="TestProject" runstate="Runnable" testcasecount="137" result="Passed" start-time="2026-07-21 08:53:43Z" end-time="2026-07-21 08:53:50Z" duration="6.196038" total="137" passed="137" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties />
+    <test-suite type="Assembly" id="1349" name="Tritone.Kernel.Tests.dll" fullname="D:/git/Tritone/.ci/TestProject/Library/ScriptAssemblies/Tritone.Kernel.Tests.dll" runstate="Runnable" testcasecount="136" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:50Z" duration="6.169879" total="136" passed="136" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="18148" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestSuite" id="1350" name="Tritone" fullname="Tritone" runstate="Runnable" testcasecount="136" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:50Z" duration="6.169438" total="136" passed="136" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1351" name="Kernel" fullname="Tritone.Kernel" runstate="Runnable" testcasecount="55" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.184509" total="55" passed="55" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1352" name="Tests" fullname="Tritone.Kernel.Tests" runstate="Runnable" testcasecount="55" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.180368" total="55" passed="55" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1181" name="EntityTests" fullname="Tritone.Kernel.Tests.EntityTests" classname="Tritone.Kernel.Tests.EntityTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.048755" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1183" name="Components_AddGetRemoveAndDestroyDeterministically" fullname="Tritone.Kernel.Tests.EntityTests.Components_AddGetRemoveAndDestroyDeterministically" methodname="Components_AddGetRemoveAndDestroyDeterministically" classname="Tritone.Kernel.Tests.EntityTests" runstate="Runnable" seed="819713444" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.020945" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1188" name="Configuration_RejectsInvalidEntityUsage" fullname="Tritone.Kernel.Tests.EntityTests.Configuration_RejectsInvalidEntityUsage" methodname="Configuration_RejectsInvalidEntityUsage" classname="Tritone.Kernel.Tests.EntityTests" runstate="Runnable" seed="476303824" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000749" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1182" name="CreateAndDestroy_ReusesSlotWithoutRevivingStaleId" fullname="Tritone.Kernel.Tests.EntityTests.CreateAndDestroy_ReusesSlotWithoutRevivingStaleId" methodname="CreateAndDestroy_ReusesSlotWithoutRevivingStaleId" classname="Tritone.Kernel.Tests.EntityTests" runstate="Runnable" seed="945063505" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.002452" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1184" name="Query_TraversesDenseComponentsAndGrowsCapacity" fullname="Tritone.Kernel.Tests.EntityTests.Query_TraversesDenseComponentsAndGrowsCapacity" methodname="Query_TraversesDenseComponentsAndGrowsCapacity" classname="Tritone.Kernel.Tests.EntityTests" runstate="Runnable" seed="600421270" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000970" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1185" name="QueryTwo_FiltersBySparseMembership" fullname="Tritone.Kernel.Tests.EntityTests.QueryTwo_FiltersBySparseMembership" methodname="QueryTwo_FiltersBySparseMembership" classname="Tritone.Kernel.Tests.EntityTests" runstate="Runnable" seed="34467166" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001083" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1187" name="SceneSwitch_RecreatesSceneWorldAndPreservesApplicationWorld" fullname="Tritone.Kernel.Tests.EntityTests.SceneSwitch_RecreatesSceneWorldAndPreservesApplicationWorld" methodname="SceneSwitch_RecreatesSceneWorldAndPreservesApplicationWorld" classname="Tritone.Kernel.Tests.EntityTests" runstate="Runnable" seed="888541125" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.003561" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1186" name="Systems_FollowStableOrderAndUpdateEntities" fullname="Tritone.Kernel.Tests.EntityTests.Systems_FollowStableOrderAndUpdateEntities" methodname="Systems_FollowStableOrderAndUpdateEntities" classname="Tritone.Kernel.Tests.EntityTests" runstate="Runnable" seed="180709110" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.002791" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1189" name="EventTests" fullname="Tritone.Kernel.Tests.EventTests" classname="Tritone.Kernel.Tests.EventTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.005479" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1191" name="Dispose_RemovesListener" fullname="Tritone.Kernel.Tests.EventTests.Dispose_RemovesListener" methodname="Dispose_RemovesListener" classname="Tritone.Kernel.Tests.EventTests" runstate="Runnable" seed="644868611" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000624" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1190" name="Publish_ForwardsTypedPayload" fullname="Tritone.Kernel.Tests.EventTests.Publish_ForwardsTypedPayload" methodname="Publish_ForwardsTypedPayload" classname="Tritone.Kernel.Tests.EventTests" runstate="Runnable" seed="995534068" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000481" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1192" name="Stop_AutomaticallyUnbindsModuleListeners" fullname="Tritone.Kernel.Tests.EventTests.Stop_AutomaticallyUnbindsModuleListeners" methodname="Stop_AutomaticallyUnbindsModuleListeners" classname="Tritone.Kernel.Tests.EventTests" runstate="Runnable" seed="1359210932" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.003071" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1193" name="FlowTests" fullname="Tritone.Kernel.Tests.FlowTests" classname="Tritone.Kernel.Tests.FlowTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.038980" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1200" name="Registration_RejectsInvalidConfigurationAndResults" fullname="Tritone.Kernel.Tests.FlowTests.Registration_RejectsInvalidConfigurationAndResults" methodname="Registration_RejectsInvalidConfigurationAndResults" classname="Tritone.Kernel.Tests.FlowTests" runstate="Runnable" seed="800156662" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.018309" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1199" name="SwitchAsync_CancellationRollsBackPreviousFlow" fullname="Tritone.Kernel.Tests.FlowTests.SwitchAsync_CancellationRollsBackPreviousFlow" methodname="SwitchAsync_CancellationRollsBackPreviousFlow" classname="Tritone.Kernel.Tests.FlowTests" runstate="Runnable" seed="108747093" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.011930" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1194" name="SwitchAsync_EntersFlowAndStopReleasesIt" fullname="Tritone.Kernel.Tests.FlowTests.SwitchAsync_EntersFlowAndStopReleasesIt" methodname="SwitchAsync_EntersFlowAndStopReleasesIt" classname="Tritone.Kernel.Tests.FlowTests" runstate="Runnable" seed="1221123933" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001798" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1197" name="SwitchAsync_EntryFailureRollsBackPreviousFlow" fullname="Tritone.Kernel.Tests.FlowTests.SwitchAsync_EntryFailureRollsBackPreviousFlow" methodname="SwitchAsync_EntryFailureRollsBackPreviousFlow" classname="Tritone.Kernel.Tests.FlowTests" runstate="Runnable" seed="774175621" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001277" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1198" name="SwitchAsync_MergesIdenticalRequestAndRejectsConflict" fullname="Tritone.Kernel.Tests.FlowTests.SwitchAsync_MergesIdenticalRequestAndRejectsConflict" methodname="SwitchAsync_MergesIdenticalRequestAndRejectsConflict" classname="Tritone.Kernel.Tests.FlowTests" runstate="Runnable" seed="1177181983" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001653" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1196" name="SwitchAsync_ReplacesAndReleasesPreviousFlow" fullname="Tritone.Kernel.Tests.FlowTests.SwitchAsync_ReplacesAndReleasesPreviousFlow" methodname="SwitchAsync_ReplacesAndReleasesPreviousFlow" classname="Tritone.Kernel.Tests.FlowTests" runstate="Runnable" seed="1957533973" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000835" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1195" name="Update_RunsActiveFlowBeforeModules" fullname="Tritone.Kernel.Tests.FlowTests.Update_RunsActiveFlowBeforeModules" methodname="Update_RunsActiveFlowBeforeModules" classname="Tritone.Kernel.Tests.FlowTests" runstate="Runnable" seed="49375985" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000756" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1201" name="GameApplicationTests" fullname="Tritone.Kernel.Tests.GameApplicationTests" classname="Tritone.Kernel.Tests.GameApplicationTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.004514" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1203" name="Build_RejectsCircularDependencies" fullname="Tritone.Kernel.Tests.GameApplicationTests.Build_RejectsCircularDependencies" methodname="Build_RejectsCircularDependencies" classname="Tritone.Kernel.Tests.GameApplicationTests" runstate="Runnable" seed="146599547" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001055" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1202" name="StartAndStop_FollowDependencyOrder" fullname="Tritone.Kernel.Tests.GameApplicationTests.StartAndStop_FollowDependencyOrder" methodname="StartAndStop_FollowDependencyOrder" classname="Tritone.Kernel.Tests.GameApplicationTests" runstate="Runnable" seed="1546150337" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000598" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1204" name="Update_UsesSystemOrder" fullname="Tritone.Kernel.Tests.GameApplicationTests.Update_UsesSystemOrder" methodname="Update_UsesSystemOrder" classname="Tritone.Kernel.Tests.GameApplicationTests" runstate="Runnable" seed="1693614512" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000646" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1205" name="UpdateStages_DispatchInExpectedOrderOnlyWhileRunning" fullname="Tritone.Kernel.Tests.GameApplicationTests.UpdateStages_DispatchInExpectedOrderOnlyWhileRunning" methodname="UpdateStages_DispatchInExpectedOrderOnlyWhileRunning" classname="Tritone.Kernel.Tests.GameApplicationTests" runstate="Runnable" seed="1950949860" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000906" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1206" name="LoggerTests" fullname="Tritone.Kernel.Tests.LoggerTests" classname="Tritone.Kernel.Tests.LoggerTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.007561" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1208" name="Log_DispatchesCompleteEventData" fullname="Tritone.Kernel.Tests.LoggerTests.Log_DispatchesCompleteEventData" methodname="Log_DispatchesCompleteEventData" classname="Tritone.Kernel.Tests.LoggerTests" runstate="Runnable" seed="1119437633" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001633" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1207" name="Log_FiltersEventsBelowMinimumLevel" fullname="Tritone.Kernel.Tests.LoggerTests.Log_FiltersEventsBelowMinimumLevel" methodname="Log_FiltersEventsBelowMinimumLevel" classname="Tritone.Kernel.Tests.LoggerTests" runstate="Runnable" seed="1086665985" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000903" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1211" name="ModuleBase_UsesNullLoggerWhenLoggingIsNotConfigured" fullname="Tritone.Kernel.Tests.LoggerTests.ModuleBase_UsesNullLoggerWhenLoggingIsNotConfigured" methodname="ModuleBase_UsesNullLoggerWhenLoggingIsNotConfigured" classname="Tritone.Kernel.Tests.LoggerTests" runstate="Runnable" seed="1550966631" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001187" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1210" name="ModuleLogger_UsesModuleCategoryAndLevel" fullname="Tritone.Kernel.Tests.LoggerTests.ModuleLogger_UsesModuleCategoryAndLevel" methodname="ModuleLogger_UsesModuleCategoryAndLevel" classname="Tritone.Kernel.Tests.LoggerTests" runstate="Runnable" seed="1931182168" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001221" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1209" name="UseLogging_DisposesOwnedSinksAfterModulesStop" fullname="Tritone.Kernel.Tests.LoggerTests.UseLogging_DisposesOwnedSinksAfterModulesStop" methodname="UseLogging_DisposesOwnedSinksAfterModulesStop" classname="Tritone.Kernel.Tests.LoggerTests" runstate="Runnable" seed="564554496" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000504" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1212" name="ModelTests" fullname="Tritone.Kernel.Tests.ModelTests" classname="Tritone.Kernel.Tests.ModelTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.012330" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1213" name="ApplicationModel_IsLazySharedAndReleasedOnStop" fullname="Tritone.Kernel.Tests.ModelTests.ApplicationModel_IsLazySharedAndReleasedOnStop" methodname="ApplicationModel_IsLazySharedAndReleasedOnStop" classname="Tritone.Kernel.Tests.ModelTests" runstate="Runnable" seed="1937440117" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.003869" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1216" name="Build_RejectsDuplicateModelRegistration" fullname="Tritone.Kernel.Tests.ModelTests.Build_RejectsDuplicateModelRegistration" methodname="Build_RejectsDuplicateModelRegistration" classname="Tritone.Kernel.Tests.ModelTests" runstate="Runnable" seed="1293870261" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001053" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1218" name="Get_InitializationFailureDisposesAndAllowsRetry" fullname="Tritone.Kernel.Tests.ModelTests.Get_InitializationFailureDisposesAndAllowsRetry" methodname="Get_InitializationFailureDisposesAndAllowsRetry" classname="Tritone.Kernel.Tests.ModelTests" runstate="Runnable" seed="1074020769" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000752" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1217" name="Get_RejectsInvalidFactoryResult" fullname="Tritone.Kernel.Tests.ModelTests.Get_RejectsInvalidFactoryResult" methodname="Get_RejectsInvalidFactoryResult" classname="Tritone.Kernel.Tests.ModelTests" runstate="Runnable" seed="1636783965" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000521" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1214" name="SceneModel_IsRecreatedWhileApplicationModelSurvives" fullname="Tritone.Kernel.Tests.ModelTests.SceneModel_IsRecreatedWhileApplicationModelSurvives" methodname="SceneModel_IsRecreatedWhileApplicationModelSurvives" classname="Tritone.Kernel.Tests.ModelTests" runstate="Runnable" seed="2141946553" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001395" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1215" name="SceneModel_RequiresActiveSceneModule" fullname="Tritone.Kernel.Tests.ModelTests.SceneModel_RequiresActiveSceneModule" methodname="SceneModel_RequiresActiveSceneModule" classname="Tritone.Kernel.Tests.ModelTests" runstate="Runnable" seed="1956970079" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000448" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1219" name="SceneStartupFailure_ReleasesCreatedSceneModels" fullname="Tritone.Kernel.Tests.ModelTests.SceneStartupFailure_ReleasesCreatedSceneModels" methodname="SceneStartupFailure_ReleasesCreatedSceneModels" classname="Tritone.Kernel.Tests.ModelTests" runstate="Runnable" seed="1812971879" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000772" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1220" name="Stop_ReleasesAllModelsInReverseOrder" fullname="Tritone.Kernel.Tests.ModelTests.Stop_ReleasesAllModelsInReverseOrder" methodname="Stop_ReleasesAllModelsInReverseOrder" classname="Tritone.Kernel.Tests.ModelTests" runstate="Runnable" seed="186260625" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001044" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1221" name="RuntimeDiagnosticsTests" fullname="Tritone.Kernel.Tests.RuntimeDiagnosticsTests" classname="Tritone.Kernel.Tests.RuntimeDiagnosticsTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.014714" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1222" name="LogBuffer_RetainsNewestEventsInChronologicalOrder" fullname="Tritone.Kernel.Tests.RuntimeDiagnosticsTests.LogBuffer_RetainsNewestEventsInChronologicalOrder" methodname="LogBuffer_RetainsNewestEventsInChronologicalOrder" classname="Tritone.Kernel.Tests.RuntimeDiagnosticsTests" runstate="Runnable" seed="746229019" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000984" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1224" name="Logging_CapturesModuleEvents" fullname="Tritone.Kernel.Tests.RuntimeDiagnosticsTests.Logging_CapturesModuleEvents" methodname="Logging_CapturesModuleEvents" classname="Tritone.Kernel.Tests.RuntimeDiagnosticsTests" runstate="Runnable" seed="1015330481" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001168" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1223" name="Update_CapturesRuntimeSnapshot" fullname="Tritone.Kernel.Tests.RuntimeDiagnosticsTests.Update_CapturesRuntimeSnapshot" methodname="Update_CapturesRuntimeSnapshot" classname="Tritone.Kernel.Tests.RuntimeDiagnosticsTests" runstate="Runnable" seed="2106461968" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.010905" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1225" name="SceneModuleTests" fullname="Tritone.Kernel.Tests.SceneModuleTests" classname="Tritone.Kernel.Tests.SceneModuleTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.004298" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1226" name="Start_ActivatesInitialSceneModule" fullname="Tritone.Kernel.Tests.SceneModuleTests.Start_ActivatesInitialSceneModule" methodname="Start_ActivatesInitialSceneModule" classname="Tritone.Kernel.Tests.SceneModuleTests" runstate="Runnable" seed="1085611585" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000951" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1227" name="SwitchModule_StopsPreviousAndCreatesFreshInstance" fullname="Tritone.Kernel.Tests.SceneModuleTests.SwitchModule_StopsPreviousAndCreatesFreshInstance" methodname="SwitchModule_StopsPreviousAndCreatesFreshInstance" classname="Tritone.Kernel.Tests.SceneModuleTests" runstate="Runnable" seed="1493575246" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001145" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1228" name="SwitchModule_UpdatesActiveServiceLookup" fullname="Tritone.Kernel.Tests.SceneModuleTests.SwitchModule_UpdatesActiveServiceLookup" methodname="SwitchModule_UpdatesActiveServiceLookup" classname="Tritone.Kernel.Tests.SceneModuleTests" runstate="Runnable" seed="907889189" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000801" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1229" name="TimerTests" fullname="Tritone.Kernel.Tests.TimerTests" classname="Tritone.Kernel.Tests.TimerTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.014281" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1233" name="Schedule_EqualDueTimesUseCreationOrder" fullname="Tritone.Kernel.Tests.TimerTests.Schedule_EqualDueTimesUseCreationOrder" methodname="Schedule_EqualDueTimesUseCreationOrder" classname="Tritone.Kernel.Tests.TimerTests" runstate="Runnable" seed="1511405223" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.006520" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1230" name="Schedule_ExecutesOnceAfterDelay" fullname="Tritone.Kernel.Tests.TimerTests.Schedule_ExecutesOnceAfterDelay" methodname="Schedule_ExecutesOnceAfterDelay" classname="Tritone.Kernel.Tests.TimerTests" runstate="Runnable" seed="829275310" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000543" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1231" name="Schedule_UnscaledTimerUsesUnscaledClock" fullname="Tritone.Kernel.Tests.TimerTests.Schedule_UnscaledTimerUsesUnscaledClock" methodname="Schedule_UnscaledTimerUsesUnscaledClock" classname="Tritone.Kernel.Tests.TimerTests" runstate="Runnable" seed="1661604974" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000976" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1232" name="ScheduleRepeating_CanCancelItselfInsideCallback" fullname="Tritone.Kernel.Tests.TimerTests.ScheduleRepeating_CanCancelItselfInsideCallback" methodname="ScheduleRepeating_CanCancelItselfInsideCallback" classname="Tritone.Kernel.Tests.TimerTests" runstate="Runnable" seed="209616845" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000766" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1234" name="SetTimer_SameKeyReplacesPreviousTimer" fullname="Tritone.Kernel.Tests.TimerTests.SetTimer_SameKeyReplacesPreviousTimer" methodname="SetTimer_SameKeyReplacesPreviousTimer" classname="Tritone.Kernel.Tests.TimerTests" runstate="Runnable" seed="1443775216" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000473" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1235" name="Update_CallbackExceptionDoesNotStopQueue" fullname="Tritone.Kernel.Tests.TimerTests.Update_CallbackExceptionDoesNotStopQueue" methodname="Update_CallbackExceptionDoesNotStopQueue" classname="Tritone.Kernel.Tests.TimerTests" runstate="Runnable" seed="1959286130" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001052" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1236" name="Update_CallbackLimitDefersRemainingTimers" fullname="Tritone.Kernel.Tests.TimerTests.Update_CallbackLimitDefersRemainingTimers" methodname="Update_CallbackLimitDefersRemainingTimers" classname="Tritone.Kernel.Tests.TimerTests" runstate="Runnable" seed="130708146" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001153" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1237" name="TweenTests" fullname="Tritone.Kernel.Tests.TweenTests" classname="Tritone.Kernel.Tests.TweenTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.022928" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1244" name="Completion_ScheduledTweenStartsNextUpdate" fullname="Tritone.Kernel.Tests.TweenTests.Completion_ScheduledTweenStartsNextUpdate" methodname="Completion_ScheduledTweenStartsNextUpdate" classname="Tritone.Kernel.Tests.TweenTests" runstate="Runnable" seed="716277523" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.005163" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1240" name="Controls_PauseResumeAndCancelTween" fullname="Tritone.Kernel.Tests.TweenTests.Controls_PauseResumeAndCancelTween" methodname="Controls_PauseResumeAndCancelTween" classname="Tritone.Kernel.Tests.TweenTests" runstate="Runnable" seed="1795089610" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001763" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1245" name="ModuleStop_CancelsOwnedTweens" fullname="Tritone.Kernel.Tests.TweenTests.ModuleStop_CancelsOwnedTweens" methodname="ModuleStop_CancelsOwnedTweens" classname="Tritone.Kernel.Tests.TweenTests" runstate="Runnable" seed="1172289959" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001972" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1238" name="Play_InterpolatesAndCompletes" fullname="Tritone.Kernel.Tests.TweenTests.Play_InterpolatesAndCompletes" methodname="Play_InterpolatesAndCompletes" classname="Tritone.Kernel.Tests.TweenTests" runstate="Runnable" seed="521400070" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000914" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1239" name="Play_UsesEasingAndSelectedClock" fullname="Tritone.Kernel.Tests.TweenTests.Play_UsesEasingAndSelectedClock" methodname="Play_UsesEasingAndSelectedClock" classname="Tritone.Kernel.Tests.TweenTests" runstate="Runnable" seed="531863705" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.002239" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1241" name="Sequence_ProcessesStepsAndCarriesOvershoot" fullname="Tritone.Kernel.Tests.TweenTests.Sequence_ProcessesStepsAndCarriesOvershoot" methodname="Sequence_ProcessesStepsAndCarriesOvershoot" classname="Tritone.Kernel.Tests.TweenTests" runstate="Runnable" seed="2079608588" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.003765" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1242" name="Sequence_SupportsFiniteAndInfiniteLoops" fullname="Tritone.Kernel.Tests.TweenTests.Sequence_SupportsFiniteAndInfiniteLoops" methodname="Sequence_SupportsFiniteAndInfiniteLoops" classname="Tritone.Kernel.Tests.TweenTests" runstate="Runnable" seed="615293297" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.002296" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1243" name="Update_CallbackFailureIsIsolated" fullname="Tritone.Kernel.Tests.TweenTests.Update_CallbackFailureIsIsolated" methodname="Update_CallbackFailureIsIsolated" classname="Tritone.Kernel.Tests.TweenTests" runstate="Runnable" seed="1256661007" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001090" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+        <test-suite type="TestSuite" id="1353" name="Tests" fullname="Tritone.Tests" runstate="Runnable" testcasecount="81" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:50Z" duration="5.981205" total="81" passed="81" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1246" name="AddressablesCatalogTests" fullname="Tritone.Tests.AddressablesCatalogTests" classname="Tritone.Tests.AddressablesCatalogTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.011305" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1249" name="UpdateCatalogsAsync_CancelledRequestDoesNotReachBackend" fullname="Tritone.Tests.AddressablesCatalogTests.UpdateCatalogsAsync_CancelledRequestDoesNotReachBackend" methodname="UpdateCatalogsAsync_CancelledRequestDoesNotReachBackend" classname="Tritone.Tests.AddressablesCatalogTests" runstate="Runnable" seed="2065783157" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.003914" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1248" name="UpdateCatalogsAsync_WithChangesActivatesLatestLocators" fullname="Tritone.Tests.AddressablesCatalogTests.UpdateCatalogsAsync_WithChangesActivatesLatestLocators" methodname="UpdateCatalogsAsync_WithChangesActivatesLatestLocators" classname="Tritone.Tests.AddressablesCatalogTests" runstate="Runnable" seed="1798990450" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.002423" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1247" name="UpdateCatalogsAsync_WithoutChangesSkipsLocatorUpdate" fullname="Tritone.Tests.AddressablesCatalogTests.UpdateCatalogsAsync_WithoutChangesSkipsLocatorUpdate" methodname="UpdateCatalogsAsync_WithoutChangesSkipsLocatorUpdate" classname="Tritone.Tests.AddressablesCatalogTests" runstate="Runnable" seed="1962936811" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000585" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1250" name="AddressablesDownloadTests" fullname="Tritone.Tests.AddressablesDownloadTests" classname="Tritone.Tests.AddressablesDownloadTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.008382" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1254" name="ClearCacheAsync_ValidKeyClearsDependencies" fullname="Tritone.Tests.AddressablesDownloadTests.ClearCacheAsync_ValidKeyClearsDependencies" methodname="ClearCacheAsync_ValidKeyClearsDependencies" classname="Tritone.Tests.AddressablesDownloadTests" runstate="Runnable" seed="1276791887" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.002166" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1251" name="DownloadAsync_CachedDependenciesSkipDownload" fullname="Tritone.Tests.AddressablesDownloadTests.DownloadAsync_CachedDependenciesSkipDownload" methodname="DownloadAsync_CachedDependenciesSkipDownload" classname="Tritone.Tests.AddressablesDownloadTests" runstate="Runnable" seed="637959756" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.002884" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1253" name="DownloadAsync_EmptyKeyIsRejected" fullname="Tritone.Tests.AddressablesDownloadTests.DownloadAsync_EmptyKeyIsRejected" methodname="DownloadAsync_EmptyKeyIsRejected" classname="Tritone.Tests.AddressablesDownloadTests" runstate="Runnable" seed="1866421818" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000912" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1252" name="DownloadAsync_UncachedDependenciesPopulateCache" fullname="Tritone.Tests.AddressablesDownloadTests.DownloadAsync_UncachedDependenciesPopulateCache" methodname="DownloadAsync_UncachedDependenciesPopulateCache" classname="Tritone.Tests.AddressablesDownloadTests" runstate="Runnable" seed="481008711" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000691" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1255" name="AssetBundleProviderTests" fullname="Tritone.Tests.AssetBundleProviderTests" classname="Tritone.Tests.AssetBundleProviderTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.015805" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1259" name="Constructor_RejectsDependencyCycle" fullname="Tritone.Tests.AssetBundleProviderTests.Constructor_RejectsDependencyCycle" methodname="Constructor_RejectsDependencyCycle" classname="Tritone.Tests.AssetBundleProviderTests" runstate="Runnable" seed="714310556" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.003710" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1258" name="Load_MissingAssetRollsBackBundles" fullname="Tritone.Tests.AssetBundleProviderTests.Load_MissingAssetRollsBackBundles" methodname="Load_MissingAssetRollsBackBundles" classname="Tritone.Tests.AssetBundleProviderTests" runstate="Runnable" seed="575216015" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.003888" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1256" name="Load_UsesDependenciesAndUnloadsAfterFinalAsset" fullname="Tritone.Tests.AssetBundleProviderTests.Load_UsesDependenciesAndUnloadsAfterFinalAsset" methodname="Load_UsesDependenciesAndUnloadsAfterFinalAsset" classname="Tritone.Tests.AssetBundleProviderTests" runstate="Runnable" seed="326611541" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.002295" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1257" name="LoadAsync_MergesConcurrentBundleRequests" fullname="Tritone.Tests.AssetBundleProviderTests.LoadAsync_MergesConcurrentBundleRequests" methodname="LoadAsync_MergesConcurrentBundleRequests" classname="Tritone.Tests.AssetBundleProviderTests" runstate="Runnable" seed="1795181869" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.003569" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1260" name="AssetTests" fullname="Tritone.Tests.AssetTests" classname="Tritone.Tests.AssetTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.014585" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1261" name="AddressablesProvider_RejectsNonUnityAssetTypes" fullname="Tritone.Tests.AssetTests.AddressablesProvider_RejectsNonUnityAssetTypes" methodname="AddressablesProvider_RejectsNonUnityAssetTypes" classname="Tritone.Tests.AssetTests" runstate="Runnable" seed="1861617257" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000731" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1263" name="LoadAsset_ReusesCachedAssetUntilLastReferenceIsReleased" fullname="Tritone.Tests.AssetTests.LoadAsset_ReusesCachedAssetUntilLastReferenceIsReleased" methodname="LoadAsset_ReusesCachedAssetUntilLastReferenceIsReleased" classname="Tritone.Tests.AssetTests" runstate="Runnable" seed="13048580" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.004905" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1266" name="LoadAssetAsync_KeepsSharedRequestAliveForRemainingScope" fullname="Tritone.Tests.AssetTests.LoadAssetAsync_KeepsSharedRequestAliveForRemainingScope" methodname="LoadAssetAsync_KeepsSharedRequestAliveForRemainingScope" classname="Tritone.Tests.AssetTests" runstate="Runnable" seed="195861736" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.003280" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1264" name="LoadAssetAsync_MergesConcurrentRequests" fullname="Tritone.Tests.AssetTests.LoadAssetAsync_MergesConcurrentRequests" methodname="LoadAssetAsync_MergesConcurrentRequests" classname="Tritone.Tests.AssetTests" runstate="Runnable" seed="1093744196" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.001326" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1265" name="Stop_AutomaticallyReleasesOwnedAssets" fullname="Tritone.Tests.AssetTests.Stop_AutomaticallyReleasesOwnedAssets" methodname="Stop_AutomaticallyReleasesOwnedAssets" classname="Tritone.Tests.AssetTests" runstate="Runnable" seed="1176310042" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000872" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1262" name="UseAddressableAssets_RegistersAssetService" fullname="Tritone.Tests.AssetTests.UseAddressableAssets_RegistersAssetService" methodname="UseAddressableAssets_RegistersAssetService" classname="Tritone.Tests.AssetTests" runstate="Runnable" seed="1914862062" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000750" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1267" name="AudioTests" fullname="Tritone.Tests.AudioTests" classname="Tritone.Tests.AudioTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.011589" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1268" name="AudioService_PlaysStopsAndReleasesClips" fullname="Tritone.Tests.AudioTests.AudioService_PlaysStopsAndReleasesClips" methodname="AudioService_PlaysStopsAndReleasesClips" classname="Tritone.Tests.AudioTests" runstate="Runnable" seed="1188170087" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.009523" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1269" name="AudioService_RejectsInvalidVolume" fullname="Tritone.Tests.AudioTests.AudioService_RejectsInvalidVolume" methodname="AudioService_RejectsInvalidVolume" classname="Tritone.Tests.AudioTests" runstate="Runnable" seed="1584321648" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.000831" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1270" name="CodeGenerationTests" fullname="Tritone.Tests.CodeGenerationTests" classname="Tritone.Tests.CodeGenerationTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.060877" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1272" name="Network_GeneratesRelationshipsCodecsAndRegistry" fullname="Tritone.Tests.CodeGenerationTests.Network_GeneratesRelationshipsCodecsAndRegistry" methodname="Network_GeneratesRelationshipsCodecsAndRegistry" classname="Tritone.Tests.CodeGenerationTests" runstate="Runnable" seed="1956755124" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.041230" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1271" name="Tables_GenerateIncrementally" fullname="Tritone.Tests.CodeGenerationTests.Tables_GenerateIncrementally" methodname="Tables_GenerateIncrementally" classname="Tritone.Tests.CodeGenerationTests" runstate="Runnable" seed="1465363566" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:44Z" duration="0.017639" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1273" name="ContentBuildTests" fullname="Tritone.Tests.ContentBuildTests" classname="Tritone.Tests.ContentBuildTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:49Z" duration="5.311720" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1277" name="Build_WithAssignedAssetWritesCompatibleManifest" fullname="Tritone.Tests.ContentBuildTests.Build_WithAssignedAssetWritesCompatibleManifest" methodname="Build_WithAssignedAssetWritesCompatibleManifest" classname="Tritone.Tests.ContentBuildTests" runstate="Runnable" seed="642671368" result="Passed" start-time="2026-07-21 08:53:44Z" end-time="2026-07-21 08:53:49Z" duration="5.307511" asserts="0">
+              <properties />
+              <output><![CDATA[D:\git\Tritone\Runtime\Kernel\Localization\LocalizationModule.cs(88,27): warning CS0108: 'LocalizationModule.SetLanguageAsync(string)' hides inherited member 'ModuleBase.SetLanguageAsync(string)'. Use the new keyword if hiding was intended.
+D:\git\Tritone\Runtime\Kernel\Saves\SaveModule.cs(49,21): warning CS0108: 'SaveModule.Save<T>(string, T)' hides inherited member 'ModuleBase.Save<T>(string, T)'. Use the new keyword if hiding was intended.
+D:\git\Tritone\Runtime\Unity\Audio\AudioModule.cs(107,21): warning CS0108: 'AudioModule.PlayMusic(string)' hides inherited member 'ModuleBase.PlayMusic(string)'. Use the new keyword if hiding was intended.
+D:\git\Tritone\Runtime\Unity\Audio\AudioModule.cs(115,27): warning CS0108: 'AudioModule.PlayMusicAsync(string)' hides inherited member 'ModuleBase.PlayMusicAsync(string)'. Use the new keyword if hiding was intended.
+D:\git\Tritone\Runtime\Unity\Audio\AudioModule.cs(128,21): warning CS0108: 'AudioModule.StopMusic()' hides inherited member 'ModuleBase.StopMusic()'. Use the new keyword if hiding was intended.
+D:\git\Tritone\Runtime\Unity\Audio\AudioModule.cs(143,28): warning CS0108: 'AudioModule.PlaySound(string)' hides inherited member 'ModuleBase.PlaySound(string)'. Use the new keyword if hiding was intended.
+D:\git\Tritone\Runtime\Unity\Audio\AudioModule.cs(149,40): warning CS0108: 'AudioModule.PlaySoundAsync(string)' hides inherited member 'ModuleBase.PlaySoundAsync(string)'. Use the new keyword if hiding was intended.
+D:\git\Tritone\Runtime\Unity\Audio\AudioModule.cs(155,21): warning CS0108: 'AudioModule.StopSound(AudioHandle)' hides inherited member 'ModuleBase.StopSound(AudioHandle)'. Use the new keyword if hiding was intended.
+]]></output>
+            </test-case>
+            <test-case id="1276" name="Constructor_ClonesConfiguredAssets" fullname="Tritone.Tests.ContentBuildTests.Constructor_ClonesConfiguredAssets" methodname="Constructor_ClonesConfiguredAssets" classname="Tritone.Tests.ContentBuildTests" runstate="Runnable" seed="1174341333" result="Passed" start-time="2026-07-21 08:53:49Z" end-time="2026-07-21 08:53:49Z" duration="0.000339" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1274" name="CreateAssets_WithExplicitAddressesReturnsDeterministicMappings" fullname="Tritone.Tests.ContentBuildTests.CreateAssets_WithExplicitAddressesReturnsDeterministicMappings" methodname="CreateAssets_WithExplicitAddressesReturnsDeterministicMappings" classname="Tritone.Tests.ContentBuildTests" runstate="Runnable" seed="737636706" result="Passed" start-time="2026-07-21 08:53:49Z" end-time="2026-07-21 08:53:49Z" duration="0.001603" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1275" name="CreateAssets_WithUnassignedAssetThrows" fullname="Tritone.Tests.ContentBuildTests.CreateAssets_WithUnassignedAssetThrows" methodname="CreateAssets_WithUnassignedAssetThrows" classname="Tritone.Tests.ContentBuildTests" runstate="Runnable" seed="332008616" result="Passed" start-time="2026-07-21 08:53:49Z" end-time="2026-07-21 08:53:49Z" duration="0.000500" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1278" name="ContentUpdateExecutionTests" fullname="Tritone.Tests.ContentUpdateExecutionTests" classname="Tritone.Tests.ContentUpdateExecutionTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-07-21 08:53:49Z" end-time="2026-07-21 08:53:50Z" duration="0.429145" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1284" name="ModuleBase_UpdateContentAsyncActivatesAssetLoading" fullname="Tritone.Tests.ContentUpdateExecutionTests.ModuleBase_UpdateContentAsyncActivatesAssetLoading" methodname="ModuleBase_UpdateContentAsyncActivatesAssetLoading" classname="Tritone.Tests.ContentUpdateExecutionTests" runstate="Runnable" seed="2105094265" result="Passed" start-time="2026-07-21 08:53:49Z" end-time="2026-07-21 08:53:49Z" duration="0.069040" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+            </test-case>
+            <test-case id="1280" name="UpdateAsync_ChangedBundleReplacesInstalledFile" fullname="Tritone.Tests.ContentUpdateExecutionTests.UpdateAsync_ChangedBundleReplacesInstalledFile" methodname="UpdateAsync_ChangedBundleReplacesInstalledFile" classname="Tritone.Tests.ContentUpdateExecutionTests" runstate="Runnable" seed="1938949825" result="Passed" start-time="2026-07-21 08:53:49Z" end-time="2026-07-21 08:53:49Z" duration="0.091474" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+            </test-case>
+            <test-case id="1279" name="UpdateAsync_FirstInstallCommitsAndSecondCheckReusesFiles" fullname="Tritone.Tests.ContentUpdateExecutionTests.UpdateAsync_FirstInstallCommitsAndSecondCheckReusesFiles" methodname="UpdateAsync_FirstInstallCommitsAndSecondCheckReusesFiles" classname="Tritone.Tests.ContentUpdateExecutionTests" runstate="Runnable" seed="792462891" result="Passed" start-time="2026-07-21 08:53:49Z" end-time="2026-07-21 08:53:49Z" duration="0.060504" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+            </test-case>
+            <test-case id="1281" name="UpdateAsync_HashMismatchPreservesInstalledContent" fullname="Tritone.Tests.ContentUpdateExecutionTests.UpdateAsync_HashMismatchPreservesInstalledContent" methodname="UpdateAsync_HashMismatchPreservesInstalledContent" classname="Tritone.Tests.ContentUpdateExecutionTests" runstate="Runnable" seed="1836891155" result="Passed" start-time="2026-07-21 08:53:49Z" end-time="2026-07-21 08:53:49Z" duration="0.092916" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+            </test-case>
+            <test-case id="1283" name="UpdateAsync_InterruptedTransactionRestoresPreviousVersion" fullname="Tritone.Tests.ContentUpdateExecutionTests.UpdateAsync_InterruptedTransactionRestoresPreviousVersion" methodname="UpdateAsync_InterruptedTransactionRestoresPreviousVersion" classname="Tritone.Tests.ContentUpdateExecutionTests" runstate="Runnable" seed="256413325" result="Passed" start-time="2026-07-21 08:53:49Z" end-time="2026-07-21 08:53:49Z" duration="0.010611" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+            </test-case>
+            <test-case id="1282" name="UpdateAsync_MissingInstalledFileForcesDownload" fullname="Tritone.Tests.ContentUpdateExecutionTests.UpdateAsync_MissingInstalledFileForcesDownload" methodname="UpdateAsync_MissingInstalledFileForcesDownload" classname="Tritone.Tests.ContentUpdateExecutionTests" runstate="Runnable" seed="1763372649" result="Passed" start-time="2026-07-21 08:53:49Z" end-time="2026-07-21 08:53:50Z" duration="0.100335" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1285" name="ContentUpdateTests" fullname="Tritone.Tests.ContentUpdateTests" classname="Tritone.Tests.ContentUpdateTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.007440" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1290" name="Constructor_RejectsDependencyCycle" fullname="Tritone.Tests.ContentUpdateTests.Constructor_RejectsDependencyCycle" methodname="Constructor_RejectsDependencyCycle" classname="Tritone.Tests.ContentUpdateTests" runstate="Runnable" seed="745357356" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000808" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1289" name="Constructor_RejectsMissingDependency" fullname="Tritone.Tests.ContentUpdateTests.Constructor_RejectsMissingDependency" methodname="Constructor_RejectsMissingDependency" classname="Tritone.Tests.ContentUpdateTests" runstate="Runnable" seed="917264989" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000349" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1291" name="CreateAssetBundleRegistry_MapsBundlesDependenciesAndAssets" fullname="Tritone.Tests.ContentUpdateTests.CreateAssetBundleRegistry_MapsBundlesDependenciesAndAssets" methodname="CreateAssetBundleRegistry_MapsBundlesDependenciesAndAssets" classname="Tritone.Tests.ContentUpdateTests" runstate="Runnable" seed="2133216689" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000404" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1286" name="CreatePlan_ReturnsMinimalDeterministicFileChanges" fullname="Tritone.Tests.ContentUpdateTests.CreatePlan_ReturnsMinimalDeterministicFileChanges" methodname="CreatePlan_ReturnsMinimalDeterministicFileChanges" classname="Tritone.Tests.ContentUpdateTests" runstate="Runnable" seed="1669285265" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000578" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1287" name="CreatePlan_ReusesFileAfterLogicalBundleRename" fullname="Tritone.Tests.ContentUpdateTests.CreatePlan_ReusesFileAfterLogicalBundleRename" methodname="CreatePlan_ReusesFileAfterLogicalBundleRename" classname="Tritone.Tests.ContentUpdateTests" runstate="Runnable" seed="464286712" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000300" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1288" name="CreatePlan_WithoutLocalManifestDownloadsEverything" fullname="Tritone.Tests.ContentUpdateTests.CreatePlan_WithoutLocalManifestDownloadsEverything" methodname="CreatePlan_WithoutLocalManifestDownloadsEverything" classname="Tritone.Tests.ContentUpdateTests" runstate="Runnable" seed="210287401" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000263" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1292" name="DispatcherTests" fullname="Tritone.Tests.DispatcherTests" classname="Tritone.Tests.DispatcherTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.005928" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1293" name="Post_FromWorkerExecutesDuringPreUpdate" fullname="Tritone.Tests.DispatcherTests.Post_FromWorkerExecutesDuringPreUpdate" methodname="Post_FromWorkerExecutesDuringPreUpdate" classname="Tritone.Tests.DispatcherTests" runstate="Runnable" seed="306824814" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.003525" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1295" name="PreUpdate_RespectsCallbackLimitAcrossFrames" fullname="Tritone.Tests.DispatcherTests.PreUpdate_RespectsCallbackLimitAcrossFrames" methodname="PreUpdate_RespectsCallbackLimitAcrossFrames" classname="Tritone.Tests.DispatcherTests" runstate="Runnable" seed="1477791178" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000746" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1294" name="Scope_CancellationAndDisposalSuppressCallbacks" fullname="Tritone.Tests.DispatcherTests.Scope_CancellationAndDisposalSuppressCallbacks" methodname="Scope_CancellationAndDisposalSuppressCallbacks" classname="Tritone.Tests.DispatcherTests" runstate="Runnable" seed="209575936" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000702" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1296" name="InputTests" fullname="Tritone.Tests.InputTests" classname="Tritone.Tests.InputTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.003851" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1297" name="InputBindings_DispatchAndReleaseWithModule" fullname="Tritone.Tests.InputTests.InputBindings_DispatchAndReleaseWithModule" methodname="InputBindings_DispatchAndReleaseWithModule" classname="Tritone.Tests.InputTests" runstate="Runnable" seed="1078390868" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.001788" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1298" name="LocalizationTests" fullname="Tritone.Tests.LocalizationTests" classname="Tritone.Tests.LocalizationTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.008568" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1299" name="LocalizationService_SwitchesTablesAndFallsBackToKey" fullname="Tritone.Tests.LocalizationTests.LocalizationService_SwitchesTablesAndFallsBackToKey" methodname="LocalizationService_SwitchesTablesAndFallsBackToKey" classname="Tritone.Tests.LocalizationTests" runstate="Runnable" seed="233969173" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.006763" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1300" name="MessageSerializerTests" fullname="Tritone.Tests.MessageSerializerTests" classname="Tritone.Tests.MessageSerializerTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.004252" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1302" name="Deserialize_RejectsIncompleteFrame" fullname="Tritone.Tests.MessageSerializerTests.Deserialize_RejectsIncompleteFrame" methodname="Deserialize_RejectsIncompleteFrame" classname="Tritone.Tests.MessageSerializerTests" runstate="Runnable" seed="19465724" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.001961" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1303" name="Deserialize_RejectsTrailingBytes" fullname="Tritone.Tests.MessageSerializerTests.Deserialize_RejectsTrailingBytes" methodname="Deserialize_RejectsTrailingBytes" classname="Tritone.Tests.MessageSerializerTests" runstate="Runnable" seed="1119124619" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.001053" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1301" name="Serialize_RoundTripsRegisteredMessage" fullname="Tritone.Tests.MessageSerializerTests.Serialize_RoundTripsRegisteredMessage" methodname="Serialize_RoundTripsRegisteredMessage" classname="Tritone.Tests.MessageSerializerTests" runstate="Runnable" seed="383706539" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000273" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1304" name="ModuleScopeTests" fullname="Tritone.Tests.ModuleScopeTests" classname="Tritone.Tests.ModuleScopeTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.001010" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1305" name="Dispose_ReleasesAllResourcesInReverseOrder" fullname="Tritone.Tests.ModuleScopeTests.Dispose_ReleasesAllResourcesInReverseOrder" methodname="Dispose_ReleasesAllResourcesInReverseOrder" classname="Tritone.Tests.ModuleScopeTests" runstate="Runnable" seed="1215771156" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000427" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1306" name="NetworkProtocolTests" fullname="Tritone.Tests.NetworkProtocolTests" classname="Tritone.Tests.NetworkProtocolTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.006515" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1310" name="EvaluateCompatibility_WithDefaultDescriptorReturnsInvalidDescriptor" fullname="Tritone.Tests.NetworkProtocolTests.EvaluateCompatibility_WithDefaultDescriptorReturnsInvalidDescriptor" methodname="EvaluateCompatibility_WithDefaultDescriptorReturnsInvalidDescriptor" classname="Tritone.Tests.NetworkProtocolTests" runstate="Runnable" seed="791326322" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.001021" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1309" name="EvaluateCompatibility_WithIncompatibleVersionsReturnsExactReason" fullname="Tritone.Tests.NetworkProtocolTests.EvaluateCompatibility_WithIncompatibleVersionsReturnsExactReason" methodname="EvaluateCompatibility_WithIncompatibleVersionsReturnsExactReason" classname="Tritone.Tests.NetworkProtocolTests" runstate="Runnable" seed="1278867754" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000453" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1307" name="EvaluateCompatibility_WithOverlappingRangesReturnsCompatible" fullname="Tritone.Tests.NetworkProtocolTests.EvaluateCompatibility_WithOverlappingRangesReturnsCompatible" methodname="EvaluateCompatibility_WithOverlappingRangesReturnsCompatible" classname="Tritone.Tests.NetworkProtocolTests" runstate="Runnable" seed="1078793249" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000227" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1308" name="EvaluateCompatibility_WithSchemaDriftReturnsSchemaMismatch" fullname="Tritone.Tests.NetworkProtocolTests.EvaluateCompatibility_WithSchemaDriftReturnsSchemaMismatch" methodname="EvaluateCompatibility_WithSchemaDriftReturnsSchemaMismatch" classname="Tritone.Tests.NetworkProtocolTests" runstate="Runnable" seed="955830235" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000188" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1311" name="NetworkTests" fullname="Tritone.Tests.NetworkTests" classname="Tritone.Tests.NetworkTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.019868" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1318" name="HandshakeFrames_RoundTripServerDecision" fullname="Tritone.Tests.NetworkTests.HandshakeFrames_RoundTripServerDecision" methodname="HandshakeFrames_RoundTripServerDecision" classname="Tritone.Tests.NetworkTests" runstate="Runnable" seed="491976677" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.001770" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1312" name="Network_DispatchesOnUpdateAndSerializesSend" fullname="Tritone.Tests.NetworkTests.Network_DispatchesOnUpdateAndSerializesSend" methodname="Network_DispatchesOnUpdateAndSerializesSend" classname="Tritone.Tests.NetworkTests" runstate="Runnable" seed="1169961899" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.004107" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1313" name="RequestAsync_CompletesMatchingResponse" fullname="Tritone.Tests.NetworkTests.RequestAsync_CompletesMatchingResponse" methodname="RequestAsync_CompletesMatchingResponse" classname="Tritone.Tests.NetworkTests" runstate="Runnable" seed="1312974533" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.003865" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1316" name="Session_CompletesProtocolHandshakeBeforeConnectReturns" fullname="Tritone.Tests.NetworkTests.Session_CompletesProtocolHandshakeBeforeConnectReturns" methodname="Session_CompletesProtocolHandshakeBeforeConnectReturns" classname="Tritone.Tests.NetworkTests" runstate="Runnable" seed="1467809522" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.003336" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1319" name="Session_ReconnectRunsProtocolHandshakeAgain" fullname="Tritone.Tests.NetworkTests.Session_ReconnectRunsProtocolHandshakeAgain" methodname="Session_ReconnectRunsProtocolHandshakeAgain" classname="Tritone.Tests.NetworkTests" runstate="Runnable" seed="707275339" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.001337" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1315" name="Session_ReconnectsUnexpectedDisconnectOnly" fullname="Tritone.Tests.NetworkTests.Session_ReconnectsUnexpectedDisconnectOnly" methodname="Session_ReconnectsUnexpectedDisconnectOnly" classname="Tritone.Tests.NetworkTests" runstate="Runnable" seed="944111469" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.001151" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1317" name="Session_RejectsIncompatibleProtocolAndDisconnects" fullname="Tritone.Tests.NetworkTests.Session_RejectsIncompatibleProtocolAndDisconnects" methodname="Session_RejectsIncompatibleProtocolAndDisconnects" classname="Tritone.Tests.NetworkTests" runstate="Runnable" seed="604217159" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000739" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1314" name="Session_SendsHeartbeatAndPublishesState" fullname="Tritone.Tests.NetworkTests.Session_SendsHeartbeatAndPublishesState" methodname="Session_SendsHeartbeatAndPublishesState" classname="Tritone.Tests.NetworkTests" runstate="Runnable" seed="828978880" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.001506" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1320" name="PoolTests" fullname="Tritone.Tests.PoolTests" classname="Tritone.Tests.PoolTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.013633" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1321" name="Rent_Return_ReusesPlainObject" fullname="Tritone.Tests.PoolTests.Rent_Return_ReusesPlainObject" methodname="Rent_Return_ReusesPlainObject" classname="Tritone.Tests.PoolTests" runstate="Runnable" seed="1414673245" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.004945" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1322" name="Spawn_Despawn_ReusesComponentPrefab" fullname="Tritone.Tests.PoolTests.Spawn_Despawn_ReusesComponentPrefab" methodname="Spawn_Despawn_ReusesComponentPrefab" classname="Tritone.Tests.PoolTests" runstate="Runnable" seed="10805632" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.005465" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1323" name="Stop_AutomaticallyReturnsOwnedObjects" fullname="Tritone.Tests.PoolTests.Stop_AutomaticallyReturnsOwnedObjects" methodname="Stop_AutomaticallyReturnsOwnedObjects" classname="Tritone.Tests.PoolTests" runstate="Runnable" seed="1284802616" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000315" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1324" name="UIElementDisable_AutomaticallyReturnsSpawnedObjects" fullname="Tritone.Tests.PoolTests.UIElementDisable_AutomaticallyReturnsSpawnedObjects" methodname="UIElementDisable_AutomaticallyReturnsSpawnedObjects" classname="Tritone.Tests.PoolTests" runstate="Runnable" seed="1257563480" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.001717" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1325" name="SaveTests" fullname="Tritone.Tests.SaveTests" classname="Tritone.Tests.SaveTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.005454" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1327" name="SaveService_RejectsDirectorySlot" fullname="Tritone.Tests.SaveTests.SaveService_RejectsDirectorySlot" methodname="SaveService_RejectsDirectorySlot" classname="Tritone.Tests.SaveTests" runstate="Runnable" seed="1237119026" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.001707" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1326" name="SaveService_RoundTripsAndDeletesTypedData" fullname="Tritone.Tests.SaveTests.SaveService_RoundTripsAndDeletesTypedData" methodname="SaveService_RoundTripsAndDeletesTypedData" classname="Tritone.Tests.SaveTests" runstate="Runnable" seed="1463748055" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.002939" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1328" name="SceneServiceTests" fullname="Tritone.Tests.SceneServiceTests" classname="Tritone.Tests.SceneServiceTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.007864" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1330" name="SwitchAsync_LoadFailurePreservesPreviousState" fullname="Tritone.Tests.SceneServiceTests.SwitchAsync_LoadFailurePreservesPreviousState" methodname="SwitchAsync_LoadFailurePreservesPreviousState" classname="Tritone.Tests.SceneServiceTests" runstate="Runnable" seed="1087428398" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.003407" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1329" name="SwitchAsync_LoadsTargetBeforeChangingModule" fullname="Tritone.Tests.SceneServiceTests.SwitchAsync_LoadsTargetBeforeChangingModule" methodname="SwitchAsync_LoadsTargetBeforeChangingModule" classname="Tritone.Tests.SceneServiceTests" runstate="Runnable" seed="2017403816" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000677" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1331" name="SwitchAsync_MergesIdenticalConcurrentRequests" fullname="Tritone.Tests.SceneServiceTests.SwitchAsync_MergesIdenticalConcurrentRequests" methodname="SwitchAsync_MergesIdenticalConcurrentRequests" classname="Tritone.Tests.SceneServiceTests" runstate="Runnable" seed="87794109" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000849" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1333" name="SwitchAsync_ModuleFailureRestoresPreviousSceneAndModule" fullname="Tritone.Tests.SceneServiceTests.SwitchAsync_ModuleFailureRestoresPreviousSceneAndModule" methodname="SwitchAsync_ModuleFailureRestoresPreviousSceneAndModule" classname="Tritone.Tests.SceneServiceTests" runstate="Runnable" seed="1375862184" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.001031" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1332" name="SwitchAsync_RejectsConflictingConcurrentRequest" fullname="Tritone.Tests.SceneServiceTests.SwitchAsync_RejectsConflictingConcurrentRequest" methodname="SwitchAsync_RejectsConflictingConcurrentRequest" classname="Tritone.Tests.SceneServiceTests" runstate="Runnable" seed="966568582" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000638" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1334" name="SettingsTests" fullname="Tritone.Tests.SettingsTests" classname="Tritone.Tests.SettingsTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.011031" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1335" name="SettingsService_PersistsDirtyValuesOnStop" fullname="Tritone.Tests.SettingsTests.SettingsService_PersistsDirtyValuesOnStop" methodname="SettingsService_PersistsDirtyValuesOnStop" classname="Tritone.Tests.SettingsTests" runstate="Runnable" seed="1654370142" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.010358" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1336" name="TableTests" fullname="Tritone.Tests.TableTests" classname="Tritone.Tests.TableTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.010539" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1339" name="LoadTable_DuplicateKeysReleaseSourceAsset" fullname="Tritone.Tests.TableTests.LoadTable_DuplicateKeysReleaseSourceAsset" methodname="LoadTable_DuplicateKeysReleaseSourceAsset" classname="Tritone.Tests.TableTests" runstate="Runnable" seed="860452711" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.002777" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1340" name="LoadTable_ReusesParsedTableUntilFinalReferenceIsReleased" fullname="Tritone.Tests.TableTests.LoadTable_ReusesParsedTableUntilFinalReferenceIsReleased" methodname="LoadTable_ReusesParsedTableUntilFinalReferenceIsReleased" classname="Tritone.Tests.TableTests" runstate="Runnable" seed="237522933" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.001802" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1341" name="LoadTableAsync_MergesConcurrentRequests" fullname="Tritone.Tests.TableTests.LoadTableAsync_MergesConcurrentRequests" methodname="LoadTableAsync_MergesConcurrentRequests" classname="Tritone.Tests.TableTests" runstate="Runnable" seed="402432523" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.002645" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1342" name="ReleaseTable_FinalReferenceClearsCallerAndReleasesSource" fullname="Tritone.Tests.TableTests.ReleaseTable_FinalReferenceClearsCallerAndReleasesSource" methodname="ReleaseTable_FinalReferenceClearsCallerAndReleasesSource" classname="Tritone.Tests.TableTests" runstate="Runnable" seed="1442344924" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000535" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1343" name="Stop_AutomaticallyReleasesOwnedTables" fullname="Tritone.Tests.TableTests.Stop_AutomaticallyReleasesOwnedTables" methodname="Stop_AutomaticallyReleasesOwnedTables" classname="Tritone.Tests.TableTests" runstate="Runnable" seed="1286906317" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000319" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1338" name="Table_DuplicateKeyThrows" fullname="Tritone.Tests.TableTests.Table_DuplicateKeyThrows" methodname="Table_DuplicateKeyThrows" classname="Tritone.Tests.TableTests" runstate="Runnable" seed="1439793908" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000309" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1337" name="Table_IndexesRowsByStableKey" fullname="Tritone.Tests.TableTests.Table_IndexesRowsByStableKey" methodname="Table_IndexesRowsByStableKey" classname="Tritone.Tests.TableTests" runstate="Runnable" seed="1876878644" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000319" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1344" name="UITests" fullname="Tritone.Tests.UITests" classname="Tritone.Tests.UITests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.008641" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1348" name="OpenWindowAsync_MergesConcurrentRequests" fullname="Tritone.Tests.UITests.OpenWindowAsync_MergesConcurrentRequests" methodname="OpenWindowAsync_MergesConcurrentRequests" classname="Tritone.Tests.UITests" runstate="Runnable" seed="2000436361" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.005428" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1346" name="WindowDefinition_CanUseNewPathAfterFinalOwnerExits" fullname="Tritone.Tests.UITests.WindowDefinition_CanUseNewPathAfterFinalOwnerExits" methodname="WindowDefinition_CanUseNewPathAfterFinalOwnerExits" classname="Tritone.Tests.UITests" runstate="Runnable" seed="1276735213" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000875" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1347" name="WindowDefinition_RejectsConflictingActiveRegistration" fullname="Tritone.Tests.UITests.WindowDefinition_RejectsConflictingActiveRegistration" methodname="WindowDefinition_RejectsConflictingActiveRegistration" classname="Tritone.Tests.UITests" runstate="Runnable" seed="1767757157" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000578" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1345" name="WindowOwners_ShareAndReleaseOneLoadedWindow" fullname="Tritone.Tests.UITests.WindowOwners_ShareAndReleaseOneLoadedWindow" methodname="WindowOwners_ShareAndReleaseOneLoadedWindow" classname="Tritone.Tests.UITests" runstate="Runnable" seed="1280133634" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000597" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1356" name="Unity.Addressables.Editor.Tests.DocExampleCode.dll" fullname="D:/git/Tritone/.ci/TestProject/Library/ScriptAssemblies/Unity.Addressables.Editor.Tests.DocExampleCode.dll" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.012563" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="18148" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestSuite" id="1357" name="AddressableAssets" fullname="AddressableAssets" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.012250" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1358" name="DocExampleCode" fullname="AddressableAssets.DocExampleCode" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.008403" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1354" name="TestStub" fullname="AddressableAssets.DocExampleCode.TestStub" classname="AddressableAssets.DocExampleCode.TestStub" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.004420" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1355" name="RequiredTest" fullname="AddressableAssets.DocExampleCode.TestStub.RequiredTest" methodname="RequiredTest" classname="AddressableAssets.DocExampleCode.TestStub" runstate="Runnable" seed="1385338838" result="Passed" start-time="2026-07-21 08:53:50Z" end-time="2026-07-21 08:53:50Z" duration="0.000211" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

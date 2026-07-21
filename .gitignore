@@ -10,3 +10,11 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+### CI Unity project
+.ci/TestProject/[Ll]ibrary/
+.ci/TestProject/[Ll]ogs/
+.ci/TestProject/[Oo]bj/
+.ci/TestProject/[Tt]emp/
+.ci/TestProject/[Uu]serSettings/
+.ci/TestProject/Packages/packages-lock.json

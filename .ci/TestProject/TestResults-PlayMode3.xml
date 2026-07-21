@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="2" result="Passed" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-07-21 08:56:11Z" end-time="2026-07-21 08:56:11Z" duration="0.050342">
+  <test-suite type="TestSuite" id="1000" name="TestProject" fullname="TestProject" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-07-21 08:56:11Z" end-time="2026-07-21 08:56:11Z" duration="0.050342" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties />
+    <test-suite type="Assembly" id="1004" name="Tritone.PlayMode.Tests.dll" fullname="D:/git/Tritone/.ci/TestProject/Library/ScriptAssemblies/Tritone.PlayMode.Tests.dll" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-07-21 08:56:11Z" end-time="2026-07-21 08:56:11Z" duration="0.045637" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="39760" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+      </properties>
+      <test-suite type="TestSuite" id="1005" name="Tritone" fullname="Tritone" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-07-21 08:56:11Z" end-time="2026-07-21 08:56:11Z" duration="0.045139" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1006" name="PlayMode" fullname="Tritone.PlayMode" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-07-21 08:56:11Z" end-time="2026-07-21 08:56:11Z" duration="0.044969" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1007" name="Tests" fullname="Tritone.PlayMode.Tests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-07-21 08:56:11Z" end-time="2026-07-21 08:56:11Z" duration="0.044768" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1001" name="BootstrapPlayModeTests" fullname="Tritone.PlayMode.Tests.BootstrapPlayModeTests" classname="Tritone.PlayMode.Tests.BootstrapPlayModeTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-07-21 08:56:11Z" end-time="2026-07-21 08:56:11Z" duration="0.043610" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1003" name="Bootstrap_ForwardsUnityPlayerLoop" fullname="Tritone.PlayMode.Tests.BootstrapPlayModeTests.Bootstrap_ForwardsUnityPlayerLoop" methodname="Bootstrap_ForwardsUnityPlayerLoop" classname="Tritone.PlayMode.Tests.BootstrapPlayModeTests" runstate="Runnable" seed="515905680" result="Passed" start-time="2026-07-21 08:56:11Z" end-time="2026-07-21 08:56:11Z" duration="0.023025" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                </properties>
+              </test-case>
+              <test-case id="1002" name="Bootstrap_StartsAndStopsApplication" fullname="Tritone.PlayMode.Tests.BootstrapPlayModeTests.Bootstrap_StartsAndStopsApplication" methodname="Bootstrap_StartsAndStopsApplication" classname="Tritone.PlayMode.Tests.BootstrapPlayModeTests" runstate="Runnable" seed="886683151" result="Passed" start-time="2026-07-21 08:56:11Z" end-time="2026-07-21 08:56:11Z" duration="0.007347" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                </properties>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
