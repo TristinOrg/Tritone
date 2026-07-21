@@ -823,3 +823,20 @@ Use `await UpdateContentAsync(OnContentProgress)` instead when the caller alread
 The transaction keeps backups and creation markers beneath `.tritone-update`. A failed verification leaves active files untouched. A failed commit restores every replaced or removed file and the previous manifest. If the process terminates during commit, the next update check recovers the unfinished transaction before contacting the server. An update gate rejects the operation while old assets are loaded or loading, blocks new loads during the transaction, and activates the new manifest only after every bundle operation succeeds.
 
 The installed manifest is loaded during application construction, so an existing verified version remains available when the remote check fails. Run content updates before loading content assets; changing files on disk cannot replace AssetBundles or prefab instances that are already in memory.
+
+## Content builds
+
+Assign AssetBundle names through Unity's import settings, set `PlayerSettings.bundleVersion`, then run `Tritone > Build > Content for Active Platform`. Tritone writes bundles and a runtime-compatible `manifest.json` under `ContentBuilds/<platform>/<version>`. Bundle entries contain deterministic direct dependencies, file sizes, and lowercase SHA-256 hashes. By default each project-relative asset path is also its public address.
+
+Build automation can provide explicit stable addresses and choose its own output path:
+
+```csharp
+var assets = new[]
+{
+    new ContentBuildAsset("UI/Login", "Assets/UI/Login.prefab")
+};
+var options = new ContentBuildOptions("1.2.0", outputPath, BuildTarget.StandaloneWindows64, assets: assets);
+var result = ContentBuildPipeline.Build(options);
+```
+
+The build fails before publishing a manifest when a configured asset is not assigned to a built bundle, an output bundle is missing, or the generated runtime manifest is invalid. Upload the version directory as-is and point `ContentUpdateOptions` at its `manifest.json`.
