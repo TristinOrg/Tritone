@@ -24,6 +24,23 @@ namespace Tritone.Unity.Assets
         /// <returns>The same builder for fluent configuration.</returns>
         public static GameApplicationBuilder UseAddressableAssets(this GameApplicationBuilder builder)
         {
+            return UseAddressableAssets(builder, new UnityAddressablesCatalogBackend());
+        }
+
+        /// <summary>
+        /// Adds Addressables asset and remote catalog management with a replaceable catalog backend.
+        /// </summary>
+        /// <param name="builder">The application builder receiving the asset modules.</param>
+        /// <param name="catalogBackend">The backend executing remote catalog operations.</param>
+        /// <returns>The same builder for fluent configuration.</returns>
+        public static GameApplicationBuilder UseAddressableAssets(this GameApplicationBuilder builder, IAddressablesCatalogBackend catalogBackend)
+        {
+            if (builder == null)
+                throw new ArgumentNullException(nameof(builder));
+            if (catalogBackend == null)
+                throw new ArgumentNullException(nameof(catalogBackend));
+
+            builder.AddModule(new AddressablesCatalogModule(catalogBackend));
             return UseAssets(builder, new AddressablesAssetProvider());
         }
 
