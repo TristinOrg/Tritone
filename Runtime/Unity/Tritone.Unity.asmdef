@@ -5,6 +5,8 @@
     "Tritone.Kernel",
     "Tritone.Diagnostics",
     "Tritone.Content",
+    "Unity.Addressables",
+    "Unity.ResourceManager",
     "Unity.ugui"
   ],
   "autoReferenced": true,

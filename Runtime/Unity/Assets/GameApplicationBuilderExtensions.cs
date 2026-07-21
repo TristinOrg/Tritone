@@ -18,6 +18,16 @@ namespace Tritone.Unity.Assets
         }
 
         /// <summary>
+        /// Adds asset management backed by Unity Addressables.
+        /// </summary>
+        /// <param name="builder">The application builder receiving the asset module.</param>
+        /// <returns>The same builder for fluent configuration.</returns>
+        public static GameApplicationBuilder UseAddressableAssets(this GameApplicationBuilder builder)
+        {
+            return UseAssets(builder, new AddressablesAssetProvider());
+        }
+
+        /// <summary>
         /// Adds asset management backed by a custom provider.
         /// </summary>
         public static GameApplicationBuilder UseAssets(this GameApplicationBuilder builder,

@@ -14,6 +14,29 @@ namespace Tritone.Tests
     public sealed class AssetTests
     {
         /// <summary>
+        /// Verifies that the Addressables adapter rejects unsupported managed asset types before starting a request.
+        /// </summary>
+        [Test]
+        public void AddressablesProvider_RejectsNonUnityAssetTypes()
+        {
+            Assert.Throws<ArgumentException>(() => new AddressablesAssetProvider().Load("Data/Managed", typeof(AssetTestData)));
+        }
+
+        /// <summary>
+        /// Verifies that the builder can select Addressables without changing the shared asset service API.
+        /// </summary>
+        [Test]
+        public void UseAddressableAssets_RegistersAssetService()
+        {
+            GameApplicationBuilder builder = new();
+            var application                = builder.UseAddressableAssets().Build();
+
+            application.Start();
+            Assert.IsNotNull(application.Services.GetRequired<IAssetService>());
+            application.Stop();
+        }
+
+        /// <summary>
         /// Verifies that repeated synchronous requests reuse one provider load.
         /// </summary>
         [Test]
