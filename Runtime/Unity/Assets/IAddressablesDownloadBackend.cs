@@ -25,5 +25,13 @@ namespace Tritone.Unity.Assets
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task completed after dependencies enter the Addressables cache.</returns>
         Task DownloadDependenciesAsync(string key, Action<AddressablesDownloadProgress> progress, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Removes cached dependencies for one Addressables key.
+        /// </summary>
+        /// <param name="key">The address or label whose cache must be cleared.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task containing true when matching cache entries were cleared.</returns>
+        Task<bool> ClearDependencyCacheAsync(string key, CancellationToken cancellationToken);
     }
 }

@@ -26,6 +26,11 @@ namespace Tritone.Tests
         internal int DownloadCount { get; private set; }
 
         /// <summary>
+        /// Gets the number of dependency cache clears.
+        /// </summary>
+        internal int ClearCount { get; private set; }
+
+        /// <summary>
         /// Initializes one backend with a deterministic uncached byte count.
         /// </summary>
         /// <param name="downloadBytes">The byte count returned by size checks.</param>
@@ -49,6 +54,14 @@ namespace Tritone.Tests
             DownloadCount++;
             progress?.Invoke(new AddressablesDownloadProgress(mDownloadBytes, mDownloadBytes));
             return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public Task<bool> ClearDependencyCacheAsync(string key, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ClearCount++;
+            return Task.FromResult(true);
         }
     }
 }

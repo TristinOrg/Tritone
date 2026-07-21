@@ -53,8 +53,7 @@ namespace Tritone.Unity.Assets
         {
             if (mStopped)
                 throw new ObjectDisposedException(nameof(AddressablesDownloadModule));
-            if (string.IsNullOrWhiteSpace(key))
-                throw new ArgumentException("An Addressables download key is required.", nameof(key));
+            ValidateKey(key);
 
             using var downloadSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, mShutdownSource.Token);
             await mDownloadLock.WaitAsync(downloadSource.Token);
@@ -78,6 +77,25 @@ namespace Tritone.Unity.Assets
             }
         }
 
+        /// <inheritdoc />
+        public async Task<bool> ClearCacheAsync(string key, CancellationToken cancellationToken = default)
+        {
+            if (mStopped)
+                throw new ObjectDisposedException(nameof(AddressablesDownloadModule));
+            ValidateKey(key);
+
+            using var clearSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, mShutdownSource.Token);
+            await mDownloadLock.WaitAsync(clearSource.Token);
+            try
+            {
+                return await mBackend.ClearDependencyCacheAsync(key, clearSource.Token);
+            }
+            finally
+            {
+                mDownloadLock.Release();
+            }
+        }
+
         /// <summary>
         /// Cancels active downloads and rejects future work.
         /// </summary>
@@ -86,6 +104,16 @@ namespace Tritone.Unity.Assets
             mStopped = true;
             mShutdownSource.Cancel();
             mShutdownSource.Dispose();
+        }
+
+        /// <summary>
+        /// Rejects empty Addressables addresses and labels.
+        /// </summary>
+        /// <param name="key">The requested address or label.</param>
+        private static void ValidateKey(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentException("An Addressables download key is required.", nameof(key));
         }
     }
 }

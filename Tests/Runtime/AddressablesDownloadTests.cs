@@ -70,6 +70,22 @@ namespace Tritone.Tests
         }
 
         /// <summary>
+        /// Verifies that one key clears its dependency cache through the shared serialized service.
+        /// </summary>
+        [Test]
+        public void ClearCacheAsync_ValidKeyClearsDependencies()
+        {
+            FakeAddressablesDownloadBackend backend = new(0);
+            using var application                   = CreateApplication(backend);
+            var service                             = application.Services.GetRequired<IAddressablesDownloadService>();
+
+            var cleared = service.ClearCacheAsync("events").GetAwaiter().GetResult();
+
+            Assert.IsTrue(cleared);
+            Assert.AreEqual(1, backend.ClearCount);
+        }
+
+        /// <summary>
         /// Creates one started application using the supplied download backend.
         /// </summary>
         /// <param name="downloadBackend">The deterministic dependency backend.</param>

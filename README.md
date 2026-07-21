@@ -613,6 +613,7 @@ var catalogs = application.Services.GetRequired<IAddressablesCatalogService>();
 await catalogs.UpdateCatalogsAsync(cancellationToken);
 var downloads = application.Services.GetRequired<IAddressablesDownloadService>();
 await downloads.DownloadAsync("startup", OnDownloadProgress, cancellationToken);
+await downloads.ClearCacheAsync("startup", cancellationToken);
 ```
 
 Preloads skip cached content, report byte progress with a readonly struct, and release every Addressables operation handle.

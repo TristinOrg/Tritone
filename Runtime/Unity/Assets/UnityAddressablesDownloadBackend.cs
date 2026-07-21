@@ -54,6 +54,24 @@ namespace Tritone.Unity.Assets
             }
         }
 
+        /// <inheritdoc />
+        public async Task<bool> ClearDependencyCacheAsync(string key, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var handle = Addressables.ClearDependencyCacheAsync(key, false);
+            try
+            {
+                var cleared = await handle.Task;
+                cancellationToken.ThrowIfCancellationRequested();
+                ValidateOperation(handle.Status, handle.OperationException, "clear Addressables dependency cache");
+                return cleared;
+            }
+            finally
+            {
+                Addressables.Release(handle);
+            }
+        }
+
         /// <summary>
         /// Reports one operation download snapshot when a listener exists.
         /// </summary>
