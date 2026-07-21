@@ -10,6 +10,22 @@ if ($manifest.name -ne 'com.tristinwen.tritone') {
 if ($manifest.unity -ne '2022.3') {
     throw "The package must retain Unity 2022.3 compatibility."
 }
+if ($manifest.version -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$') {
+    throw "Package version '$($manifest.version)' is not valid Semantic Versioning."
+}
+
+$requiredFiles = @('README.md', 'CHANGELOG.md', 'CHANGELOG.md.meta', 'LICENSE', 'Documentation~/index.md')
+foreach ($requiredFile in $requiredFiles) {
+    if (-not (Test-Path -LiteralPath (Join-Path $root $requiredFile))) {
+        throw "Missing release file: $requiredFile"
+    }
+}
+
+$changelog = Get-Content -LiteralPath (Join-Path $root 'CHANGELOG.md') -Raw
+$escapedVersion = [Regex]::Escape($manifest.version)
+if ($changelog -notmatch "(?m)^## \[$escapedVersion\] - \d{4}-\d{2}-\d{2}$") {
+    throw "CHANGELOG.md does not contain a dated entry for version '$($manifest.version)'."
+}
 
 $assetRoots = @('Runtime', 'Editor', 'Tests')
 $guids = @{}
