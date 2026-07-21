@@ -4,7 +4,7 @@ Tritone is a clean, modular, high-performance game framework for Unity and .NET.
 
 ## Continuous integration
 
-The `Unity Package` GitHub workflow validates package metadata and GUID integrity, then runs EditMode and PlayMode tests with Unity 2022.3. Configure the repository secrets `UNITY_LICENSE`, `UNITY_EMAIL`, and `UNITY_PASSWORD` before enabling the Unity test jobs.
+The `Unity Package` GitHub workflow validates package metadata and GUID integrity, then runs EditMode and PlayMode tests with Unity 2022.3. Configure the repository secrets `UNITY_LICENSE`, `UNITY_EMAIL`, and `UNITY_PASSWORD` to enable Unity test jobs; without them, package validation still runs and Unity jobs report an explicit skip warning.
 
 ## Current milestone: Kernel
 
