@@ -5,6 +5,7 @@ using Tritone.Audio;
 using Tritone.Content;
 using Tritone.Events;
 using Tritone.Networking;
+using Tritone.Dispatching;
 using Tritone.Models;
 using Tritone.Flows;
 using Tritone.Entities;
@@ -339,6 +340,36 @@ namespace Tritone.Kernel
         protected void CancelAllTimers()
         {
             Context.Timers.CancelAll();
+        }
+
+        /// <summary>
+        /// Posts one module-owned callback for the next application pre-update.
+        /// </summary>
+        /// <param name="callback">The callback to execute on the application thread.</param>
+        /// <returns>A value handle that can cancel or query the pending callback.</returns>
+        protected DispatchHandle PostToMainThread(Action callback)
+        {
+            return Context.MainThread.Post(callback);
+        }
+
+        /// <summary>
+        /// Cancels one pending module-owned main-thread callback.
+        /// </summary>
+        /// <param name="handle">The pending callback handle.</param>
+        /// <returns>True when the callback was pending and is now cancelled.</returns>
+        protected bool CancelMainThreadDispatch(DispatchHandle handle)
+        {
+            return Context.MainThread.Cancel(handle);
+        }
+
+        /// <summary>
+        /// Determines whether one module-owned main-thread callback remains pending.
+        /// </summary>
+        /// <param name="handle">The callback handle to query.</param>
+        /// <returns>True when the callback remains pending.</returns>
+        protected bool IsMainThreadDispatchPending(DispatchHandle handle)
+        {
+            return Context.MainThread.IsPending(handle);
         }
 
         /// <summary>

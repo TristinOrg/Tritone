@@ -1,0 +1,9 @@
+{
+  "name": "Tritone.Dispatching",
+  "rootNamespace": "Tritone.Dispatching",
+  "references": [
+    "Tritone.Kernel"
+  ],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

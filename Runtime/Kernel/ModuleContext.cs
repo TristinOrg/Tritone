@@ -32,6 +32,11 @@ namespace Tritone.Kernel
         private TweenCapability mTweens;
 
         /// <summary>
+        /// Lazily stores module-owned cross-thread dispatch operations.
+        /// </summary>
+        private MainThreadCapability mMainThread;
+
+        /// <summary>
         /// Initializes one independently owned module context.
         /// </summary>
         /// <param name="services">The application-scoped service registry.</param>
@@ -153,6 +158,11 @@ namespace Tritone.Kernel
         /// Gets module-owned tween and sequence operations.
         /// </summary>
         public TweenCapability Tweens => mTweens ??= new TweenCapability(this);
+
+        /// <summary>
+        /// Gets module-owned cross-thread callback dispatch operations.
+        /// </summary>
+        public MainThreadCapability MainThread => mMainThread ??= new MainThreadCapability(this);
 
         /// <summary>
         /// Creates and stores the logger for one concrete module.

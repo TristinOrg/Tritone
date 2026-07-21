@@ -91,6 +91,30 @@ Context.Events.Bind(player.Events.HealthChanged, OnHealthChanged);
 
 Unused capabilities are created lazily and allocate no domain-specific scope.
 
+## Main-thread dispatch
+
+Configure one bounded dispatcher before modules that consume asynchronous services:
+
+```csharp
+builder.UseMainThreadDispatcher(maxCallbacksPerUpdate: 4096);
+```
+
+Post a method group from a worker-thread completion and let module ownership cancel it automatically if the module stops first:
+
+```csharp
+private void OnDownloadCompleted()
+{
+    PostToMainThread(ApplyDownloadedContent);
+}
+
+private void ApplyDownloadedContent()
+{
+    // Safe to access Unity objects here.
+}
+```
+
+`Context.MainThread.Post(callback)` returns a readonly `DispatchHandle` for explicit cancellation or pending-state queries. Producers enqueue a compact struct through a thread-safe queue; callbacks execute in deterministic FIFO order during `PreUpdate`. The per-frame limit prevents an unbounded worker backlog from monopolizing one frame, and one callback failure does not stop later work.
+
 ## Model and state quick start
 
 Register shared state with an explicit factory and ownership lifetime:
