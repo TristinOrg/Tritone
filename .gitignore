@@ -18,3 +18,7 @@ $RECYCLE.BIN/
 .ci/TestProject/[Tt]emp/
 .ci/TestProject/[Uu]serSettings/
 .ci/TestProject/Packages/packages-lock.json
+.ci/TestProject/*.log
+.ci/TestProject/TestResults*.xml
+.ci/TestProject/ProjectSettings/*
+!.ci/TestProject/ProjectSettings/ProjectVersion.txt
