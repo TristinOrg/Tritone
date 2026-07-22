@@ -653,21 +653,35 @@ strongly typed rows without manually maintaining boilerplate:
 {
   "Namespace": "Game.Tables",
   "OutputPath": "Assets/Generated/Tritone/Tables",
+  "DataOutputPath": "Assets/Resources/Tables",
   "Tables": [
     {
       "Name": "Role",
       "Path": "Tables/Roles",
+      "Source": "Assets/GameData/Roles.csv",
+      "DataFile": "Roles.json",
       "Fields": [
         { "Name": "Id", "Type": "int", "Key": true },
-        { "Name": "Name", "Type": "string", "Key": false }
+        { "Name": "Name", "Type": "string" },
+        { "Name": "Enabled", "Type": "bool", "DefaultValue": "true" }
       ]
     }
   ]
 }
 ```
 
-Generated files are rewritten only when their contents change. Removed table
-definitions also remove their former generated source files.
+The CSV or TSV header names map directly to fields. The compiler validates field
+types, required cells, and duplicate keys before committing any output, then writes
+the generated row source and runtime-compatible `{ "Rows": [...] }` JSON together.
+Built-in field types are `bool`, `int`, `long`, `float`, `double`, and `string`.
+Omit `Source`, `DataFile`, and `DataOutputPath` to retain the original code-only
+generation workflow. Generated files are rewritten only when their contents change.
+Removed table definitions also remove their former generated source files.
+
+For project-specific formats, compose a compiler explicitly with
+`TableCompilerBuilder`. Source readers, field types, validators, code generators,
+and data writers are independent interfaces, so extensions do not require changes
+to Tritone's runtime table module.
 
 Enable tables after configuring either Resources or content-managed assets:
 

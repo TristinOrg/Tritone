@@ -3,6 +3,7 @@ using System.IO;
 using NUnit.Framework;
 using Tritone.Editor.CodeGeneration;
 using Tritone.Editor.UI;
+using Tritone.Editor.Tables;
 using Tritone.Unity.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -128,6 +129,51 @@ namespace Tritone.Tests
             StringAssert.Contains("public int Key => Id;", source);
         }
 
+        /// <summary>
+        /// Verifies that CSV input generates deterministic code and runtime-compatible JSON data.
+        /// </summary>
+        [Test]
+        public void Tables_CompileCsvIntoCodeAndJson()
+        {
+            var sourcePath = Path.Combine(mOutputPath, "Roles.csv");
+            Directory.CreateDirectory(mOutputPath);
+            File.WriteAllText(sourcePath, "Id,Name,Enabled\n1001,\"Tristin, WYF\",true\n1002,Aigis,false\n");
+            var schema = CreateSourceSchema(sourcePath);
+
+            var first  = TableCodeGenerator.Compile(schema);
+            var second = TableCodeGenerator.Compile(schema);
+
+            Assert.IsTrue(first.Succeeded);
+            Assert.IsTrue(first.Changed);
+            Assert.IsTrue(second.Succeeded);
+            Assert.IsFalse(second.Changed);
+            var code = File.ReadAllText(Path.Combine(mOutputPath, "RoleTable.Generated.cs"));
+            StringAssert.Contains("public sealed partial class RoleRow", code);
+            var json = File.ReadAllText(Path.Combine(mOutputPath, "Role.json"));
+            StringAssert.Contains("\"Name\": \"Tristin, WYF\"", json);
+            StringAssert.Contains("\"Enabled\": true", json);
+        }
+
+        /// <summary>
+        /// Verifies that one invalid table prevents every generated output from being committed.
+        /// </summary>
+        [Test]
+        public void Tables_ValidationFailureCommitsNoOutputs()
+        {
+            var sourcePath = Path.Combine(mOutputPath, "Roles.tsv");
+            Directory.CreateDirectory(mOutputPath);
+            File.WriteAllText(sourcePath, "Id\tName\tEnabled\n1001\tFirst\ttrue\n1001\tSecond\tfalse\n");
+            var schema = CreateSourceSchema(sourcePath);
+
+            var result = TableCodeGenerator.Compile(schema);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsFalse(result.Changed);
+            Assert.IsTrue(ContainsDiagnostic(result.Diagnostics, "TRT-TABLE-3102"));
+            Assert.IsFalse(File.Exists(Path.Combine(mOutputPath, "RoleTable.Generated.cs")));
+            Assert.IsFalse(File.Exists(Path.Combine(mOutputPath, "Role.json")));
+        }
+
         [Test]
         public void Network_GeneratesRelationshipsCodecsAndRegistry()
         {
@@ -183,6 +229,55 @@ namespace Tritone.Tests
                     }
                 }
             };
+        }
+
+        /// <summary>
+        /// Creates one source-backed table schema using the isolated test directory.
+        /// </summary>
+        /// <param name="sourcePath">The CSV or TSV source path.</param>
+        /// <returns>The configured schema.</returns>
+        private TableSchema CreateSourceSchema(string sourcePath)
+        {
+            return new TableSchema
+            {
+                Namespace      = "Game.Tables",
+                OutputPath    = mOutputPath,
+                DataOutputPath = mOutputPath,
+                Tables        = new[]
+                {
+                    new TableDefinition
+                    {
+                        Name     = "Role",
+                        Path     = "Tables/Role",
+                        Source   = sourcePath,
+                        DataFile = "Role.json",
+                        Fields   = new[]
+                        {
+                            new TableFieldDefinition { Name = "Id", Type = "int", Key = true },
+                            new TableFieldDefinition { Name = "Name", Type = "string" },
+                            new TableFieldDefinition { Name = "Enabled", Type = "bool" }
+                        }
+                    }
+                }
+            };
+        }
+
+        /// <summary>
+        /// Checks whether a build result contains one stable diagnostic code.
+        /// </summary>
+        /// <param name="diagnostics">The build diagnostics.</param>
+        /// <param name="code">The diagnostic code.</param>
+        /// <returns>True when the code exists.</returns>
+        private static bool ContainsDiagnostic(TableDiagnostic[] diagnostics, string code)
+        {
+            foreach (var diagnostic in diagnostics)
+            {
+                if (diagnostic.Code == code)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
