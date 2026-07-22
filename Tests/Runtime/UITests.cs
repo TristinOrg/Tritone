@@ -8,6 +8,7 @@ using Tritone.UI;
 using Tritone.Unity.Assets;
 using Tritone.Unity.UI;
 using UnityEngine;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace Tritone.Tests
@@ -127,6 +128,36 @@ namespace Tritone.Tests
             Assert.AreSame(first, second);
             scope.Dispose();
             Assert.AreEqual(1, environment.Provider.ReleaseCount);
+        }
+
+        /// <summary>
+        /// Verifies that preprocessed Canvas and Renderer nodes receive consecutive runtime orders.
+        /// </summary>
+        [Test]
+        public void UIView_AppliesPreprocessedSortingOrder()
+        {
+            GameObject rootObject     = new("SortingView", typeof(RectTransform), typeof(Canvas), typeof(SortingTestView));
+            GameObject canvasObject   = new("Canvas", typeof(RectTransform), typeof(Canvas));
+            GameObject rendererObject = new("Renderer", typeof(SpriteRenderer));
+            canvasObject.transform.SetParent(rootObject.transform, false);
+            rendererObject.transform.SetParent(rootObject.transform, false);
+            var view     = rootObject.GetComponent<SortingTestView>();
+            var canvas   = canvasObject.GetComponent<Canvas>();
+            var renderer = rendererObject.GetComponent<SpriteRenderer>();
+            view.SortingNodes = new[]
+            {
+                new UISortingNode { Target = canvas, RelativeOrder = 0, HierarchyDepth = 1 },
+                new UISortingNode { Target = renderer, RelativeOrder = 1, HierarchyDepth = 1 }
+            };
+
+            var order = 42;
+            view.ApplySortingOrder(ref order);
+
+            Assert.IsTrue(canvas.overrideSorting);
+            Assert.AreEqual(42, canvas.sortingOrder);
+            Assert.AreEqual(43, renderer.sortingOrder);
+            Assert.AreEqual(44, order);
+            Object.DestroyImmediate(rootObject);
         }
     }
 
@@ -262,6 +293,13 @@ namespace Tritone.Tests
     /// Provides an empty strongly typed view for UI tests.
     /// </summary>
     public sealed class UITestView : UIView
+    {
+    }
+
+    /// <summary>
+    /// Provides a view used to verify preprocessed sorting metadata.
+    /// </summary>
+    public sealed class SortingTestView : UIView
     {
     }
 

@@ -22,3 +22,7 @@ $RECYCLE.BIN/
 .ci/TestProject/TestResults*.xml
 .ci/TestProject/ProjectSettings/*
 !.ci/TestProject/ProjectSettings/ProjectVersion.txt
+
+### Graphify
+graphify-out/
+graphify-out.meta

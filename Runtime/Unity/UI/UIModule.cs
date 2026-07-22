@@ -13,6 +13,16 @@ namespace Tritone.Unity.UI
     /// </summary>
     public sealed class UIModule : ModuleBase, IUIService
     {
+        /// <summary>
+        /// Reserves a non-overlapping sorting-order interval for every logical UI layer.
+        /// </summary>
+        private const int LayerOrderStride = 5000;
+
+        /// <summary>
+        /// Keeps all six layer intervals inside Unity's signed 16-bit sorting-order range.
+        /// </summary>
+        private const int FirstLayerOrder = -15000;
+
         // Maps concrete window types to their definitions and runtime state.
         private readonly Dictionary<Type, WindowRecord> mWindows = new();
 
@@ -65,7 +75,9 @@ namespace Tritone.Unity.UI
                 }
             }
 
+            record.InstanceObject.transform.SetAsLastSibling();
             record.Instance.Open();
+            RefreshSortingOrders(record.Definition.Layer);
             return record.Instance;
         }
 
@@ -90,7 +102,9 @@ namespace Tritone.Unity.UI
             if (record.InstanceObject == null)
                 throw new InvalidOperationException($"Window {windowType.Name} was released before it finished opening.");
 
+            record.InstanceObject.transform.SetAsLastSibling();
             record.Instance.Open();
+            RefreshSortingOrders(record.Definition.Layer);
             return record.Instance;
         }
 
@@ -102,6 +116,7 @@ namespace Tritone.Unity.UI
                 return false;
 
             record.Instance.Close();
+            RefreshSortingOrders(record.Definition.Layer);
             return true;
         }
 
@@ -302,6 +317,48 @@ namespace Tritone.Unity.UI
 
             instanceObject = instance;
             return window;
+        }
+
+        /// <summary>
+        /// Assigns stable non-overlapping sorting orders to active windows in one logical layer.
+        /// </summary>
+        /// <param name="layer">The layer whose active windows must be reordered.</param>
+        private void RefreshSortingOrders(EUILayer layer)
+        {
+            var parent = mRoot.GetLayer(layer);
+            var order  = FirstLayerOrder + (int)layer * LayerOrderStride;
+            var limit  = order + LayerOrderStride;
+            for (var i = 0; i < parent.childCount; i++)
+            {
+                var child = parent.GetChild(i);
+                if (!child.gameObject.activeSelf)
+                    continue;
+                if (!TryGetWindowRecord(child.gameObject, layer))
+                    continue;
+                var view = child.GetComponent<UIView>();
+                if (!view)
+                    continue;
+                view.ApplySortingOrder(ref order);
+                if (order > limit)
+                    throw new InvalidOperationException($"UI layer {layer} contains more than {LayerOrderStride} preprocessed sorting nodes.");
+            }
+        }
+
+        /// <summary>
+        /// Checks whether one root object is an instantiated window assigned to the requested layer.
+        /// </summary>
+        /// <param name="instanceObject">The candidate root object.</param>
+        /// <param name="layer">The expected logical layer.</param>
+        /// <returns>True when a matching window record exists; otherwise, false.</returns>
+        private bool TryGetWindowRecord(GameObject instanceObject, EUILayer layer)
+        {
+            foreach (var pair in mWindows)
+            {
+                var record = pair.Value;
+                if (record.Definition.Layer == layer && record.InstanceObject == instanceObject)
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>
