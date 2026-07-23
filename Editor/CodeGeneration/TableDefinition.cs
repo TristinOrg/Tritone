@@ -29,7 +29,7 @@ namespace Tritone.Editor.CodeGeneration
         public string DataFile;
 
         /// <summary>
-        /// Stores the serialized row fields.
+        /// Stores optional explicit row fields for compatibility; source files infer fields when omitted.
         /// </summary>
         public TableFieldDefinition[] Fields;
     }

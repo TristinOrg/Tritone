@@ -137,7 +137,7 @@ namespace Tritone.Tests
         {
             var sourcePath = Path.Combine(mOutputPath, "Roles.csv");
             Directory.CreateDirectory(mOutputPath);
-            File.WriteAllText(sourcePath, "Id,Name,Enabled\n1001,\"Tristin, WYF\",true\n1002,Aigis,false\n");
+            File.WriteAllText(sourcePath, "Id,Name,Enabled\nint,string,bool\n1001,\"Tristin, WYF\",true\n1002,Aigis,false\n");
             var schema = CreateSourceSchema(sourcePath);
 
             var first  = TableCodeGenerator.Compile(schema);
@@ -162,7 +162,7 @@ namespace Tritone.Tests
         {
             var sourcePath = Path.Combine(mOutputPath, "Roles.tsv");
             Directory.CreateDirectory(mOutputPath);
-            File.WriteAllText(sourcePath, "Id\tName\tEnabled\n1001\tFirst\ttrue\n1001\tSecond\tfalse\n");
+            File.WriteAllText(sourcePath, "Id\tName\tEnabled\nint\tstring\tbool\n1001\tFirst\ttrue\n1001\tSecond\tfalse\n");
             var schema = CreateSourceSchema(sourcePath);
 
             var result = TableCodeGenerator.Compile(schema);
@@ -250,13 +250,7 @@ namespace Tritone.Tests
                         Name     = "Role",
                         Path     = "Tables/Role",
                         Source   = sourcePath,
-                        DataFile = "Role.json",
-                        Fields   = new[]
-                        {
-                            new TableFieldDefinition { Name = "Id", Type = "int", Key = true },
-                            new TableFieldDefinition { Name = "Name", Type = "string" },
-                            new TableFieldDefinition { Name = "Enabled", Type = "bool" }
-                        }
+                        DataFile = "Role.json"
                     }
                 }
             };
