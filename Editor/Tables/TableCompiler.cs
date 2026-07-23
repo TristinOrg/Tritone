@@ -69,16 +69,18 @@ namespace Tritone.Editor.Tables
             var paths      = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var table in schema.Tables)
             {
-                if (!ValidateDefinition(table, tableNames, diagnostics, out var fieldTypes))
+                var source     = ReadSource(table, diagnostics);
+                var definition = InferDefinition(table, source, diagnostics, out source);
+                if (!ValidateDefinition(definition, tableNames, diagnostics, out var fieldTypes))
                 {
                     continue;
                 }
-                AddOutput(mCodeGenerator.Generate(schema, table, fieldTypes), paths, outputs, diagnostics);
-                if (string.IsNullOrWhiteSpace(table.Source))
+                AddOutput(mCodeGenerator.Generate(schema, definition, fieldTypes), paths, outputs, diagnostics);
+                if (source == null)
                 {
                     continue;
                 }
-                var compilation = CompileSource(table, fieldTypes, diagnostics);
+                var compilation = CompileSource(definition, source, fieldTypes, diagnostics);
                 if (compilation == null)
                 {
                     continue;
@@ -106,6 +108,72 @@ namespace Tritone.Editor.Tables
                 diagnostics.Error("TRT-TABLE-5001", $"Generated output transaction failed: {exception.Message}", new TableSourceLocation(null, 0, 0));
                 return new TableBuildResult(false, false, diagnostics.ToArray());
             }
+        }
+
+        /// <summary>Reads a configured source once before schema resolution.</summary>
+        /// <param name="table">The table definition.</param>
+        /// <param name="diagnostics">The diagnostic destination.</param>
+        /// <returns>The source data, or null when no source is configured or reading fails.</returns>
+        private TableSourceData ReadSource(TableDefinition table, TableDiagnosticCollection diagnostics)
+        {
+            if (table == null || string.IsNullOrWhiteSpace(table.Source))
+            {
+                return null;
+            }
+            var reader = GetReader(table.Source);
+            if (reader == null)
+            {
+                diagnostics.Error("TRT-TABLE-3001", $"No table source reader supports '{table.Source}'.", new TableSourceLocation(table.Source, 0, 0));
+                return null;
+            }
+            return reader.Read(table.Source, diagnostics);
+        }
+
+        /// <summary>Infers fields from the source type row when no explicit fields are configured.</summary>
+        /// <param name="table">The configured table.</param>
+        /// <param name="source">The raw source data.</param>
+        /// <param name="diagnostics">The diagnostic destination.</param>
+        /// <param name="dataSource">The source containing data rows only.</param>
+        /// <returns>The original or inferred table definition.</returns>
+        private static TableDefinition InferDefinition(TableDefinition table, TableSourceData source, TableDiagnosticCollection diagnostics, out TableSourceData dataSource)
+        {
+            dataSource = source;
+            if (table == null || table.Fields != null && table.Fields.Length > 0)
+            {
+                return table;
+            }
+            if (source == null || source.Rows.Length == 0)
+            {
+                diagnostics.Error("TRT-TABLE-2105", $"Table '{table?.Name}' requires a type row or explicit fields.", new TableSourceLocation(table?.Source, 2, 1));
+                return table;
+            }
+            var typeRow = source.Rows[0];
+            if (typeRow.Cells.Length != source.Headers.Length)
+            {
+                diagnostics.Error("TRT-TABLE-3004", "The type row must contain one type for every header.", new TableSourceLocation(source.Source, typeRow.Number, 1));
+                return table;
+            }
+            var fields = new TableFieldDefinition[source.Headers.Length];
+            for (var i = 0; i < fields.Length; i++)
+            {
+                fields[i] = new TableFieldDefinition
+                {
+                    Name = source.Headers[i]?.Trim(),
+                    Type = typeRow.Cells[i]?.Trim(),
+                    Key  = i == 0
+                };
+            }
+            var rows = new TableSourceRow[source.Rows.Length - 1];
+            Array.Copy(source.Rows, 1, rows, 0, rows.Length);
+            dataSource = new TableSourceData(source.Source, source.Headers, rows);
+            return new TableDefinition
+            {
+                Name     = table.Name,
+                Path     = table.Path,
+                Source   = table.Source,
+                DataFile = table.DataFile,
+                Fields   = fields
+            };
         }
 
         /// <summary>Validates the schema root shared by every table.</summary>
@@ -213,15 +281,8 @@ namespace Tritone.Editor.Tables
         /// <param name="fieldTypes">The resolved field types.</param>
         /// <param name="diagnostics">The diagnostic destination.</param>
         /// <returns>The normalized compilation, or null after an error.</returns>
-        private TableCompilation CompileSource(TableDefinition table, ITableFieldType[] fieldTypes, TableDiagnosticCollection diagnostics)
+        private static TableCompilation CompileSource(TableDefinition table, TableSourceData source, ITableFieldType[] fieldTypes, TableDiagnosticCollection diagnostics)
         {
-            var reader = GetReader(table.Source);
-            if (reader == null)
-            {
-                diagnostics.Error("TRT-TABLE-3001", $"No table source reader supports '{table.Source}'.", new TableSourceLocation(table.Source, 0, 0));
-                return null;
-            }
-            var source = reader.Read(table.Source, diagnostics);
             if (source == null || diagnostics.HasErrors)
             {
                 return null;

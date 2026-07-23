@@ -659,23 +659,27 @@ strongly typed rows without manually maintaining boilerplate:
       "Name": "Role",
       "Path": "Tables/Roles",
       "Source": "Assets/GameData/Roles.csv",
-      "DataFile": "Roles.json",
-      "Fields": [
-        { "Name": "Id", "Type": "int", "Key": true },
-        { "Name": "Name", "Type": "string" },
-        { "Name": "Enabled", "Type": "bool", "DefaultValue": "true" }
-      ]
+      "DataFile": "Roles.json"
     }
   ]
 }
 ```
 
-The CSV or TSV header names map directly to fields. The compiler validates field
-types, required cells, and duplicate keys before committing any output, then writes
+The CSV or TSV is self-describing. Its first row contains field names, its second
+row contains field types, and remaining rows contain data. The first column is the
+stable primary key:
+
+```csv
+Id,Name,Enabled
+int,string,bool
+1001,tristin,true
+```
+
+The compiler validates field types, required cells, and duplicate keys before committing any output, then writes
 the generated row source and runtime-compatible `{ "Rows": [...] }` JSON together.
 Built-in field types are `bool`, `int`, `long`, `float`, `double`, and `string`.
-Omit `Source`, `DataFile`, and `DataOutputPath` to retain the original code-only
-generation workflow. Generated files are rewritten only when their contents change.
+Explicit `Fields` remain supported for compatibility and for code-only generation.
+Generated files are rewritten only when their contents change.
 Removed table definitions also remove their former generated source files.
 
 For project-specific formats, compose a compiler explicitly with
