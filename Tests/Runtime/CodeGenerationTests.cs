@@ -155,6 +155,35 @@ namespace Tritone.Tests
         }
 
         /// <summary>
+        /// Verifies that configured directories recursively discover every self-describing table.
+        /// </summary>
+        [Test]
+        public void Tables_CompileConfiguredDirectories()
+        {
+            var sourceDirectory = Path.Combine(mOutputPath, "Tables");
+            var nestedDirectory = Path.Combine(sourceDirectory, "Items");
+            Directory.CreateDirectory(nestedDirectory);
+            File.WriteAllText(Path.Combine(sourceDirectory, "Roles.csv"), "Id,Name\nint,string\n1,tristin\n");
+            File.WriteAllText(Path.Combine(nestedDirectory, "Weapons.tsv"), "Id\tName\nint\tstring\n10\tSword\n");
+            var schema = new TableSchema
+            {
+                Namespace         = "Game.Tables",
+                OutputPath       = mOutputPath,
+                DataOutputPath   = mOutputPath,
+                SourceDirectories = new[] { sourceDirectory }
+            };
+
+            var result = TableCodeGenerator.Compile(schema);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsTrue(File.Exists(Path.Combine(mOutputPath, "RolesTable.Generated.cs")));
+            Assert.IsTrue(File.Exists(Path.Combine(mOutputPath, "WeaponsTable.Generated.cs")));
+            Assert.IsTrue(File.Exists(Path.Combine(mOutputPath, "Roles.json")));
+            Assert.IsTrue(File.Exists(Path.Combine(mOutputPath, "Items", "Weapons.json")));
+            StringAssert.Contains("Tables/Items/Weapons", File.ReadAllText(Path.Combine(mOutputPath, "WeaponsTable.Generated.cs")));
+        }
+
+        /// <summary>
         /// Verifies that one invalid table prevents every generated output from being committed.
         /// </summary>
         [Test]

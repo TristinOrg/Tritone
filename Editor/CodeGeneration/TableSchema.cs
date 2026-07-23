@@ -24,7 +24,12 @@ namespace Tritone.Editor.CodeGeneration
         public string DataOutputPath;
 
         /// <summary>
-        /// Stores every table definition.
+        /// Stores directories recursively scanned for self-describing CSV and TSV sources.
+        /// </summary>
+        public string[] SourceDirectories;
+
+        /// <summary>
+        /// Stores optional explicit table definitions for compatibility and overrides.
         /// </summary>
         public TableDefinition[] Tables;
     }

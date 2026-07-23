@@ -654,18 +654,20 @@ strongly typed rows without manually maintaining boilerplate:
   "Namespace": "Game.Tables",
   "OutputPath": "Assets/Generated/Tritone/Tables",
   "DataOutputPath": "Assets/Resources/Tables",
-  "Tables": [
-    {
-      "Name": "Role",
-      "Path": "Tables/Roles",
-      "Source": "Assets/GameData/Roles.csv",
-      "DataFile": "Roles.json"
-    }
+  "SourceDirectories": [
+    "Assets/GameData/Tables"
   ]
 }
 ```
 
-The CSV or TSV is self-describing. Its first row contains field names, its second
+Every CSV and TSV below a configured directory is discovered recursively. The file
+name becomes the generated table type, the relative file path becomes the generated
+JSON path, and the source directory name prefixes the runtime asset path. For example,
+`Assets/GameData/Tables/Items/Weapons.csv` generates `WeaponsRow`,
+`Assets/Resources/Tables/Items/Weapons.json`, and runtime path
+`Tables/Items/Weapons`.
+
+Each CSV or TSV is self-describing. Its first row contains field names, its second
 row contains field types, and remaining rows contain data. The first column is the
 stable primary key:
 

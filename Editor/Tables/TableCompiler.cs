@@ -59,7 +59,8 @@ namespace Tritone.Editor.Tables
         {
             var diagnostics = new TableDiagnosticCollection();
             var outputs     = new List<TableGeneratedFile>();
-            ValidateSchema(schema, diagnostics);
+            var tables      = TableDirectoryDiscovery.Discover(schema, diagnostics);
+            ValidateSchema(schema, tables, diagnostics);
             if (diagnostics.HasErrors)
             {
                 return new TableBuildResult(false, false, diagnostics.ToArray());
@@ -67,7 +68,7 @@ namespace Tritone.Editor.Tables
 
             var tableNames = new HashSet<string>(StringComparer.Ordinal);
             var paths      = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var table in schema.Tables)
+            foreach (var table in tables)
             {
                 var source     = ReadSource(table, diagnostics);
                 var definition = InferDefinition(table, source, diagnostics, out source);
@@ -178,8 +179,9 @@ namespace Tritone.Editor.Tables
 
         /// <summary>Validates the schema root shared by every table.</summary>
         /// <param name="schema">The schema root.</param>
+        /// <param name="tables">The resolved explicit and discovered tables.</param>
         /// <param name="diagnostics">The diagnostic destination.</param>
-        private static void ValidateSchema(TableSchema schema, TableDiagnosticCollection diagnostics)
+        private static void ValidateSchema(TableSchema schema, TableDefinition[] tables, TableDiagnosticCollection diagnostics)
         {
             if (schema == null)
             {
@@ -194,7 +196,7 @@ namespace Tritone.Editor.Tables
             {
                 diagnostics.Error("TRT-TABLE-2002", exception.Message, new TableSourceLocation(null, 0, 0));
             }
-            if (schema.Tables == null || schema.Tables.Length == 0)
+            if (tables.Length == 0)
             {
                 diagnostics.Error("TRT-TABLE-2003", "At least one table definition is required.", new TableSourceLocation(null, 0, 0));
             }

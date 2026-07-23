@@ -73,7 +73,9 @@ namespace Tritone.Editor.CodeGeneration
                 return false;
             }
             var expectedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var table in schema.Tables)
+            var diagnostics   = new TableDiagnosticCollection();
+            var tables        = TableDirectoryDiscovery.Discover(schema, diagnostics);
+            foreach (var table in tables)
             {
                 expectedFiles.Add(Path.GetFullPath(Path.Combine(outputPath, table.Name + "Table.Generated.cs")));
             }
