@@ -469,12 +469,35 @@ public sealed class ShopWindow : UIWindow<UIShopView>
 
 `UIElement<TView>` resolves the view once, binds listeners during `OnBindEvents`, and releases every Unity and Tritone listener when disabled. `ModuleBase` releases all of its bindings when the module stops.
 
+Register reusable item templates and single-instance panels once per window:
+
+```csharp
+public sealed class InventoryWindow : UIWindow<UIInventoryView>
+{
+    protected override void OnInitialize()
+    {
+        AddItemTemplate<InventoryItem>("UI/Inventory/InventoryItem");
+        AddPanel<ItemDetailPanel>("UI/Inventory/ItemDetailPanel", mView.PanelRoot);
+    }
+
+    private void RefreshItem()
+    {
+        var item = CreateItem<InventoryItem>(mView.Content);
+        OpenPanel<ItemDetailPanel>();
+        ReleaseItem(ref item);
+    }
+}
+```
+
+Item prefabs load lazily and reuse the shared prefab pool. Panels are created lazily and retain one instance during a window activity. Closing a window returns all composed instances; releasing the window also releases loaded template assets. Dynamic child views participate in the owning window's sorting-order sequence.
+
 Enable assets and UI once in the bootstrap:
 
 ```csharp
 protected override void Configure(GameApplicationBuilder builder)
 {
     builder.UseAssets();
+    builder.UsePools();
     builder.UseUI(mUIRoot);
     builder.AddModule(new ShopModule());
 }

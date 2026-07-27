@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Tritone.Assets;
 using Tritone.Kernel;
+using Tritone.Pooling;
 using Tritone.UI;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -116,6 +118,10 @@ namespace Tritone.Unity.UI
                 return false;
 
             record.Instance.Close();
+            if (record.Instance is IUICompositionHost compositionHost)
+            {
+                compositionHost.ReleaseCompositionActivity();
+            }
             RefreshSortingOrders(record.Definition.Layer);
             return true;
         }
@@ -315,6 +321,13 @@ namespace Tritone.Unity.UI
                 throw new InvalidOperationException($"Loaded prefab {prefab.name} does not contain {windowType.Name}.");
             }
 
+            if (window is IUICompositionHost compositionHost)
+            {
+                Context.Services.TryGet<IAssetService>(out var assetService);
+                Context.Services.TryGet<IPoolService>(out var poolService);
+                compositionHost.ConfigureComposition(assetService, poolService);
+            }
+
             instanceObject = instance;
             return window;
         }
@@ -338,7 +351,7 @@ namespace Tritone.Unity.UI
                 var view = child.GetComponent<UIView>();
                 if (!view)
                     continue;
-                view.ApplySortingOrder(ref order);
+                view.ApplySortingOrder(ref order, limit);
                 if (order > limit)
                     throw new InvalidOperationException($"UI layer {layer} contains more than {LayerOrderStride} preprocessed sorting nodes.");
             }
@@ -392,12 +405,17 @@ namespace Tritone.Unity.UI
             record.Version++;
             record.OpenOperation = null;
 
+            var instance         = record.Instance;
             var instanceObject   = record.InstanceObject;
             record.Instance       = null;
             record.InstanceObject = null;
             if (instanceObject != null)
             {
                 instanceObject.SetActive(false);
+                if (instance is IUICompositionHost compositionHost)
+                {
+                    compositionHost.ReleaseComposition();
+                }
                 UnityObjectUtility.Destroy(instanceObject);
             }
 

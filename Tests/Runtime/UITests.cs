@@ -6,6 +6,7 @@ using Tritone.Assets;
 using Tritone.Kernel;
 using Tritone.UI;
 using Tritone.Unity.Assets;
+using Tritone.Unity.Pooling;
 using Tritone.Unity.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -159,6 +160,77 @@ namespace Tritone.Tests
             Assert.AreEqual(44, order);
             Object.DestroyImmediate(rootObject);
         }
+
+        /// <summary>
+        /// Verifies that dynamically appended child views continue the owning view's sorting sequence.
+        /// </summary>
+        [Test]
+        public void UIView_AppendsDynamicChildSortingOrder()
+        {
+            GameObject rootObject  = new("RootView", typeof(RectTransform), typeof(SortingTestView));
+            GameObject rootCanvas  = new("RootCanvas", typeof(RectTransform), typeof(Canvas));
+            GameObject childObject = new("ChildView", typeof(RectTransform), typeof(SortingTestView));
+            GameObject childCanvas = new("ChildCanvas", typeof(RectTransform), typeof(Canvas));
+            rootCanvas.transform.SetParent(rootObject.transform, false);
+            childObject.transform.SetParent(rootObject.transform, false);
+            childCanvas.transform.SetParent(childObject.transform, false);
+            var rootView  = rootObject.GetComponent<SortingTestView>();
+            var childView = childObject.GetComponent<SortingTestView>();
+            rootView.SortingNodes  = new[] { new UISortingNode { Target = rootCanvas.GetComponent<Canvas>() } };
+            childView.SortingNodes = new[] { new UISortingNode { Target = childCanvas.GetComponent<Canvas>() } };
+
+            var order = 100;
+            rootView.ApplySortingOrder(ref order);
+            rootView.AddSubView(childView);
+
+            Assert.AreEqual(100, rootCanvas.GetComponent<Canvas>().sortingOrder);
+            Assert.AreEqual(101, childCanvas.GetComponent<Canvas>().sortingOrder);
+            Object.DestroyImmediate(rootObject);
+        }
+
+        /// <summary>
+        /// Verifies window-owned items use pools while panels retain one instance per window activity.
+        /// </summary>
+        [Test]
+        public void WindowComposition_ReusesItemsAndPanels()
+        {
+            using UITestEnvironment environment = new();
+            GameObject itemPrefab = new("UITestItemPrefab");
+            itemPrefab.SetActive(false);
+            itemPrefab.AddComponent<UITestItemView>();
+            itemPrefab.AddComponent<UITestItem>();
+            Assert.IsNotNull(itemPrefab.GetComponent<UITestItem>());
+            GameObject panelPrefab = new("UITestPanelPrefab");
+            panelPrefab.SetActive(false);
+            panelPrefab.AddComponent<UITestPanelView>();
+            panelPrefab.AddComponent<UITestPanel>();
+            environment.Provider.AddPrefab("UI/TestItem", itemPrefab);
+            environment.Provider.AddPrefab("UI/TestPanel", panelPrefab);
+            var scope = environment.UIService.CreateScope();
+            scope.AddWindow(typeof(UITestWindow), "UI/TestWindow", EUILayer.Normal, EUIWindowLifetime.Module);
+            var window = (UITestWindow)environment.UIService.OpenWindow(typeof(UITestWindow));
+            window.ConfigureTestComposition();
+
+            var firstItem       = window.CreateTestItem(window.transform);
+            var firstItemObject = firstItem.gameObject;
+            Assert.IsTrue(window.ReleaseTestItem(ref firstItem));
+            var secondItem = window.CreateTestItem(window.transform);
+            var firstPanel = window.OpenTestPanel();
+            var secondPanel = window.OpenTestPanel();
+
+            Assert.AreSame(firstItemObject, secondItem.gameObject);
+            Assert.AreSame(firstPanel, secondPanel);
+            Assert.IsTrue(window.CloseTestPanel());
+            Assert.IsFalse(firstPanel.gameObject.activeSelf);
+            Assert.AreEqual(3, environment.Provider.LoadCount);
+
+            environment.UIService.CloseWindow(typeof(UITestWindow));
+            Assert.IsFalse(secondItem.gameObject.activeInHierarchy);
+            scope.Dispose();
+            Assert.AreEqual(3, environment.Provider.ReleaseCount);
+            Object.DestroyImmediate(itemPrefab);
+            Object.DestroyImmediate(panelPrefab);
+        }
     }
 
     /// <summary>
@@ -204,6 +276,7 @@ namespace Tritone.Tests
             GameApplicationBuilder builder = new();
             Application = builder
                 .UseAssets(Provider)
+                .UsePools()
                 .UseUI(Root)
                 .Build();
             Application.Start();
@@ -228,6 +301,11 @@ namespace Tritone.Tests
     {
         // Stores the prefab returned for every configured test path.
         private readonly GameObject mPrefab;
+
+        /// <summary>
+        /// Stores path-specific prefabs used by composition tests.
+        /// </summary>
+        private readonly Dictionary<string, GameObject> mPrefabs = new(StringComparer.Ordinal);
 
         // Stores incomplete asynchronous requests by path.
         private readonly Dictionary<string, TaskCompletionSource<object>> mPendingLoads = new(StringComparer.Ordinal);
@@ -257,7 +335,7 @@ namespace Tritone.Tests
         public object Load(string path, Type assetType)
         {
             LoadCount++;
-            return mPrefab;
+            return mPrefabs.TryGetValue(path, out var prefab) ? prefab : mPrefab;
         }
 
         /// <inheritdoc />
@@ -265,7 +343,7 @@ namespace Tritone.Tests
         {
             LoadAsyncCount++;
             if (!mDelayAsyncLoads)
-                return Task.FromResult((object)mPrefab);
+                return Task.FromResult((object)GetPrefab(path));
 
             TaskCompletionSource<object> completion = new();
             mPendingLoads.Add(path, completion);
@@ -285,7 +363,27 @@ namespace Tritone.Tests
         {
             var completion = mPendingLoads[path];
             mPendingLoads.Remove(path);
-            completion.SetResult(mPrefab);
+            completion.SetResult(GetPrefab(path));
+        }
+
+        /// <summary>
+        /// Registers one path-specific prefab.
+        /// </summary>
+        /// <param name="path">The provider path.</param>
+        /// <param name="prefab">The prefab returned for the path.</param>
+        internal void AddPrefab(string path, GameObject prefab)
+        {
+            mPrefabs.Add(path, prefab);
+        }
+
+        /// <summary>
+        /// Gets a path-specific prefab or the default window prefab.
+        /// </summary>
+        /// <param name="path">The requested provider path.</param>
+        /// <returns>The configured prefab.</returns>
+        private GameObject GetPrefab(string path)
+        {
+            return mPrefabs.TryGetValue(path, out var prefab) ? prefab : mPrefab;
         }
     }
 
@@ -308,5 +406,86 @@ namespace Tritone.Tests
     /// </summary>
     public sealed class UITestWindow : UIWindow<UITestView>
     {
+        /// <inheritdoc />
+        protected override void OnInitialize()
+        {
+            ConfigureTestComposition();
+        }
+
+        /// <summary>
+        /// Registers composition explicitly when EditMode does not invoke MonoBehaviour initialization.
+        /// </summary>
+        internal void ConfigureTestComposition()
+        {
+            AddItemTemplate<UITestItem>("UI/TestItem");
+            AddPanel<UITestPanel>("UI/TestPanel");
+        }
+
+        /// <summary>
+        /// Creates one test item.
+        /// </summary>
+        /// <param name="parent">The item parent.</param>
+        /// <returns>The created item.</returns>
+        internal UITestItem CreateTestItem(Transform parent)
+        {
+            return CreateItem<UITestItem>(parent);
+        }
+
+        /// <summary>
+        /// Releases one test item.
+        /// </summary>
+        /// <param name="item">The item to release and clear.</param>
+        /// <returns>True when the item was released.</returns>
+        internal bool ReleaseTestItem(ref UITestItem item)
+        {
+            return ReleaseItem(ref item);
+        }
+
+        /// <summary>
+        /// Opens the test panel.
+        /// </summary>
+        /// <returns>The test panel.</returns>
+        internal UITestPanel OpenTestPanel()
+        {
+            return OpenPanel<UITestPanel>();
+        }
+
+        /// <summary>
+        /// Closes the test panel.
+        /// </summary>
+        /// <returns>True when the panel was closed.</returns>
+        internal bool CloseTestPanel()
+        {
+            return ClosePanel<UITestPanel>();
+        }
     }
+
+    /// <summary>
+    /// Provides an empty view for a reusable test item.
+    /// </summary>
+    public sealed class UITestItemView : UIView
+    {
+    }
+
+    /// <summary>
+    /// Provides one concrete reusable test item.
+    /// </summary>
+    public sealed class UITestItem : UIItem<UITestItemView>
+    {
+    }
+
+    /// <summary>
+    /// Provides an empty view for a test panel.
+    /// </summary>
+    public sealed class UITestPanelView : UIView
+    {
+    }
+
+    /// <summary>
+    /// Provides one concrete single-instance test panel.
+    /// </summary>
+    public sealed class UITestPanel : UIPanel<UITestPanelView>
+    {
+    }
+
 }

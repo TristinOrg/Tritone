@@ -21,11 +21,26 @@ namespace Tritone.Unity.UI
         /// </summary>
         protected virtual void Awake()
         {
-            mView = GetComponent<TView>();
-            if (mView == null)
-                throw new InvalidOperationException($"{GetType().Name} requires {typeof(TView).Name} on the same GameObject.");
-
+            ResolveView();
             OnInitialize();
+        }
+
+        /// <summary>
+        /// Resolves and caches the typed view when Unity has not invoked Awake yet.
+        /// </summary>
+        /// <returns>The required typed view.</returns>
+        protected TView ResolveView()
+        {
+            if (mView)
+            {
+                return mView;
+            }
+            mView = GetComponent<TView>();
+            if (!mView)
+            {
+                throw new InvalidOperationException($"{GetType().Name} requires {typeof(TView).Name} on the same GameObject.");
+            }
+            return mView;
         }
 
         /// <summary>
