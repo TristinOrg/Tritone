@@ -4,23 +4,21 @@ This document is the shared source of truth for ongoing development. Keep it in
 the repository so that a new Codex task, on any computer, can recover the
 current direction without relying on chat history.
 
-Last reviewed: 2026-08-12  
-Current release: `v0.1.0`  
-Current development target: `v0.2.0`
+- Last reviewed: 2026-08-18
+- Current release: `v0.1.0`
+- Current development target: `v0.2.0` release candidate
 
 ## Current focus
 
-The next development session should start here:
+Development for the planned `v0.2.0` scope is complete. The next session should
+prepare and publish the release:
 
-1. Harden the UI composition API added after `v0.1.0`.
-2. Add tests for nested panels, repeated open and close cycles, failed prefab
-   loads, and disposal during an in-flight load.
-3. Document a complete generated-view and window-composition example.
-4. Run package validation and the Unity EditMode and PlayMode suites before
-   marking the UI work complete.
-
-If these items are already complete, continue with the `v0.2.0` work in the
-order shown below.
+1. Review the `v0.2.0` entries under `Unreleased` in `CHANGELOG.md`.
+2. Change `package.json` to `0.2.0` and replace `Unreleased` with a dated
+   `0.2.0` heading.
+3. Run package validation plus EditMode and PlayMode tests once more.
+4. Commit the release metadata, tag `v0.2.0`, push the tag, and verify the
+   GitHub workflow.
 
 ## Shipped in v0.1.0
 
@@ -48,19 +46,26 @@ Work already completed on `main` after `v0.1.0`:
 
 Remaining work, in priority order:
 
-- [ ] Harden UI composition lifecycle behavior and failure recovery.
-- [ ] Add end-to-end documentation for generated views, windows, panels, and
+- [x] Harden UI composition lifecycle behavior and failure recovery.
+- [x] Add end-to-end documentation for generated views, windows, panels, and
   items.
-- [ ] Expand table compiler diagnostics with source, row, and column context.
-- [ ] Define and test duplicate table names, conflicting inferred schemas, and
+- [x] Expand table compiler diagnostics with source, row, and column context.
+- [x] Define and test duplicate table names, conflicting inferred schemas, and
   deterministic output ordering across multiple source directories.
-- [ ] Add sample table sources and generated output to the CI test project.
-- [ ] Update `Documentation~/index.md` so the package documentation covers the
+- [x] Add sample table sources and generated output to the CI test project.
+- [x] Update `Documentation~/index.md` so the package documentation covers the
   post-`v0.1.0` authoring workflows.
-- [ ] Run `.ci/Validate-Package.ps1` and all available Unity EditMode and
+- [x] Run `.ci/Validate-Package.ps1` and all available Unity EditMode and
   PlayMode tests.
-- [ ] Update `CHANGELOG.md`, choose the final `0.2.0` scope, and publish the
-  release tag.
+- [x] Update `CHANGELOG.md` and choose the final `0.2.0` development scope.
+- [ ] Publish the `v0.2.0` release metadata and tag.
+
+Validation recorded on 2026-08-18:
+
+- Package validation: 369 Unity assets.
+- EditMode: 153 passed, 0 failed, 0 skipped.
+- PlayMode: 2 passed, 0 failed, 0 skipped.
+- Unity Console: no errors or warnings after the full test run.
 
 ## Later candidates
 

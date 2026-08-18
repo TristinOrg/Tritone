@@ -677,6 +677,9 @@ Preloads skip cached content, report byte progress with a readonly struct, and r
 
 ## Configuration table quick start
 
+For the complete source, diagnostic, extension, and CI workflow, see
+[Configuration table authoring](Documentation~/table-authoring.md).
+
 Create `Assets/Tritone/Tables.json` and run `Tritone/Generate/Tables` to generate
 strongly typed rows without manually maintaining boilerplate:
 
@@ -708,8 +711,11 @@ int,string,bool
 1001,tristin,true
 ```
 
-The compiler validates field types, required cells, and duplicate keys before committing any output, then writes
-the generated row source and runtime-compatible `{ "Rows": [...] }` JSON together.
+The compiler validates field types, required cells, duplicate keys, duplicate
+table names, and conflicting field schemas before committing any output, then
+writes the generated row source and runtime-compatible `{ "Rows": [...] }` JSON
+together. Diagnostics identify the source, row, and column whenever a source
+cell is responsible.
 Built-in field types are `bool`, `int`, `long`, `float`, `double`, and `string`.
 Explicit `Fields` remain supported for compatibility and for code-only generation.
 Generated files are rewritten only when their contents change.

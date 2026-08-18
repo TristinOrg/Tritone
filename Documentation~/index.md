@@ -52,3 +52,4 @@ See the repository [README](https://github.com/TristinOrg/Tritone#readme) for fe
 ## Guides
 
 - [UI authoring and composition](ui-authoring.md)
+- [Configuration table authoring](table-authoring.md)
