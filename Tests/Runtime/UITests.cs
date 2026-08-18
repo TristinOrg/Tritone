@@ -231,6 +231,147 @@ namespace Tritone.Tests
             Object.DestroyImmediate(itemPrefab);
             Object.DestroyImmediate(panelPrefab);
         }
+
+        /// <summary>
+        /// Verifies that closing and reopening a window recreates its activity from retained prefabs.
+        /// </summary>
+        [Test]
+        public void WindowComposition_RepeatedOpenCloseReusesPrefabsAndInstances()
+        {
+            using UITestEnvironment environment = new();
+            GameObject itemPrefab = new("UITestItemPrefab");
+            itemPrefab.SetActive(false);
+            itemPrefab.AddComponent<UITestItemView>();
+            itemPrefab.AddComponent<UITestItem>();
+            GameObject panelPrefab = new("UITestPanelPrefab");
+            panelPrefab.SetActive(false);
+            panelPrefab.AddComponent<UITestPanelView>();
+            panelPrefab.AddComponent<UITestPanel>();
+            environment.Provider.AddPrefab("UI/TestItem", itemPrefab);
+            environment.Provider.AddPrefab("UI/TestPanel", panelPrefab);
+            var scope = environment.UIService.CreateScope();
+            scope.AddWindow(typeof(UITestWindow), "UI/TestWindow", EUILayer.Normal, EUIWindowLifetime.Module);
+            var window           = (UITestWindow)environment.UIService.OpenWindow(typeof(UITestWindow));
+            window.ConfigureTestComposition();
+            var firstItem        = window.CreateTestItem(window.transform);
+            var firstItemObject  = firstItem.gameObject;
+            var firstPanel       = window.OpenTestPanel();
+            var firstPanelObject = firstPanel.gameObject;
+
+            Assert.IsTrue(environment.UIService.CloseWindow(typeof(UITestWindow)));
+            Assert.IsFalse(window.CloseTestPanel());
+            environment.UIService.OpenWindow(typeof(UITestWindow));
+            var secondItem  = window.CreateTestItem(window.transform);
+            var secondPanel = window.OpenTestPanel();
+
+            Assert.AreSame(firstItemObject, secondItem.gameObject);
+            Assert.AreSame(firstPanelObject, secondPanel.gameObject);
+            Assert.AreEqual(3, environment.Provider.LoadCount);
+            scope.Dispose();
+            Assert.AreEqual(3, environment.Provider.ReleaseCount);
+            Object.DestroyImmediate(itemPrefab);
+            Object.DestroyImmediate(panelPrefab);
+        }
+
+        /// <summary>
+        /// Verifies that a panel can use another active panel as its deterministic parent.
+        /// </summary>
+        [Test]
+        public void WindowComposition_NestedPanelUsesConfiguredParent()
+        {
+            using UITestEnvironment environment = new();
+            GameObject panelPrefab = new("UITestPanelPrefab");
+            panelPrefab.SetActive(false);
+            panelPrefab.AddComponent<UITestPanelView>();
+            panelPrefab.AddComponent<UITestPanel>();
+            GameObject nestedPrefab = new("UITestNestedPanelPrefab");
+            nestedPrefab.SetActive(false);
+            nestedPrefab.AddComponent<UITestNestedPanelView>();
+            nestedPrefab.AddComponent<UITestNestedPanel>();
+            environment.Provider.AddPrefab("UI/TestPanel", panelPrefab);
+            environment.Provider.AddPrefab("UI/TestNestedPanel", nestedPrefab);
+            var scope = environment.UIService.CreateScope();
+            scope.AddWindow(typeof(UITestWindow), "UI/TestWindow", EUILayer.Normal, EUIWindowLifetime.Module);
+            var window      = (UITestWindow)environment.UIService.OpenWindow(typeof(UITestWindow));
+            window.ConfigureTestComposition();
+            var parentPanel = window.OpenTestPanel();
+            window.AddTestNestedPanel(parentPanel.transform);
+            var nestedPanel = window.OpenTestNestedPanel();
+
+            Assert.AreSame(parentPanel.transform, nestedPanel.transform.parent);
+            Assert.IsTrue(window.CloseTestNestedPanel());
+            Assert.IsTrue(parentPanel.gameObject.activeSelf);
+            scope.Dispose();
+            Object.DestroyImmediate(panelPrefab);
+            Object.DestroyImmediate(nestedPrefab);
+        }
+
+        /// <summary>
+        /// Verifies that invalid composition prefabs release their asset references immediately.
+        /// </summary>
+        [Test]
+        public void WindowComposition_MissingComponentsRollBackAssetReferences()
+        {
+            using UITestEnvironment environment = new();
+            GameObject invalidItemPrefab  = new("InvalidItemPrefab");
+            GameObject invalidPanelPrefab = new("InvalidPanelPrefab");
+            environment.Provider.AddPrefab("UI/TestItem", invalidItemPrefab);
+            environment.Provider.AddPrefab("UI/TestPanel", invalidPanelPrefab);
+            var scope = environment.UIService.CreateScope();
+            scope.AddWindow(typeof(UITestWindow), "UI/TestWindow", EUILayer.Normal, EUIWindowLifetime.Module);
+            var window = (UITestWindow)environment.UIService.OpenWindow(typeof(UITestWindow));
+            window.ConfigureTestComposition();
+
+            Assert.Throws<InvalidOperationException>(() => window.CreateTestItem(window.transform));
+            Assert.Throws<InvalidOperationException>(() => window.OpenTestPanel());
+            Assert.AreEqual(2, environment.Provider.ReleaseCount);
+
+            scope.Dispose();
+            Assert.AreEqual(3, environment.Provider.ReleaseCount);
+            Object.DestroyImmediate(invalidItemPrefab);
+            Object.DestroyImmediate(invalidPanelPrefab);
+        }
+
+        /// <summary>
+        /// Verifies that a failed asynchronous load can be retried without retaining failed state.
+        /// </summary>
+        [Test]
+        public void OpenWindowAsync_LoadFailureCanBeRetried()
+        {
+            using UITestEnvironment environment = new(true);
+            var scope = environment.UIService.CreateScope();
+            scope.AddWindow(typeof(UITestWindow), "UI/AsyncWindow", EUILayer.Normal, EUIWindowLifetime.Module);
+            var failedTask = environment.UIService.OpenWindowAsync(typeof(UITestWindow));
+
+            environment.Provider.FailAsync("UI/AsyncWindow", new InvalidOperationException("Test load failure."));
+            Assert.Throws<InvalidOperationException>(() => failedTask.GetAwaiter().GetResult());
+
+            var retryTask = environment.UIService.OpenWindowAsync(typeof(UITestWindow));
+            environment.Provider.CompleteAsync("UI/AsyncWindow");
+            Assert.IsInstanceOf<UITestWindow>(retryTask.GetAwaiter().GetResult());
+            Assert.AreEqual(2, environment.Provider.LoadAsyncCount);
+            scope.Dispose();
+            Assert.AreEqual(1, environment.Provider.ReleaseCount);
+        }
+
+        /// <summary>
+        /// Verifies that releasing the final owner invalidates an in-flight asynchronous open.
+        /// </summary>
+        [Test]
+        public void OpenWindowAsync_FinalOwnerReleaseInvalidatesInFlightLoad()
+        {
+            using UITestEnvironment environment = new(true);
+            var scope = environment.UIService.CreateScope();
+            scope.AddWindow(typeof(UITestWindow), "UI/AsyncWindow", EUILayer.Normal, EUIWindowLifetime.Module);
+            var openTask = environment.UIService.OpenWindowAsync(typeof(UITestWindow));
+
+            scope.Dispose();
+            environment.Provider.CompleteAsync("UI/AsyncWindow");
+
+            Assert.Throws<InvalidOperationException>(() => openTask.GetAwaiter().GetResult());
+            Assert.AreEqual(1, environment.Provider.ReleaseCount);
+            Assert.IsNull(environment.UIService.GetWindow(typeof(UITestWindow)));
+        }
     }
 
     /// <summary>
@@ -367,6 +508,18 @@ namespace Tritone.Tests
         }
 
         /// <summary>
+        /// Fails one delayed provider request with the supplied exception.
+        /// </summary>
+        /// <param name="path">The pending provider path.</param>
+        /// <param name="exception">The deterministic load failure.</param>
+        internal void FailAsync(string path, Exception exception)
+        {
+            var completion = mPendingLoads[path];
+            mPendingLoads.Remove(path);
+            completion.SetException(exception);
+        }
+
+        /// <summary>
         /// Registers one path-specific prefab.
         /// </summary>
         /// <param name="path">The provider path.</param>
@@ -458,6 +611,33 @@ namespace Tritone.Tests
         {
             return ClosePanel<UITestPanel>();
         }
+
+        /// <summary>
+        /// Registers one nested panel below the supplied parent.
+        /// </summary>
+        /// <param name="parent">The parent panel transform.</param>
+        internal void AddTestNestedPanel(Transform parent)
+        {
+            AddPanel<UITestNestedPanel>("UI/TestNestedPanel", parent);
+        }
+
+        /// <summary>
+        /// Opens the nested test panel.
+        /// </summary>
+        /// <returns>The nested test panel.</returns>
+        internal UITestNestedPanel OpenTestNestedPanel()
+        {
+            return OpenPanel<UITestNestedPanel>();
+        }
+
+        /// <summary>
+        /// Closes the nested test panel.
+        /// </summary>
+        /// <returns>True when the nested panel was closed.</returns>
+        internal bool CloseTestNestedPanel()
+        {
+            return ClosePanel<UITestNestedPanel>();
+        }
     }
 
     /// <summary>
@@ -485,6 +665,20 @@ namespace Tritone.Tests
     /// Provides one concrete single-instance test panel.
     /// </summary>
     public sealed class UITestPanel : UIPanel<UITestPanelView>
+    {
+    }
+
+    /// <summary>
+    /// Provides an empty view for a nested test panel.
+    /// </summary>
+    public sealed class UITestNestedPanelView : UIView
+    {
+    }
+
+    /// <summary>
+    /// Provides one concrete nested test panel.
+    /// </summary>
+    public sealed class UITestNestedPanel : UIPanel<UITestNestedPanelView>
     {
     }
 

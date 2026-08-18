@@ -272,6 +272,7 @@ namespace Tritone.Unity.UI
             var prefab       = prefabObject.GetComponent<TItem>();
             if (!prefab)
             {
+                mCompositionAssetScope.Release(prefabObject);
                 throw new InvalidOperationException($"Item prefab '{assetPath}' does not contain {itemType.Name}.");
             }
             mItemPrefabs[itemType] = prefab;
@@ -309,6 +310,7 @@ namespace Tritone.Unity.UI
             var prefab       = prefabObject.GetComponent<TPanel>();
             if (!prefab)
             {
+                mCompositionAssetScope.Release(prefabObject);
                 throw new InvalidOperationException($"Panel prefab '{definition.AssetPath}' does not contain {typeof(TPanel).Name}.");
             }
             definition.Prefab = prefab;
