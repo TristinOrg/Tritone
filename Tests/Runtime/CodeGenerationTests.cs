@@ -149,6 +149,7 @@ namespace Tritone.Tests
             Assert.IsFalse(second.Changed);
             var code = File.ReadAllText(Path.Combine(mOutputPath, "RoleTable.Generated.cs"));
             StringAssert.Contains("public sealed partial class RoleRow", code);
+            Assert.IsFalse(System.Text.RegularExpressions.Regex.IsMatch(code, @"(?m)^ +$"));
             var json = File.ReadAllText(Path.Combine(mOutputPath, "Role.json"));
             StringAssert.Contains("\"Name\": \"Tristin, WYF\"", json);
             StringAssert.Contains("\"Enabled\": true", json);

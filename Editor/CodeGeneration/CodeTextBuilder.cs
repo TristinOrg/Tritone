@@ -20,8 +20,11 @@ namespace Tritone.Editor.CodeGeneration
         /// <param name="text">The source line without indentation.</param>
         internal void Line(string text = "")
         {
-            for (int i = 0; i < mIndent; i++)
-                mBuilder.Append("    ");
+            if (text.Length > 0)
+            {
+                for (int i = 0; i < mIndent; i++)
+                    mBuilder.Append("    ");
+            }
             mBuilder.Append(text);
             mBuilder.Append('\n');
         }
