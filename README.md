@@ -2,6 +2,9 @@
 
 Tritone is a clean, modular, high-performance game framework for Unity and .NET.
 
+Development priorities and cross-computer handoff instructions are maintained
+in [ROADMAP.md](ROADMAP.md).
+
 ## Installation
 
 Add `https://github.com/TristinOrg/Tritone.git` through Unity Package Manager's **Add package from git URL** command. Once a release tag is published, append that tag for reproducible production projects; use the untagged URL only when intentionally tracking `main`.
