@@ -1,0 +1,5 @@
+Id,Name,Enabled
+int,string,bool
+1001,Tristin,true
+1002,Aigis,false
+

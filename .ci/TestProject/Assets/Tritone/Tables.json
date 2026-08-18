@@ -1,0 +1,9 @@
+{
+  "Namespace": "Tritone.CI.Tables",
+  "OutputPath": "Assets/Generated/Tritone/Tables",
+  "DataOutputPath": "Assets/Resources/Tables",
+  "SourceDirectories": [
+    "Assets/GameData/Tables"
+  ]
+}
+
