@@ -25,7 +25,10 @@ namespace Tritone.Editor.Tables
             {
                 return tables.ToArray();
             }
-            foreach (var directory in schema.SourceDirectories)
+
+            var directories = (string[])schema.SourceDirectories.Clone();
+            Array.Sort(directories, StringComparer.OrdinalIgnoreCase);
+            foreach (var directory in directories)
             {
                 DiscoverDirectory(directory, tables, diagnostics);
             }

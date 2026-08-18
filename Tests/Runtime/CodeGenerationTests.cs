@@ -203,6 +203,100 @@ namespace Tritone.Tests
             Assert.IsFalse(File.Exists(Path.Combine(mOutputPath, "Role.json")));
         }
 
+        /// <summary>
+        /// Verifies that inferred field diagnostics identify the exact source type cell.
+        /// </summary>
+        [Test]
+        public void Tables_InferredTypeDiagnosticIncludesSourceRowAndColumn()
+        {
+            var sourcePath = Path.Combine(mOutputPath, "Roles.csv");
+            Directory.CreateDirectory(mOutputPath);
+            File.WriteAllText(sourcePath, "Id,Name\nint,unsupported\n1,Tristin\n");
+            var schema = CreateSourceSchema(sourcePath);
+
+            var result     = TableCodeGenerator.Compile(schema);
+            var diagnostic = GetDiagnostic(result.Diagnostics, "TRT-TABLE-2204");
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(sourcePath, diagnostic.Location.Source);
+            Assert.AreEqual(2, diagnostic.Location.Row);
+            Assert.AreEqual(2, diagnostic.Location.Column);
+        }
+
+        /// <summary>
+        /// Verifies that duplicate discovered names report both conflicting sources.
+        /// </summary>
+        [Test]
+        public void Tables_DuplicateNamesReportBothSources()
+        {
+            var firstDirectory  = Path.Combine(mOutputPath, "First");
+            var secondDirectory = Path.Combine(mOutputPath, "Second");
+            Directory.CreateDirectory(firstDirectory);
+            Directory.CreateDirectory(secondDirectory);
+            var firstSource  = Path.Combine(firstDirectory, "Roles.csv");
+            var secondSource = Path.Combine(secondDirectory, "Roles.csv");
+            File.WriteAllText(firstSource, "Id,Name\nint,string\n1,First\n");
+            File.WriteAllText(secondSource, "Id,Name\nint,string\n2,Second\n");
+            var schema       = CreateDirectorySchema(secondDirectory, firstDirectory);
+
+            var result     = TableCodeGenerator.Compile(schema);
+            var diagnostic = GetDiagnostic(result.Diagnostics, "TRT-TABLE-2103");
+
+            Assert.IsFalse(result.Succeeded);
+            StringAssert.Contains(Path.GetFullPath(firstSource), diagnostic.Message);
+            StringAssert.Contains(Path.GetFullPath(secondSource), diagnostic.Message);
+            Assert.AreEqual(Path.GetFullPath(secondSource), diagnostic.Location.Source);
+        }
+
+        /// <summary>
+        /// Verifies that duplicate names with different inferred fields receive a distinct diagnostic.
+        /// </summary>
+        [Test]
+        public void Tables_ConflictingInferredSchemasAreRejected()
+        {
+            var firstDirectory  = Path.Combine(mOutputPath, "First");
+            var secondDirectory = Path.Combine(mOutputPath, "Second");
+            Directory.CreateDirectory(firstDirectory);
+            Directory.CreateDirectory(secondDirectory);
+            var firstSource  = Path.Combine(firstDirectory, "Roles.csv");
+            var secondSource = Path.Combine(secondDirectory, "Roles.csv");
+            File.WriteAllText(firstSource, "Id,Name\nint,string\n1,First\n");
+            File.WriteAllText(secondSource, "Id,Power\nint,float\n2,1.5\n");
+            var schema       = CreateDirectorySchema(firstDirectory, secondDirectory);
+
+            var result     = TableCodeGenerator.Compile(schema);
+            var diagnostic = GetDiagnostic(result.Diagnostics, "TRT-TABLE-2106");
+
+            Assert.IsFalse(result.Succeeded);
+            StringAssert.Contains("conflicting field schemas", diagnostic.Message);
+            StringAssert.Contains(Path.GetFullPath(firstSource), diagnostic.Message);
+            StringAssert.Contains(Path.GetFullPath(secondSource), diagnostic.Message);
+        }
+
+        /// <summary>
+        /// Verifies that reversing configured source directories preserves diagnostic order.
+        /// </summary>
+        [Test]
+        public void Tables_SourceDirectoryOrderIsDeterministic()
+        {
+            var firstDirectory  = Path.Combine(mOutputPath, "First");
+            var secondDirectory = Path.Combine(mOutputPath, "Second");
+            Directory.CreateDirectory(firstDirectory);
+            Directory.CreateDirectory(secondDirectory);
+            File.WriteAllText(Path.Combine(firstDirectory, "Alpha.csv"), "Id,Name\nint,unsupported\n1,First\n");
+            File.WriteAllText(Path.Combine(secondDirectory, "Beta.csv"), "Id,Name\nint,unsupported\n2,Second\n");
+
+            var forward = TableCodeGenerator.Compile(CreateDirectorySchema(firstDirectory, secondDirectory));
+            var reverse = TableCodeGenerator.Compile(CreateDirectorySchema(secondDirectory, firstDirectory));
+
+            Assert.AreEqual(forward.Diagnostics.Length, reverse.Diagnostics.Length);
+            for (var i = 0; i < forward.Diagnostics.Length; i++)
+            {
+                Assert.AreEqual(forward.Diagnostics[i].Code, reverse.Diagnostics[i].Code);
+                Assert.AreEqual(forward.Diagnostics[i].Location.Source, reverse.Diagnostics[i].Location.Source);
+            }
+        }
+
         [Test]
         public void Network_GeneratesRelationshipsCodecsAndRegistry()
         {
@@ -286,6 +380,22 @@ namespace Tritone.Tests
         }
 
         /// <summary>
+        /// Creates one directory-discovered table schema using the isolated output directory.
+        /// </summary>
+        /// <param name="sourceDirectories">The source directories to discover.</param>
+        /// <returns>The configured schema.</returns>
+        private TableSchema CreateDirectorySchema(params string[] sourceDirectories)
+        {
+            return new TableSchema
+            {
+                Namespace         = "Game.Tables",
+                OutputPath       = mOutputPath,
+                DataOutputPath   = mOutputPath,
+                SourceDirectories = sourceDirectories
+            };
+        }
+
+        /// <summary>
         /// Checks whether a build result contains one stable diagnostic code.
         /// </summary>
         /// <param name="diagnostics">The build diagnostics.</param>
@@ -301,6 +411,23 @@ namespace Tritone.Tests
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// Gets one required diagnostic by stable code.
+        /// </summary>
+        /// <param name="diagnostics">The build diagnostics.</param>
+        /// <param name="code">The required diagnostic code.</param>
+        /// <returns>The matching diagnostic.</returns>
+        private static TableDiagnostic GetDiagnostic(TableDiagnostic[] diagnostics, string code)
+        {
+            foreach (var diagnostic in diagnostics)
+            {
+                if (diagnostic.Code == code)
+                    return diagnostic;
+            }
+            Assert.Fail($"Expected diagnostic '{code}'.");
+            return default;
         }
     }
 }

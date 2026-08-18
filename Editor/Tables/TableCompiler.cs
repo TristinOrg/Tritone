@@ -66,13 +66,13 @@ namespace Tritone.Editor.Tables
                 return new TableBuildResult(false, false, diagnostics.ToArray());
             }
 
-            var tableNames = new HashSet<string>(StringComparer.Ordinal);
-            var paths      = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var tableDefinitions = new Dictionary<string, TableDefinition>(StringComparer.Ordinal);
+            var paths            = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var table in tables)
             {
                 var source     = ReadSource(table, diagnostics);
-                var definition = InferDefinition(table, source, diagnostics, out source);
-                if (!ValidateDefinition(definition, tableNames, diagnostics, out var fieldTypes))
+                var definition = InferDefinition(table, source, diagnostics, out source, out var inferred);
+                if (!ValidateDefinition(definition, inferred, tableDefinitions, diagnostics, out var fieldTypes))
                 {
                     continue;
                 }
@@ -136,9 +136,14 @@ namespace Tritone.Editor.Tables
         /// <param name="diagnostics">The diagnostic destination.</param>
         /// <param name="dataSource">The source containing data rows only.</param>
         /// <returns>The original or inferred table definition.</returns>
-        private static TableDefinition InferDefinition(TableDefinition table, TableSourceData source, TableDiagnosticCollection diagnostics, out TableSourceData dataSource)
+        private static TableDefinition InferDefinition(TableDefinition table,
+                                                       TableSourceData source,
+                                                       TableDiagnosticCollection diagnostics,
+                                                       out TableSourceData dataSource,
+                                                       out bool inferred)
         {
             dataSource = source;
+            inferred   = false;
             if (table == null || table.Fields != null && table.Fields.Length > 0)
             {
                 return table;
@@ -167,6 +172,7 @@ namespace Tritone.Editor.Tables
             var rows = new TableSourceRow[source.Rows.Length - 1];
             Array.Copy(source.Rows, 1, rows, 0, rows.Length);
             dataSource = new TableSourceData(source.Source, source.Headers, rows);
+            inferred   = true;
             return new TableDefinition
             {
                 Name     = table.Name,
@@ -204,11 +210,16 @@ namespace Tritone.Editor.Tables
 
         /// <summary>Validates one definition and resolves its field types.</summary>
         /// <param name="table">The table definition.</param>
-        /// <param name="tableNames">The names already encountered.</param>
+        /// <param name="inferred">Whether the definition fields came from source headers and a type row.</param>
+        /// <param name="tableDefinitions">The first definition encountered for each table name.</param>
         /// <param name="diagnostics">The diagnostic destination.</param>
         /// <param name="fieldTypes">The resolved field types.</param>
         /// <returns>True when code generation can continue.</returns>
-        private bool ValidateDefinition(TableDefinition table, HashSet<string> tableNames, TableDiagnosticCollection diagnostics, out ITableFieldType[] fieldTypes)
+        private bool ValidateDefinition(TableDefinition table,
+                                        bool inferred,
+                                        Dictionary<string, TableDefinition> tableDefinitions,
+                                        TableDiagnosticCollection diagnostics,
+                                        out ITableFieldType[] fieldTypes)
         {
             fieldTypes = null;
             if (table == null)
@@ -225,9 +236,18 @@ namespace Tritone.Editor.Tables
                 diagnostics.Error("TRT-TABLE-2102", exception.Message, new TableSourceLocation(table.Source, 0, 0));
                 return false;
             }
-            if (!tableNames.Add(table.Name))
+            if (tableDefinitions.TryGetValue(table.Name, out var firstDefinition))
             {
-                diagnostics.Error("TRT-TABLE-2103", $"Table '{table.Name}' is defined more than once.", new TableSourceLocation(table.Source, 0, 0));
+                var matchingFields = HaveMatchingFields(firstDefinition, table);
+                var code           = matchingFields ? "TRT-TABLE-2103" : "TRT-TABLE-2106";
+                var reason         = matchingFields ? "is defined more than once" : "has conflicting field schemas";
+                diagnostics.Error(code,
+                                  $"Table '{table.Name}' {reason} in '{firstDefinition.Source}' and '{table.Source}'.",
+                                  new TableSourceLocation(table.Source, 0, 0));
+            }
+            else
+            {
+                tableDefinitions.Add(table.Name, table);
             }
             if (string.IsNullOrWhiteSpace(table.Path))
             {
@@ -244,10 +264,12 @@ namespace Tritone.Editor.Tables
             var keyCount   = 0;
             for (var i = 0; i < table.Fields.Length; i++)
             {
-                var field = table.Fields[i];
+                var field        = table.Fields[i];
+                var nameLocation = new TableSourceLocation(table.Source, inferred ? 1 : 0, i + 1);
+                var typeLocation = new TableSourceLocation(table.Source, inferred ? 2 : 0, i + 1);
                 if (field == null)
                 {
-                    diagnostics.Error("TRT-TABLE-2201", $"Table '{table.Name}' field {i} is null.", new TableSourceLocation(table.Source, 0, i + 1));
+                    diagnostics.Error("TRT-TABLE-2201", $"Table '{table.Name}' field {i} is null.", nameLocation);
                     continue;
                 }
                 try
@@ -256,15 +278,15 @@ namespace Tritone.Editor.Tables
                 }
                 catch (Exception exception)
                 {
-                    diagnostics.Error("TRT-TABLE-2202", exception.Message, new TableSourceLocation(table.Source, 0, i + 1));
+                    diagnostics.Error("TRT-TABLE-2202", exception.Message, nameLocation);
                 }
                 if (!fieldNames.Add(field.Name))
                 {
-                    diagnostics.Error("TRT-TABLE-2203", $"Table '{table.Name}' field '{field.Name}' is duplicated.", new TableSourceLocation(table.Source, 0, i + 1));
+                    diagnostics.Error("TRT-TABLE-2203", $"Table '{table.Name}' field '{field.Name}' is duplicated.", nameLocation);
                 }
                 if (!mFieldTypes.TryGetValue(field.Type, out fieldTypes[i]))
                 {
-                    diagnostics.Error("TRT-TABLE-2204", $"Table '{table.Name}' field '{field.Name}' uses unregistered type '{field.Type}'.", new TableSourceLocation(table.Source, 0, i + 1));
+                    diagnostics.Error("TRT-TABLE-2204", $"Table '{table.Name}' field '{field.Name}' uses unregistered type '{field.Type}'.", typeLocation);
                 }
                 if (field.Key)
                 {
@@ -276,6 +298,35 @@ namespace Tritone.Editor.Tables
                 diagnostics.Error("TRT-TABLE-2205", $"Table '{table.Name}' must define exactly one key field.", new TableSourceLocation(table.Source, 0, 0));
             }
             return !diagnostics.HasErrors;
+        }
+
+        /// <summary>Checks whether two definitions expose the same ordered fields.</summary>
+        /// <param name="first">The first definition.</param>
+        /// <param name="second">The second definition.</param>
+        /// <returns>True when both ordered field schemas match.</returns>
+        private static bool HaveMatchingFields(TableDefinition first, TableDefinition second)
+        {
+            if (first.Fields == null || second.Fields == null || first.Fields.Length != second.Fields.Length)
+                return false;
+
+            for (var i = 0; i < first.Fields.Length; i++)
+            {
+                var firstField  = first.Fields[i];
+                var secondField = second.Fields[i];
+                if (firstField == null || secondField == null)
+                {
+                    if (!ReferenceEquals(firstField, secondField))
+                        return false;
+                    continue;
+                }
+                if (!string.Equals(firstField.Name, secondField.Name, StringComparison.Ordinal) ||
+                    !string.Equals(firstField.Type, secondField.Type, StringComparison.Ordinal) ||
+                    !string.Equals(firstField.DefaultValue, secondField.DefaultValue, StringComparison.Ordinal) ||
+                    firstField.Key != secondField.Key ||
+                    firstField.Optional != secondField.Optional)
+                    return false;
+            }
+            return true;
         }
 
         /// <summary>Reads and normalizes one configured external table source.</summary>
