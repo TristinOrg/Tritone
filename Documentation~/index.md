@@ -48,3 +48,7 @@ Attach the bootstrap to one object in the startup scene. It starts before normal
 The package contains EditMode tests and package-level PlayMode smoke tests. The repository CI also verifies manifest metadata, unique Unity GUIDs, matching `.meta` files, and the absence of `UnityEditor` references from runtime source.
 
 See the repository [README](https://github.com/TristinOrg/Tritone#readme) for feature-specific examples and architecture details.
+
+## Guides
+
+- [UI authoring and composition](ui-authoring.md)

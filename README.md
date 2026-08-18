@@ -417,6 +417,11 @@ public sealed class PlayerModule : ModuleBase
 }
 ```
 
+## UI quick start
+
+For a complete prefab-to-module walkthrough, see
+[UI authoring and composition](Documentation~/ui-authoring.md).
+
 Keep prefab references in a view without adding business logic:
 
 ```csharp
