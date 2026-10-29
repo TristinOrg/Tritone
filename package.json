@@ -1,6 +1,6 @@
 {
   "name": "com.tristinwen.tritone",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Tritone Framework",
   "description": "A clean, modular, high-performance game framework for Unity.",
   "unity": "2022.3",

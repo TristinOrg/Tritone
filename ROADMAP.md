@@ -4,21 +4,24 @@ This document is the shared source of truth for ongoing development. Keep it in
 the repository so that a new Codex task, on any computer, can recover the
 current direction without relying on chat history.
 
-- Last reviewed: 2026-08-18
-- Current release: `v0.1.0`
-- Current development target: `v0.2.0` release candidate
+- Last reviewed: 2026-10-29
+- Current release: `v0.2.0`
+- Current development target: None selected
 
 ## Current focus
 
-Development for the planned `v0.2.0` scope is complete. The next session should
-prepare and publish the release:
+The `v0.2.0` release has been published. No later milestone is committed yet.
+The next session should select one candidate from **Later candidates**, define
+its scope and acceptance criteria, and record the chosen development target
+before implementation begins.
 
-1. Review the `v0.2.0` entries under `Unreleased` in `CHANGELOG.md`.
-2. Change `package.json` to `0.2.0` and replace `Unreleased` with a dated
-   `0.2.0` heading.
-3. Run package validation plus EditMode and PlayMode tests once more.
-4. Commit the release metadata, tag `v0.2.0`, push the tag, and verify the
-   GitHub workflow.
+## v0.2.0 release verification
+
+Verified on 2026-10-29 with Unity 2022.3.62f3:
+
+- Package validation: 369 Unity assets.
+- EditMode: 154 passed, 0 failed, 0 skipped.
+- PlayMode: 2 passed, 0 failed, 0 skipped.
 
 ## Shipped in v0.1.0
 
@@ -58,7 +61,7 @@ Remaining work, in priority order:
 - [x] Run `.ci/Validate-Package.ps1` and all available Unity EditMode and
   PlayMode tests.
 - [x] Update `CHANGELOG.md` and choose the final `0.2.0` development scope.
-- [ ] Publish the `v0.2.0` release metadata and tag.
+- [x] Publish the `v0.2.0` release metadata and tag.
 
 Validation recorded on 2026-08-18:
 
@@ -116,4 +119,3 @@ At the end of a development session:
    graph together with the code.
 5. Commit and push the code, tests, documentation, and roadmap update so the
    next computer receives the full handoff.
-

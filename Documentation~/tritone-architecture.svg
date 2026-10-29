@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 460" role="img" aria-labelledby="title desc">
+  <title id="title">Tritone framework architecture</title>
+  <desc id="desc">A layered view of Tritone: an engine-independent C sharp kernel at the center, module-scoped capabilities around it, and optional Unity adapters at the edge.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111c25"/>
+      <stop offset="1" stop-color="#172832"/>
+    </linearGradient>
+    <linearGradient id="core" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d7ece5"/>
+      <stop offset="1" stop-color="#accfc5"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10Z" fill="#91b8ae"/>
+    </marker>
+    <style>
+      text { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+      .eyebrow { fill:#8ca8a6; font-size:12px; font-weight:650; letter-spacing:2.2px; }
+      .label { fill:#e8efec; font-size:19px; font-weight:600; }
+      .sub { fill:#9eb2b1; font-size:13px; }
+      .tag { fill:#c4ddd5; font-size:12px; font-weight:550; }
+    </style>
+  </defs>
+  <rect width="1200" height="460" rx="22" fill="url(#bg)"/>
+  <path d="M32 91H1168" stroke="#30434a"/>
+  <text x="56" y="48" class="eyebrow">TRITONE / COMPOSITION MODEL</text>
+  <text x="1144" y="48" text-anchor="end" class="eyebrow">UNITY · MODULAR · SCOPED</text>
+
+  <text x="70" y="134" class="eyebrow">01 / CORE</text>
+  <text x="70" y="166" class="label">Portable kernel</text>
+  <text x="70" y="192" class="sub">Application lifecycle</text>
+  <text x="70" y="214" class="sub">Modules · services · update loop</text>
+  <rect x="60" y="238" width="260" height="74" rx="12" fill="#21363c" stroke="#47635f"/>
+  <text x="82" y="268" class="tag">NO UnityEngine DEPENDENCY</text>
+  <text x="82" y="290" class="sub">Testable C# foundation</text>
+
+  <path d="M334 214H425" stroke="#91b8ae" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="379" y="198" text-anchor="middle" class="eyebrow">COMPOSE</text>
+
+  <text x="454" y="134" class="eyebrow">02 / FEATURE BOUNDARIES</text>
+  <text x="454" y="166" class="label">Module capabilities</text>
+  <text x="454" y="192" class="sub">Services adapt to each module</text>
+  <rect x="450" y="216" width="305" height="132" rx="16" fill="url(#core)"/>
+  <text x="478" y="249" fill="#1b3035" font-size="17" font-weight="700">ModuleContext</text>
+  <path d="M478 265H727" stroke="#88aaa1"/>
+  <text x="478" y="291" fill="#29434a" font-size="13">Assets · UI · Events · Timers</text>
+  <text x="478" y="316" fill="#29434a" font-size="13">Network · Models · Entities · …</text>
+  <rect x="478" y="365" width="249" height="38" rx="8" fill="#263c42"/>
+  <text x="602" y="389" text-anchor="middle" class="tag">OWNED SCOPE · RELEASED ON STOP</text>
+
+  <path d="M770 214H858" stroke="#91b8ae" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="814" y="198" text-anchor="middle" class="eyebrow">ADAPT</text>
+
+  <text x="882" y="134" class="eyebrow">03 / PLATFORM EDGE</text>
+  <text x="882" y="166" class="label">Unity adapters</text>
+  <text x="882" y="192" class="sub">Use built-in integrations</text>
+  <g fill="#21363c" stroke="#405a5d">
+    <rect x="880" y="216" width="132" height="52" rx="10"/>
+    <rect x="1024" y="216" width="132" height="52" rx="10"/>
+    <rect x="880" y="280" width="132" height="52" rx="10"/>
+    <rect x="1024" y="280" width="132" height="52" rx="10"/>
+    <rect x="880" y="344" width="132" height="52" rx="10"/>
+    <rect x="1024" y="344" width="132" height="52" rx="10"/>
+  </g>
+  <g class="tag" text-anchor="middle">
+    <text x="946" y="248">Scenes · UI</text>
+    <text x="1090" y="248">Addressables</text>
+    <text x="946" y="312">Input · Audio</text>
+    <text x="1090" y="312">Pooling · Saves</text>
+    <text x="946" y="376">Localization</text>
+    <text x="1090" y="376">Tables · Content</text>
+  </g>
+  <text x="60" y="432" class="eyebrow">ORDERED STARTUP</text>
+  <path d="M228 428H970" stroke="#435a5c" stroke-dasharray="3 8"/>
+  <text x="1140" y="432" text-anchor="end" class="eyebrow">REVERSE-ORDER CLEANUP</text>
+</svg>

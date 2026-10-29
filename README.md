@@ -1,21 +1,72 @@
 # Tritone
 
-Tritone is a clean, modular, high-performance game framework for Unity and .NET.
+**A modular game framework for Unity, built around explicit lifetimes and a Unity-independent C# kernel.**
 
-Development priorities and cross-computer handoff instructions are maintained
-in [ROADMAP.md](ROADMAP.md).
+Compose only the services your game needs. Let modules own what they acquire, and keep startup, updates, scene transitions, and shutdown predictable.
+
+[English](README.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md)
+
+[![Unity 2022.3+](https://img.shields.io/badge/Unity-2022.3%2B-222c37?logo=unity&logoColor=white)](https://unity.com/releases/editor/whats-new/2022.3.0)
+[![UPM](https://img.shields.io/badge/UPM-Git%20URL-496b73)](https://github.com/TristinOrg/Tritone)
+[![License](https://img.shields.io/github/license/TristinOrg/Tritone)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/TristinOrg/Tritone?style=social)](https://github.com/TristinOrg/Tritone/stargazers)
+[![Unity Package workflow](https://github.com/TristinOrg/Tritone/actions/workflows/unity-package.yml/badge.svg?branch=main)](https://github.com/TristinOrg/Tritone/actions/workflows/unity-package.yml)
+
+![Tritone architecture: Unity-independent kernel, scoped module capabilities, and Unity adapters](Documentation~/tritone-architecture.svg)
+
+## Why Tritone
+
+- **A small, portable kernel.** Application lifecycle, modules, services, flows, models, entities, events, timers, tweening, dispatch, and diagnostics do not depend on `UnityEngine`.
+- **Explicit ownership.** Module scopes release timers, event bindings, assets, pooled objects, and other acquired resources when their owner stops.
+- **Composable services.** Add only the capabilities a project uses, from scenes and UI to networking, content delivery, localization, saves, and tables.
+- **Deterministic transitions.** Dependencies start in order and stop in reverse; scene and flow transitions preserve the previous working state when activation fails.
+- **Editor workflows included.** Generate strongly typed UI views, compile configuration tables and network messages, and build versioned content bundles.
+
+Tritone is a Unity package rather than a starter game. Its APIs are designed to fit into an existing project and let teams keep gameplay code organized by feature.
+
+## At a glance
+
+| Area | What you get |
+| --- | --- |
+| Kernel | Modular application lifecycle, dependency ordering, service registry, scoped ownership, main-thread dispatch |
+| Game architecture | Flows, shared models, a lightweight entity world, typed events, timers, tweens, runtime diagnostics |
+| Unity runtime | Bootstrap, scenes, UI composition, input, audio, pooling, assets, saves, settings, localization, tables |
+| Content pipeline | Resources, Addressables, AssetBundles, generated content manifests, transactional remote updates |
+| Networking | TCP sessions, reconnects, request/response routing, protocol compatibility handshakes, generated messages |
+| Editor tooling | UI view generation, table and message generation, table compilation, content builds |
+
+## Contents
+
+- [Install and start](#installation)
+- [Kernel foundation](#kernel-foundation)
+- [Architecture and lifecycle](#module-context-and-capabilities)
+- [Game systems](#model-and-state-quick-start)
+- [Unity integrations](#ui-quick-start)
+- [Assets and content delivery](#asset-quick-start)
+- [Tables and networking](#configuration-table-quick-start)
+- [Continuous integration](#continuous-integration)
+- [Package guides](#package-documentation)
+
+The sections below include focused, copyable examples for each system. For the complete UI and table authoring walkthroughs, see the linked package guides.
 
 ## Installation
 
 Add `https://github.com/TristinOrg/Tritone.git` through Unity Package Manager's **Add package from git URL** command. Once a release tag is published, append that tag for reproducible production projects; use the untagged URL only when intentionally tracking `main`.
 
+For reproducible production projects, pin the current release tag:
+
+```text
+https://github.com/TristinOrg/Tritone.git#v0.2.0
+```
+
 ## Continuous integration
 
 The `Unity Package` GitHub workflow validates package metadata and GUID integrity, then runs EditMode and PlayMode tests with Unity 2022.3. Configure the repository secrets `UNITY_LICENSE`, `UNITY_EMAIL`, and `UNITY_PASSWORD` to enable Unity test jobs; without them, package validation still runs and Unity jobs report an explicit skip warning.
 
-## Current milestone: Kernel
 
-The first milestone provides:
+## Kernel foundation
+
+The kernel provides:
 
 - A pure C# application lifecycle with no Unity dependency.
 - Explicit module dependencies with topological startup order.
@@ -24,6 +75,7 @@ The first milestone provides:
 - Allocation-free PreUpdate, Update, LateUpdate, and FixedUpdate dispatch.
 - A Unity bootstrap component.
 - A filtered, multi-sink diagnostic logging service.
+
 
 ## Unity quick start
 
@@ -73,6 +125,7 @@ public sealed class GameBootstrap : TritoneBootstrap
 
 Attach `GameBootstrap` to one GameObject in the startup scene and enter Play Mode.
 
+
 ## Module context and capabilities
 
 Each module receives an independent `ModuleContext`. The context composes
@@ -102,6 +155,7 @@ Context.Events.Bind(player.Events.HealthChanged, OnHealthChanged);
 
 Unused capabilities are created lazily and allocate no domain-specific scope.
 
+
 ## Main-thread dispatch
 
 Configure one bounded dispatcher before modules that consume asynchronous services:
@@ -125,6 +179,7 @@ private void ApplyDownloadedContent()
 ```
 
 `Context.MainThread.Post(callback)` returns a readonly `DispatchHandle` for explicit cancellation or pending-state queries. Producers enqueue a compact struct through a thread-safe queue; callbacks execute in deterministic FIFO order during `PreUpdate`. The per-frame limit prevents an unbounded worker backlog from monopolizing one frame, and one callback failure does not stop later work.
+
 
 ## Model and state quick start
 
@@ -178,6 +233,7 @@ instances, so stopping one module cannot invalidate state still used elsewhere.
 Initialization failures dispose the incomplete instance and leave registration
 available for a later retry.
 
+
 ## Game flow quick start
 
 Register application flows explicitly:
@@ -225,6 +281,7 @@ exits before the target enters, but is retained until entry succeeds. Failed or
 cancelled entry disposes the incomplete target and re-enters the previous flow.
 The active flow updates before normal module updates and exits automatically
 when the application stops.
+
 
 ## Entity world quick start
 
@@ -283,6 +340,7 @@ configures and release all systems, entities, and components after that module
 stops. Entity systems initialize in stable order, update before normal modules,
 and shut down in reverse order.
 
+
 ## Tween and sequence quick start
 
 Enable the shared tween scheduler once:
@@ -329,6 +387,7 @@ same-frame execution. Setter and completion failures are isolated to their own
 tween. Every active tween is automatically cancelled when its owning module or
 scene module stops.
 
+
 ## Runtime diagnostics quick start
 
 Configure sampled runtime state and a fixed recent-log buffer. Additional sinks
@@ -362,6 +421,7 @@ runtime IMGUI panel. Press F3 by default to toggle it. The panel is deliberately
 separate from the diagnostic service: projects can replace it with their own UI
 without changing logging or sampling infrastructure.
 
+
 ## Timer quick start
 
 Register the shared timer scheduler once:
@@ -394,6 +454,7 @@ private void OnRefresh()
 Each module can own multiple keyed timers. Setting the same key replaces its previous timer, and stopping the module automatically cancels every timer it owns and clears its key cache.
 
 Use cached method-group delegates on frequently scheduled paths. Capturing lambdas can allocate even though the timer scheduler itself reuses preallocated storage.
+
 
 ## Event quick start
 
@@ -535,6 +596,7 @@ public sealed class ShopModule : ModuleBase
 
 Module windows are available while at least one active module owns the matching definition. Repeated registrations must use the same path, layer, and lifetime. Releasing the final owner closes the window, destroys its cached instance, releases its prefab, and removes the definition so a later hot-update module can register a new path. Application windows remain available until the application stops.
 
+
 ## Scene module switching
 
 Persistent infrastructure modules start with the application. Scene modules are registered as factories and created only when entered:
@@ -559,6 +621,7 @@ The target scene loads additively before the previous module stops. Tritone then
 
 `TritoneBootstrap` automatically survives scene unloading. Scene module timers, event bindings, windows, pools, assets, and tables are released when that module stops. Data that must survive transitions should live in a persistent model module. Use `SwitchModule<TModule>()` only when changing logical modules without loading a Unity scene.
 
+
 ## Pool quick start
 
 Enable shared lazy pools once without registering object types or prefabs:
@@ -582,6 +645,7 @@ Despawn(ref effect);
 ```
 
 The `ref` overload clears the caller's reference after a successful return. The first request creates the matching type or prefab pool. Objects left active are automatically returned when their owning module or `TritoneComponent` is released. `UIElement` also returns everything spawned during its current enabled lifetime when it closes, so temporary UI children do not require manual despawn calls. Implement `IPoolable` only when an object needs spawn and despawn reset callbacks.
+
 
 ## Basic experience services
 
@@ -639,6 +703,7 @@ Each localization file uses the same table JSON shape:
 }
 ```
 
+
 ## Asset quick start
 
 Enable asset management with the built-in Unity Resources provider:
@@ -674,6 +739,7 @@ await downloads.ClearCacheAsync("startup", cancellationToken);
 ```
 
 Preloads skip cached content, report byte progress with a readonly struct, and release every Addressables operation handle.
+
 
 ## Configuration table quick start
 
@@ -777,6 +843,7 @@ The first load deserializes and indexes the rows once. Repeated loads share the 
 
 Manual release is optional. `ReleaseTable(ref roles)` releases one owned reference and clears the caller. Any remaining tables and their underlying `TextAsset` references are released automatically when the owning module stops. Pass a custom `ITableDeserializer` to `UseTables(deserializer)` when switching from readable JSON to a generated binary format; gameplay loading and lookup code stays unchanged.
 
+
 ## Network message generation
 
 Create `Assets/Tritone/Network.json` and run
@@ -866,6 +933,7 @@ field types are validated before output. Supported network field types are
 Run `Tritone/Generate/All` when both schemas are present to update tables and
 network messages with a single Unity asset refresh.
 
+
 ## Local AssetBundle provider
 
 Compose bundle and asset registrations before building the application:
@@ -890,6 +958,7 @@ var prefab = await LoadAssetAsync<GameObject>("UI/LoginWindow");
 ```
 
 The registry validates missing dependencies and cycles once, then precomputes a unique dependency-first load order. Assets share loaded bundles and in-flight bundle requests. Releasing the final asset unloads its root bundle and dependencies in reverse order. The registry becomes immutable after provider construction; feature code may compose registrations before that point without editing a central ScriptableObject. `FileAssetBundleSource` is the local first-stage source. A later remote source can implement `IAssetBundleSource` without changing AssetModule or gameplay calls.
+
 
 ## Content update planning
 
@@ -928,6 +997,7 @@ var registry = remoteManifest.CreateAssetBundleRegistry();
 var provider = new AssetBundleAssetProvider(registry, source);
 builder.UseAssets(provider);
 ```
+
 
 ## Transactional content updates
 
@@ -981,6 +1051,7 @@ The transaction keeps backups and creation markers beneath `.tritone-update`. A 
 
 The installed manifest is loaded during application construction, so an existing verified version remains available when the remote check fails. Run content updates before loading content assets; changing files on disk cannot replace AssetBundles or prefab instances that are already in memory.
 
+
 ## Content builds
 
 Assign AssetBundle names through Unity's import settings, set `PlayerSettings.bundleVersion`, then run `Tritone > Build > Content for Active Platform`. Tritone writes bundles and a runtime-compatible `manifest.json` under `ContentBuilds/<platform>/<version>`. Bundle entries contain deterministic direct dependencies, file sizes, and lowercase SHA-256 hashes. By default each project-relative asset path is also its public address.
@@ -997,3 +1068,17 @@ var result = ContentBuildPipeline.Build(options);
 ```
 
 The build fails before publishing a manifest when a configured asset is not assigned to a built bundle, an output bundle is missing, or the generated runtime manifest is invalid. Upload the version directory as-is and point `ContentUpdateOptions` at its `manifest.json`.
+
+## Package documentation
+
+- [UI authoring and composition](Documentation~/ui-authoring.md)
+- [Configuration table authoring](Documentation~/table-authoring.md)
+- [Package overview](Documentation~/index.md)
+- [Changelog](CHANGELOG.md)
+- [Roadmap](ROADMAP.md)
+
+## Contributing and support
+
+Questions, bug reports, and feature proposals are welcome in [GitHub Issues](https://github.com/TristinOrg/Tritone/issues). Please include your Unity version and a minimal reproduction when reporting a problem.
+
+Tritone is maintained as a Unity Package Manager package. See [LICENSE](LICENSE) for license terms.

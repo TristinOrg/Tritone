@@ -4,12 +4,14 @@ All notable changes to Tritone are documented in this file. The format follows K
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-29
+
 ### Added
 
 - Generated strongly typed UI prefab views with deterministic sorting preprocessing.
 - Window-owned reusable items, single-instance panels, and nested composition lifetimes.
 - Extensible table compilation with inferred schemas, directory discovery, transactional output, and CI fixtures.
-- End-to-end package guides for UI composition and configuration-table authoring.
+- End-to-end package guides for generated UI composition and configuration-table authoring.
 
 ### Changed
 
@@ -33,5 +35,6 @@ All notable changes to Tritone are documented in this file. The format follows K
 - Table and network message code generation.
 - EditMode and PlayMode test suites plus Unity Package CI validation.
 
-[Unreleased]: https://github.com/TristinOrg/Tritone/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/TristinOrg/Tritone/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/TristinOrg/Tritone/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/TristinOrg/Tritone/releases/tag/v0.1.0
