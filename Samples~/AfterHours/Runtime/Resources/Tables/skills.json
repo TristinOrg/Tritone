@@ -1,0 +1,28 @@
+{
+  "Rows": [
+    {
+      "Id": "basic-strike",
+      "FocusCost": 0,
+      "Power": 4,
+      "StunTurns": 0
+    },
+    {
+      "Id": "counter-signal",
+      "FocusCost": 3,
+      "Power": 8,
+      "StunTurns": 0
+    },
+    {
+      "Id": "hold-the-line",
+      "FocusCost": 2,
+      "Power": 5,
+      "StunTurns": 1
+    },
+    {
+      "Id": "echo-strike",
+      "FocusCost": 0,
+      "Power": 5,
+      "StunTurns": 0
+    }
+  ]
+}

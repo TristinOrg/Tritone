@@ -21,7 +21,7 @@ jobs:
         run: ./.ci/Validate-Package.ps1
 
   tests:
-    name: ${{ matrix.testMode }} tests
+    name: ${{ matrix.name }} tests
     needs: package
     runs-on: ubuntu-latest
     env:
@@ -31,9 +31,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        testMode: [EditMode, PlayMode]
+        include:
+          - name: EditMode
+            testMode: EditMode
+          - name: PlayMode
+            testMode: PlayMode
+          - name: Sample
+            testMode: EditMode
+            customParameters: -testFilter AfterHours.Tests
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare UPM sample for EditMode tests
+        if: matrix.name == 'Sample' && env.UNITY_LICENSE != ''
+        run: cp -R Samples~/AfterHours .ci/TestProject/Assets/AfterHours
       - name: Run Unity tests
         if: env.UNITY_LICENSE != ''
         uses: game-ci/unity-test-runner@v4
@@ -41,15 +51,16 @@ jobs:
           projectPath: .ci/TestProject
           unityVersion: 2022.3.62f1
           testMode: ${{ matrix.testMode }}
-          artifactsPath: test-results/${{ matrix.testMode }}
+          customParameters: ${{ matrix.customParameters }}
+          artifactsPath: test-results/${{ matrix.name }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: ${{ matrix.testMode }} test results
+          checkName: ${{ matrix.name }} test results
       - name: Upload test results
         if: always() && env.UNITY_LICENSE != ''
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.testMode }}-test-results
-          path: test-results/${{ matrix.testMode }}
+          name: ${{ matrix.name }}-test-results
+          path: test-results/${{ matrix.name }}
           if-no-files-found: warn
       - name: Report missing Unity license
         if: env.UNITY_LICENSE == ''

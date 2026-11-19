@@ -1,0 +1,16 @@
+{
+  "name": "AfterHours.Sample.Runtime",
+  "rootNamespace": "AfterHours",
+  "references": [
+    "Tritone.Kernel",
+    "Tritone.Diagnostics",
+    "Tritone.Dispatching",
+    "Tritone.Timing",
+    "Tritone.Tweening",
+    "Tritone.Unity",
+    "Tritone.Content",
+    "Unity.ugui"
+  ],
+  "autoReferenced": true,
+  "noEngineReferences": false
+}

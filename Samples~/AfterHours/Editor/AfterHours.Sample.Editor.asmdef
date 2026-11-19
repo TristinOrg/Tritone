@@ -1,0 +1,14 @@
+{
+  "name": "AfterHours.Sample.Editor",
+  "rootNamespace": "AfterHours.Editor",
+  "references": [
+    "AfterHours.Sample.Runtime",
+    "Tritone.Editor",
+    "Tritone.Content",
+    "Tritone.Unity",
+    "Unity.Addressables.Editor"
+  ],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true,
+  "noEngineReferences": false
+}

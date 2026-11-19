@@ -23,11 +23,20 @@ foreach ($requiredFile in $requiredFiles) {
 
 $changelog = Get-Content -LiteralPath (Join-Path $root 'CHANGELOG.md') -Raw
 $escapedVersion = [Regex]::Escape($manifest.version)
-if ($changelog -notmatch "(?m)^## \[$escapedVersion\] - \d{4}-\d{2}-\d{2}$") {
+if ($changelog -notmatch "(?m)^## \[$escapedVersion\] - \d{4}-\d{2}-\d{2}\r?$") {
     throw "CHANGELOG.md does not contain a dated entry for version '$($manifest.version)'."
 }
 
 $assetRoots = @('Runtime', 'Editor', 'Tests')
+if ($manifest.samples) {
+    foreach ($sample in $manifest.samples) {
+        $samplePath = Join-Path $root $sample.path
+        if (-not (Test-Path -LiteralPath $samplePath -PathType Container)) {
+            throw "Package sample path does not exist: $($sample.path)"
+        }
+        $assetRoots += $sample.path
+    }
+}
 $guids = @{}
 foreach ($assetRoot in $assetRoots) {
     $path = Join-Path $root $assetRoot

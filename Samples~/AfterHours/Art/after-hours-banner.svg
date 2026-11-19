@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">After Hours — The Last Stop</title>
+  <desc id="desc">A municipal case file over a restrained rain-district transit map. One cyan route leads to an unlisted station.</desc>
+  <rect width="1600" height="900" fill="#182126"/>
+  <rect x="34" y="34" width="1532" height="832" fill="none" stroke="#74817e" stroke-opacity=".35"/>
+  <path d="M72 82h1456" stroke="#74817e" stroke-opacity=".4"/>
+  <text x="78" y="67" fill="#8ca29f" font-family="Arial,sans-serif" font-size="14" letter-spacing="4">MUNICIPAL ANOMALY BUREAU  /  NIGHT WATCH 04</text>
+  <text x="1508" y="67" fill="#8ca29f" font-family="Arial,sans-serif" font-size="13" letter-spacing="2" text-anchor="end">DISTRICT 03     •     01:17</text>
+  <g fill="none" stroke="#dce2d9" stroke-opacity=".11" stroke-width="2">
+    <path d="M625 130 746 130 746 205 830 205 830 276 937 276 937 356 1045 356 1045 434 1186 434 1186 530 1368 530"/>
+    <path d="M590 188 700 188 700 265 790 265 790 341 905 341 905 408 1012 408 1012 503 1120 503 1120 606 1278 606"/>
+    <path d="M630 284 711 284 711 363 790 363 790 443 865 443 865 523 966 523 966 603 1087 603 1087 697 1248 697"/>
+    <path d="M684 365 754 365 754 453 824 453 824 535 901 535 901 616 986 616 986 712 1110 712 1110 784 1280 784"/>
+    <path d="M816 114v98m119-18v104m108 30v112m143 70v97m-287-70v99m-206-73v112m491-418v93m-580 87v115m258-526v58"/>
+  </g>
+  <g fill="#74817e" fill-opacity=".12">
+    <path d="M680 143h48v31h-48zm91 66h42v46h-42zm108 74h49v49h-49zm98 78h54v42h-54zm120 78h63v53h-63zm-285 29h39v52h-39zm-95 82h56v47h-56zm-142-184h45v42h-45zm334 237h50v45h-50zm137 63h62v44h-62zm-230-407h43v37h-43z"/>
+  </g>
+  <g fill="none" stroke="#74d4d0" stroke-width="5">
+    <path d="M650 648 782 568 878 601 982 493 1092 444 1201 348 1332 297 1432 209"/>
+  </g>
+  <g fill="#182126" stroke="#74d4d0" stroke-width="4">
+    <circle cx="782" cy="568" r="8"/><circle cx="982" cy="493" r="8"/><circle cx="1201" cy="348" r="8"/>
+  </g>
+  <circle cx="1432" cy="209" r="13" fill="#de7059"/>
+  <circle cx="1432" cy="209" r="28" fill="none" stroke="#de7059" stroke-opacity=".55"/>
+  <path d="M1428 155v-30m0 0-7 10m7-10 7 10" stroke="#de7059" stroke-width="2"/>
+  <g font-family="Arial,sans-serif" font-size="12" letter-spacing="2" fill="#9ba8a3">
+    <text x="662" y="681">NIGHT OFFICE</text><text x="945" y="469">TICKET WINDOW</text><text x="1158" y="326">OLD TRAM</text>
+  </g>
+  <text x="1464" y="202" fill="#de7059" font-family="Arial,sans-serif" font-size="12" letter-spacing="2">PLATFORM 0</text>
+  <text x="78" y="260" fill="#74d4d0" font-family="Arial,sans-serif" font-size="15" letter-spacing="5">CASE FILE     /     01</text>
+  <text x="75" y="376" fill="#e9e4d9" font-family="Georgia,serif" font-size="82" letter-spacing="-2">AFTER</text>
+  <text x="75" y="464" fill="#e9e4d9" font-family="Georgia,serif" font-size="82" letter-spacing="-2">HOURS</text>
+  <path d="M80 494h68" stroke="#de7059" stroke-width="4"/>
+  <text x="78" y="548" fill="#bdc4bb" font-family="Arial,sans-serif" font-size="17" letter-spacing="2">THE LAST STOP</text>
+  <text x="78" y="602" fill="#9ba8a3" font-family="Arial,sans-serif" font-size="15">A quiet city. One impossible case.</text>
+  <text x="78" y="628" fill="#9ba8a3" font-family="Arial,sans-serif" font-size="15">A team that answers after hours.</text>
+  <g transform="translate(78 740)">
+    <rect width="232" height="64" fill="#26343a" stroke="#72807d" stroke-opacity=".5"/>
+    <text x="18" y="25" fill="#74d4d0" font-family="Arial,sans-serif" font-size="11" letter-spacing="2">LAST SERVICE</text>
+    <text x="18" y="48" fill="#e9e4d9" font-family="Arial,sans-serif" font-size="18" letter-spacing="2">01:17  /  NORTHBOUND</text>
+  </g>
+  <g transform="translate(1300 716)">
+    <rect width="210" height="92" fill="#e9e4d9"/>
+    <text x="16" y="25" fill="#47615f" font-family="Arial,sans-serif" font-size="10" letter-spacing="2">ROUTE STATUS</text>
+    <text x="16" y="51" fill="#182126" font-family="Arial,sans-serif" font-size="17" letter-spacing="1">NOT ON FILE</text>
+    <path d="M16 68h178" stroke="#de7059" stroke-width="2"/>
+    <text x="16" y="84" fill="#47615f" font-family="Arial,sans-serif" font-size="9" letter-spacing="1">DO NOT RETURN THE TOKEN TO THE TRACK</text>
+  </g>
+  <text x="78" y="838" fill="#6d7b78" font-family="Arial,sans-serif" font-size="11" letter-spacing="2">AN OFFLINE RPG SAMPLE BUILT WITH TRITONE FRAMEWORK</text>
+  <text x="1510" y="838" fill="#6d7b78" font-family="Arial,sans-serif" font-size="11" letter-spacing="2" text-anchor="end">EN  /  简中  /  日本語</text>
+</svg>

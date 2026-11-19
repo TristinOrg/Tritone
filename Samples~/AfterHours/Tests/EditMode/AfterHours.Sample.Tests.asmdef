@@ -1,0 +1,14 @@
+{
+  "name": "AfterHours.Sample.Tests",
+  "rootNamespace": "AfterHours.Tests",
+  "references": [
+    "AfterHours.Sample.Runtime",
+    "AfterHours.Sample.Editor",
+    "Tritone.Kernel",
+    "Tritone.Unity"
+  ],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false,
+  "noEngineReferences": false
+}

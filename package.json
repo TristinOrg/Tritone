@@ -13,6 +13,13 @@
     "addressables",
     "assetbundle"
   ],
+  "samples": [
+    {
+      "displayName": "Tritone Feature Playground",
+      "description": "Small, independent demonstrations of Tritone framework features.",
+      "path": "Samples~/AfterHours"
+    }
+  ],
   "dependencies": {
     "com.unity.addressables": "1.21.21",
     "com.unity.modules.assetbundle": "1.0.0",

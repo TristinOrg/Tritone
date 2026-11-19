@@ -1,0 +1,35 @@
+{
+  "ProtocolId": "after-hours-night-office",
+  "MajorVersion": 1,
+  "MinorVersion": 0,
+  "MinimumMinorVersion": 0,
+  "Namespace": "AfterHours.Generated.Network",
+  "OutputPath": "Assets/AfterHours/Runtime/Generated/Network",
+  "Messages": [
+    {
+      "Id": 200,
+      "Name": "CaseStatus",
+      "Kind": "Message",
+      "Fields": [
+        { "Name": "CaseId", "Type": "string" },
+        { "Name": "State", "Type": "string" }
+      ]
+    },
+    {
+      "Id": 201,
+      "Name": "NightPing",
+      "Kind": "Message",
+      "Fields": [
+        { "Name": "Nonce", "Type": "int" }
+      ]
+    },
+    {
+      "Id": 202,
+      "Name": "NightPong",
+      "Kind": "Message",
+      "Fields": [
+        { "Name": "Nonce", "Type": "int" }
+      ]
+    }
+  ]
+}

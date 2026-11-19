@@ -1,0 +1,19 @@
+{
+  "Namespace": "AfterHours.Generated.Tables",
+  "OutputPath": "Assets/AfterHours/Runtime/Generated/Tables",
+  "DataOutputPath": "Assets/AfterHours/Runtime/Resources/Tables",
+  "Tables": [
+    {
+      "Name": "Clue",
+      "Path": "Tables/clues",
+      "Source": "Assets/AfterHours/Data/clues.csv",
+      "DataFile": "clues.json"
+    },
+    {
+      "Name": "Skill",
+      "Path": "Tables/skills",
+      "Source": "Assets/AfterHours/Data/skills.csv",
+      "DataFile": "skills.json"
+    }
+  ]
+}
