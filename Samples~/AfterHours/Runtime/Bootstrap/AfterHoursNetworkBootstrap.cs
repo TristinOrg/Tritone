@@ -27,7 +27,12 @@ namespace AfterHours.Bootstrap
             else
             {
                 mMessages = mNetwork.CreateScope();
-                mMessages.Bind<CaseStatus>(message => SetResult($"Received {message.State} for case {message.CaseId}."));
+                mMessages.Bind<CaseStatus>(message =>
+                {
+                    SetVisualStage(1);
+                    SetVisualValue(message.State);
+                    SetResult($"Received {message.State} for case {message.CaseId}.");
+                });
             }
         }
 
@@ -56,6 +61,8 @@ namespace AfterHours.Bootstrap
                     return;
                 }
                 SetResult("Sent a generated CaseStatus message. Waiting for the relay acknowledgement.");
+                SetVisualStage(0);
+                SetVisualValue("CaseStatus");
                 await mNetwork.SendAsync(new CaseStatus { CaseId = "last-stop", State = "SAMPLE_REQUEST" });
             }
             catch (System.Exception exception)
@@ -69,6 +76,7 @@ namespace AfterHours.Bootstrap
             try
             {
                 await mNetwork.DisconnectAsync();
+                ResetVisual();
                 SetResult("Disconnected. Start the local relay before retrying.");
             }
             catch (System.Exception exception)
@@ -77,8 +85,17 @@ namespace AfterHours.Bootstrap
             }
         }
 
-        private void ShowConnectionState(ENetworkState state) =>
+        private void ShowConnectionState(ENetworkState state)
+        {
+            SetVisualStage(state switch
+            {
+                ENetworkState.Connected => 2,
+                ENetworkState.Connecting or ENetworkState.Handshaking or ENetworkState.Reconnecting => 1,
+                _ => 0
+            });
+            SetVisualValue(state.ToString());
             SetResult(state == ENetworkState.Connected ? "Connected. Generated protocol accepted." : $"Connection state: {state}");
+        }
 
         protected override void OnDestroy()
         {

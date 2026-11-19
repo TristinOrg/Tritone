@@ -32,6 +32,7 @@ namespace AfterHours.Bootstrap
         private AfterHoursFeatureLabController mController;
         private FocusedLabModule mDemo;
         private bool mBusy;
+        private float[] mAudioSamples;
 
         public string FeatureId => mFeatureId;
 
@@ -83,7 +84,7 @@ namespace AfterHours.Bootstrap
                     break;
             }
 
-            mDemo = new FocusedLabModule(mFeatureId, ShowResult, ShowProgress, ShowStage, input);
+            mDemo = new FocusedLabModule(mFeatureId, ShowResult, ShowProgress, ShowStage, ShowCount, ShowValue, input);
             builder.AddModule(mDemo);
         }
 
@@ -95,6 +96,21 @@ namespace AfterHours.Bootstrap
             base.Awake();
             mController = new AfterHoursFeatureLabController(mFeatureId, RunDemo, ResetDemo);
             mController.Show();
+            if (mFeatureId == "audio")
+                mAudioSamples = new float[256];
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            if (mAudioSamples == null)
+                return;
+
+            AudioListener.GetOutputData(mAudioSamples, 0);
+            float peak = 0f;
+            foreach (float sample in mAudioSamples)
+                peak = Mathf.Max(peak, Mathf.Abs(sample));
+            mController?.SetProgress(peak);
         }
 
         private async void RunDemo()
@@ -139,6 +155,8 @@ namespace AfterHours.Bootstrap
         private void ShowResult(string result) => mController?.SetResult(result);
         private void ShowProgress(float progress) => mController?.SetProgress(progress);
         private void ShowStage(int stage) => mController?.SetStage(stage);
+        private void ShowCount(int count) => mController?.SetVisualCount(count);
+        private void ShowValue(string value) => mController?.SetVisualValue(value);
 
         protected override void OnDestroy()
         {
@@ -157,6 +175,8 @@ namespace AfterHours.Bootstrap
             private readonly Action<string> mReport;
             private readonly Action<float> mProgress;
             private readonly Action<int> mStage;
+            private readonly Action<int> mVisualCount;
+            private readonly Action<string> mVisualValue;
             private readonly SampleInputSource mInput;
             private readonly Event<int> mSignal = new();
             private ModuleScope mListenerScope;
@@ -169,13 +189,16 @@ namespace AfterHours.Bootstrap
             private PooledMarker mReturned;
 
             internal FocusedLabModule(string feature, Action<string> report, Action<float> progress,
-                                      Action<int> stage, SampleInputSource input)
+                                      Action<int> stage, Action<int> visualCount, Action<string> visualValue,
+                                      SampleInputSource input)
             {
-                mFeature  = feature;
-                mReport   = report;
-                mProgress = progress;
-                mStage    = stage;
-                mInput    = input;
+                mFeature     = feature;
+                mReport      = report;
+                mProgress    = progress;
+                mStage       = stage;
+                mVisualCount = visualCount;
+                mVisualValue = visualValue;
+                mInput       = input;
             }
 
             protected override void OnStart()
@@ -191,6 +214,7 @@ namespace AfterHours.Bootstrap
             private void ReportArrival(string result)
             {
                 mStage(2);
+                mVisualValue($"#{mCount}");
                 mReport(result);
             }
 
@@ -207,6 +231,8 @@ namespace AfterHours.Bootstrap
                 {
                     case "application-composition":
                         var application = Context.Services.GetRequired<GameApplication>();
+                        mStage(2);
+                        mVisualValue(application.State.ToString());
                         mReport($"Unity bootstrap → GameApplication → {GetType().Name}\nApplication state: {application.State} · Module action #{++mCount}");
                         break;
                     case "module-contexts-scopes":
@@ -214,7 +240,11 @@ namespace AfterHours.Bootstrap
                         {
                             mListenerScope.Dispose();
                             mListenerScope = null;
+                            mStage(1);
+                            mVisualValue("0 listeners");
                             mSignal.Publish(++mCount);
+                            if (mListenerScope != null)
+                                mVisualValue($"Signal #{mCount}");
                             mReport($"Published signal #{mCount} after disposing the binding. No listener received it.");
                         }
                         else
@@ -231,22 +261,31 @@ namespace AfterHours.Bootstrap
                         else
                             await SwitchFlowAsync<ReadyFlow>();
                         mStage(mAlternate ? 1 : 0);
+                        mVisualValue(mAlternate ? "Running" : "Ready");
                         mReport(mAlternate ? "Active flow: Running. Click again to enter Ready." : "Active flow: Ready. Running has exited.");
                         break;
                     case "models-state":
                         var model = GetModel<CounterModel>();
-                        mReport($"Shared model count: {++model.Count}. The module reads and updates the same application-owned instance.");
+                        mVisualCount(++model.Count);
+                        mReport($"Shared model count: {model.Count}. The module reads and updates the same application-owned instance.");
                         break;
                     case "diagnostics-logging":
                         var diagnostics = Context.Services.GetRequired<IRuntimeDiagnosticsService>();
                         Logger.Info($"Sample diagnostic event #{++mCount}");
+                        mVisualCount(diagnostics.Logs.Count);
                         mReport($"Recorded event #{mCount} · Buffered logs: {diagnostics.Logs.Count}\nSampled frame: {diagnostics.Snapshot.FrameIndex}");
                         break;
                     case "main-thread-dispatch":
                         if (IsMainThreadDispatchPending(mDispatch))
                             break;
                         mReport("Callback queued. Waiting for Tritone's next update.");
-                        mDispatch = PostToMainThread(() => mReport($"Callback #{++mCount} ran on Unity thread {Environment.CurrentManagedThreadId}."));
+                        mStage(0);
+                        mDispatch = PostToMainThread(() =>
+                        {
+                            mStage(1);
+                            mVisualValue($"Thread {Environment.CurrentManagedThreadId}");
+                            mReport($"Callback #{++mCount} ran on Unity thread {Environment.CurrentManagedThreadId}.");
+                        });
                         break;
                     case "events":
                         mSignal.Publish(++mCount);
@@ -266,6 +305,7 @@ namespace AfterHours.Bootstrap
                         else
                             SwitchModule<LobbyModule>();
                         mStage(mAlternate ? 1 : 0);
+                        mVisualValue(mAlternate ? "Round" : "Lobby");
                         mReport(mAlternate ? "Lobby stopped → Round started." : "Round stopped → Lobby started.");
                         break;
                     case "input":
@@ -275,6 +315,7 @@ namespace AfterHours.Bootstrap
                         if (mCount > 0)
                             StopSound(mSound);
                         mSound = PlaySound("Audio/TritoneSampleChime");
+                        mVisualValue("♪  CHIME");
                         mReport($"Playing chime #{++mCount} through Tritone's sound channel.");
                         break;
                     case "saves":
@@ -282,17 +323,24 @@ namespace AfterHours.Bootstrap
                         save ??= new CounterSave();
                         save.Count++;
                         Save(SaveSlot, save);
-                        mReport($"Saved and reloaded counter: {LoadSave<CounterSave>(SaveSlot).Count}. Re-enter this scene to continue counting.");
+                        int savedCount = LoadSave<CounterSave>(SaveSlot).Count;
+                        mVisualCount(savedCount);
+                        mReport($"Saved and reloaded counter: {savedCount}. Re-enter this scene to continue counting.");
                         break;
                     case "settings":
                         int level = Settings.GetInt(SettingKey);
                         Settings.SetInt(SettingKey, (level + 1) % 4);
-                        mReport($"Stored sample setting: {level} → {Settings.GetInt(SettingKey)}. Values cycle from 0 to 3.");
+                        int current = Settings.GetInt(SettingKey);
+                        mStage(current);
+                        mVisualValue($"Level {current}");
+                        mReport($"Stored sample setting: {level} → {current}. Values cycle from 0 to 3.");
                         break;
                     case "localization":
                         mAlternate = !mAlternate;
                         await SetLanguageAsync(mAlternate ? "ja-JP" : "en-US");
-                        mReport($"office.open  ·  {(mAlternate ? "ja-JP" : "en-US")}\n{Localize("office.open")}");
+                        string localized = Localize("office.open");
+                        mVisualValue(localized);
+                        mReport($"office.open  ·  {(mAlternate ? "ja-JP" : "en-US")}\n{localized}");
                         break;
                     case "pooling-ownership":
                         AdvancePoolDemo();
@@ -302,6 +350,7 @@ namespace AfterHours.Bootstrap
                         if (asset == null)
                             throw new InvalidOperationException("The clue text asset could not be loaded.");
                         var size = asset.text.Length;
+                        mVisualValue($"{asset.name}\n{size} characters");
                         ReleaseAsset(asset);
                         mReport($"Resources loaded {size} characters from Tables/clues. The scope released its reference.");
                         break;
@@ -317,6 +366,7 @@ namespace AfterHours.Bootstrap
                     mReturned = mRented;
                     Return(ref mRented);
                     mStage(1);
+                    mVisualValue("IN POOL");
                     mReport("Returned to the pool. Click again to rent and compare the instance.");
                     return;
                 }
@@ -325,12 +375,15 @@ namespace AfterHours.Bootstrap
                 if (mReturned == null)
                 {
                     mStage(0);
+                    mVisualValue("RENTED");
                     mReport("Object rented. Click again to return it.");
                     return;
                 }
 
                 mStage(2);
-                mReport($"Rented again. Same object instance: {ReferenceEquals(mReturned, mRented)}.");
+                bool reused = ReferenceEquals(mReturned, mRented);
+                mVisualValue(reused ? "REUSED" : "NEW INSTANCE");
+                mReport($"Rented again. Same object instance: {reused}.");
             }
 
             internal async Task ResetAsync()

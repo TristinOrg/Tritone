@@ -31,6 +31,7 @@ namespace AfterHours.Bootstrap
             {
                 var clues = tables.Load<string, ClueRow>(ClueTable.Path);
                 var first = clues.Count > 0 ? clues.GetAt(0) : null;
+                mController.SetVisualCount(clues.Count);
                 string value = first == null
                     ? $"TABLE LOADED / {clues.Count} rows / no sample row found."
                     : $"TABLE LOADED / {clues.Count} rows\nFIRST ROW / {first.Id} — {first.Title}";
@@ -38,7 +39,7 @@ namespace AfterHours.Bootstrap
             }
         }
 
-        private void ResetResult() => mController?.SetResult("READY / Click Load Table to read the generated ClueRow data.");
+        private void ResetResult() => mController?.ResetResult();
 
         protected override void OnDestroy()
         {

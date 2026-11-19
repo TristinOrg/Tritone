@@ -24,6 +24,8 @@ namespace AfterHours.UI
         private Text mResult;
         private RectTransform mProgress;
         private Image[] mStages;
+        private Image[] mTiles;
+        private Text mVisualValue;
         private AfterHoursFeatureCatalog.Feature mFeature;
         private readonly Action mRunDemo;
         private readonly Action mResetDemo;
@@ -37,7 +39,7 @@ namespace AfterHours.UI
 
         public void Show(int sortingOrder = 0)
         {
-            mLocale = AfterHoursFeatureCatalog.CurrentLocale();
+            mLocale = AfterHoursFeatureCatalog.CurrentLocale;
             mFeature = AfterHoursFeatureCatalog.Load().Find(mLabId);
             var canvas = new GameObject("After Hours Feature Lab", typeof(RectTransform), typeof(Canvas),
                                         typeof(CanvasScaler), typeof(GraphicRaycaster));
@@ -61,9 +63,11 @@ namespace AfterHours.UI
 
             var body = Rect("Guide", background, new Vector2(0.055f, 0.2f), new Vector2(0.945f, 0.75f), Vector2.zero, Vector2.zero);
             body.gameObject.AddComponent<Image>().color = Card;
-            Text(Rect("Purpose", body, new Vector2(0.035f, 0.69f), new Vector2(0.96f, 0.96f), Vector2.zero, Vector2.zero),
+            var visual = CreateVisual(body);
+            float guideEdge = visual ? 0.51f : 0.96f;
+            Text(Rect("Purpose", body, new Vector2(0.035f, 0.65f), new Vector2(guideEdge, 0.96f), Vector2.zero, Vector2.zero),
                  mFeature?.Summary(mLocale) ?? Purpose(), 18, Paper, TextAnchor.MiddleLeft, true);
-            var directions = Text(Rect("Try", body, new Vector2(0.035f, 0.39f), new Vector2(0.96f, 0.68f), Vector2.zero, Vector2.zero),
+            var directions = Text(Rect("Try", body, new Vector2(0.035f, 0.39f), new Vector2(guideEdge, 0.64f), Vector2.zero, Vector2.zero),
                                   mFeature?.Prerequisite(mLocale) ?? Directions(), 16, Muted, TextAnchor.UpperLeft);
             directions.resizeTextForBestFit = true;
             directions.resizeTextMinSize = 12;
@@ -72,26 +76,6 @@ namespace AfterHours.UI
                  Localized("RESULT", "运行结果", "実行結果"), 13, Signal, TextAnchor.MiddleLeft);
             mResult = Text(Rect("Result", body, new Vector2(0.035f, 0.15f), new Vector2(0.96f, 0.30f), Vector2.zero, Vector2.zero),
                            ReadyText(), 15, Paper, TextAnchor.MiddleLeft, true);
-            if (mLabId is "tweens" or "TimerLab")
-            {
-                var track = Rect("Tween Track", body, new Vector2(0.05f, 0.43f), new Vector2(0.94f, 0.48f), Vector2.zero, Vector2.zero);
-                track.gameObject.AddComponent<Image>().color = Panel;
-                mProgress = Rect("Tween Fill", track, Vector2.zero, Vector2.up, Vector2.zero, Vector2.zero);
-                mProgress.gameObject.AddComponent<Image>().color = Signal;
-            }
-            if (mLabId == "pooling-ownership")
-                AddStages(body, "RENT", "RETURN", "REUSE");
-            else if (mLabId == "events")
-                AddStages(body, "PUBLISHER", "TYPED EVENT", "LISTENER");
-            else if (mLabId == "input")
-                AddStages(body, "BUTTON / KEY", "INTERACT", "SUBSCRIBER");
-            else if (mLabId == "flows-transitions")
-                AddStages(body, "READY", "RUNNING");
-            else if (mLabId == "scene-modules-switching")
-            {
-                AddStages(body, "LOBBY", "ROUND");
-                SetStage(0);
-            }
             if (mLabId == "EcsLab")
             {
                 mResult.gameObject.SetActive(false);
@@ -118,6 +102,8 @@ namespace AfterHours.UI
         public void Tick()
         {
             if (mEcsReadout == null) return;
+            int count = AfterHours.Modules.AfterHoursEcsLabWorld.Count;
+            SetVisualCount(count);
             mEcsReadout.text = Localized(
                 $"SCENE WORLD / {AfterHours.Modules.AfterHoursEcsLabWorld.Count:00} ENTITIES / SYSTEM PULSE {AfterHours.Modules.AfterHoursEcsLabWorld.FirstPulse:0.00}",
                 $"场景 World / {AfterHours.Modules.AfterHoursEcsLabWorld.Count:00} 个实体 / 系统脉冲 {AfterHours.Modules.AfterHoursEcsLabWorld.FirstPulse:0.00}",
@@ -133,26 +119,119 @@ namespace AfterHours.UI
         public void SetProgress(float progress)
         {
             if (mProgress != null)
+            {
                 mProgress.anchorMax = new Vector2(Mathf.Clamp01(progress), 1f);
+                int percent = Mathf.RoundToInt(Mathf.Clamp01(progress) * 100f);
+                if (mLabId != "audio")
+                    SetVisualValue($"{percent}%");
+            }
+        }
+
+        public void SetVisualCount(int count)
+        {
+            if (mTiles == null)
+                return;
+            for (int i = 0; i < mTiles.Length; i++)
+                mTiles[i].color = i < count ? Signal : Card;
+            SetVisualValue(count.ToString());
+        }
+
+        public void SetVisualValue(string value)
+        {
+            if (mVisualValue != null && mVisualValue.text != value)
+                mVisualValue.text = value;
         }
 
         public void ResetResult()
         {
             SetResult(ReadyText());
             SetProgress(0f);
-            SetStage(mLabId == "scene-modules-switching" ? 0 : -1);
+            SetStage(mLabId is "scene-modules-switching" or "module-contexts-scopes" or "settings" ? 0 : -1);
+            if (mTiles != null)
+                SetVisualCount(0);
+            else if (mProgress == null)
+                SetVisualValue("—");
         }
 
-        private void AddStages(RectTransform body, params string[] labels)
+        private bool CreateVisual(RectTransform body)
+        {
+            string[] stages = mLabId switch
+            {
+                "pooling-ownership" => new[] { "RENT", "RETURN", "REUSE" },
+                "events" => new[] { "PUBLISH", "EVENT", "RECEIVE" },
+                "input" => new[] { "INPUT", "INTERACT", "SUBSCRIBER" },
+                "flows-transitions" => new[] { "READY", "RUNNING" },
+                "scene-modules-switching" => new[] { "LOBBY", "ROUND" },
+                "module-contexts-scopes" => new[] { "LISTENING", "DISPOSED" },
+                "main-thread-dispatch" => new[] { "QUEUED", "EXECUTED" },
+                "settings" => new[] { "0", "1", "2", "3" },
+                "application-composition" => new[] { "UNITY", "TRITONE", "MODULE" },
+                "NetworkDesk" => new[] { "SEND", "ACK" },
+                "protocol-handshake-reconnect" => new[] { "OFFLINE", "CONNECTING", "ONLINE" },
+                _ => null
+            };
+            bool tiles = mLabId is "EcsLab" or "models-state" or "saves" or "diagnostics-logging" or "DataWorkshop";
+            bool progress = mLabId is "TimerLab" or "tweens" or "ContentWorkshop" or "audio";
+            bool preview = mLabId is "localization" or "resources-provider" or "AddressablesDesk" or "BundleDesk";
+            if (stages == null && !tiles && !progress && !preview)
+                return false;
+
+            var visual = Rect("Live Visual", body, new Vector2(0.53f, 0.39f), new Vector2(0.96f, 0.95f), Vector2.zero, Vector2.zero);
+            visual.gameObject.AddComponent<Image>().color = Ink;
+            bool hasGraphic = tiles || progress || stages != null;
+            var value = Rect("Visual Value", visual, new Vector2(0.04f, hasGraphic ? 0.38f : 0.08f),
+                             new Vector2(0.96f, 0.95f), Vector2.zero, Vector2.zero);
+            mVisualValue = Text(value, hasGraphic ? string.Empty : "—", 26, Signal, TextAnchor.MiddleCenter, true);
+            mVisualValue.resizeTextForBestFit = true;
+            mVisualValue.resizeTextMinSize = 12;
+            mVisualValue.resizeTextMaxSize = 26;
+
+            if (stages != null)
+            {
+                AddStages(visual, stages);
+                if (mLabId is "scene-modules-switching" or "module-contexts-scopes")
+                    SetStage(0);
+            }
+            if (tiles)
+                AddTiles(visual);
+            if (progress)
+            {
+                var track = Rect("Progress Track", visual, new Vector2(0.08f, 0.14f), new Vector2(0.92f, 0.33f), Vector2.zero, Vector2.zero);
+                track.gameObject.AddComponent<Image>().color = Card;
+                mProgress = Rect("Progress Fill", track, Vector2.zero, Vector2.up, Vector2.zero, Vector2.zero);
+                mProgress.gameObject.AddComponent<Image>().color = Signal;
+                SetProgress(0f);
+            }
+            return true;
+        }
+
+        private void AddTiles(RectTransform visual)
+        {
+            mTiles = new Image[10];
+            for (int i = 0; i < mTiles.Length; i++)
+            {
+                float left = 0.05f + i * 0.09f;
+                var tile = Rect($"Unit {i + 1}", visual, new Vector2(left, 0.14f),
+                                new Vector2(left + 0.074f, 0.38f), Vector2.zero, Vector2.zero);
+                mTiles[i] = tile.gameObject.AddComponent<Image>();
+            }
+            SetVisualCount(0);
+        }
+
+        private void AddStages(RectTransform visual, params string[] labels)
         {
             mStages = new Image[labels.Length];
             for (int i = 0; i < labels.Length; i++)
             {
-                float left = 0.05f + 0.30f * i;
-                var cell = Rect(labels[i], body, new Vector2(left, 0.41f),
-                                new Vector2(left + 0.28f, 0.53f), Vector2.zero, Vector2.zero);
+                float width = 0.92f / labels.Length;
+                float left = 0.04f + width * i;
+                var cell = Rect(labels[i], visual, new Vector2(left, 0.12f),
+                                new Vector2(left + width - 0.015f, 0.39f), Vector2.zero, Vector2.zero);
                 mStages[i] = cell.gameObject.AddComponent<Image>();
-                Text(cell, labels[i], 13, Paper, TextAnchor.MiddleCenter, true);
+                var caption = Text(cell, labels[i], 13, Paper, TextAnchor.MiddleCenter, true);
+                caption.resizeTextForBestFit = true;
+                caption.resizeTextMinSize = 9;
+                caption.resizeTextMaxSize = 13;
             }
             SetStage(-1);
         }
@@ -162,7 +241,7 @@ namespace AfterHours.UI
             if (mStages == null)
                 return;
             for (int i = 0; i < mStages.Length; i++)
-                mStages[i].color = i == index ? new Color(0.15f, 0.48f, 0.42f) : Panel;
+                mStages[i].color = i == index ? new Color(0.10f, 0.48f, 0.39f) : Panel;
         }
 
         private void AddDemoControls(RectTransform body)
@@ -330,7 +409,7 @@ namespace AfterHours.UI
 
         private static string Localized(string english, string chinese, string japanese)
         {
-            string locale = AfterHoursFeatureCatalog.CurrentLocale();
+            string locale = AfterHoursFeatureCatalog.CurrentLocale;
             return locale == "zh-CN" ? chinese : locale == "ja-JP" ? japanese : english;
         }
 

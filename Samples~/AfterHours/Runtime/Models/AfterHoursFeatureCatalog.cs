@@ -60,20 +60,12 @@ namespace AfterHours.Models
             return new AfterHoursFeatureCatalog(payload?.Features ?? Array.Empty<Feature>());
         }
 
-        public static string CurrentLocale()
-        {
-            switch (Application.systemLanguage)
-            {
-                case SystemLanguage.Chinese:
-                case SystemLanguage.ChineseSimplified:
-                case SystemLanguage.ChineseTraditional:
-                    return "zh-CN";
-                case SystemLanguage.Japanese:
-                    return "ja-JP";
-                default:
-                    return "en-US";
-            }
-        }
+        public static string CurrentLocale { get; private set; } = "en-US";
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetLocale() => CurrentLocale = "en-US";
+
+        public static void SetLocale(string locale) => CurrentLocale = locale;
 
         private static string Localize(string locale, string english, string chinese, string japanese)
         {

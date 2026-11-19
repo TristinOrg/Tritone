@@ -23,7 +23,7 @@ namespace AfterHours.UI
 
         public void Show()
         {
-            mLocale = AfterHoursFeatureCatalog.CurrentLocale();
+            mLocale = AfterHoursFeatureCatalog.CurrentLocale;
             var catalog = AfterHoursFeatureCatalog.Load();
             var canvasObject = new GameObject("After Hours Sample Hub", typeof(RectTransform), typeof(Canvas),
                                                 typeof(CanvasScaler), typeof(GraphicRaycaster));
@@ -40,7 +40,11 @@ namespace AfterHours.UI
 
             var header = Rect("Header", background, new Vector2(0.055f, 0.79f), new Vector2(0.945f, 0.955f), Vector2.zero, Vector2.zero);
             header.gameObject.AddComponent<Image>().color = Panel;
-            Text(header, "TRITONE   /   FEATURE PLAYGROUND", 20, Signal, TextAnchor.MiddleLeft);
+            var label = Rect("Label", header, new Vector2(0.025f, 0.73f), new Vector2(0.7f, 0.98f), Vector2.zero, Vector2.zero);
+            Text(label, "TRITONE   /   FEATURE PLAYGROUND", 16, Signal, TextAnchor.MiddleLeft);
+            AddLanguageOption(header, "English", "en-US", 0.69f);
+            AddLanguageOption(header, "简体中文", "zh-CN", 0.79f);
+            AddLanguageOption(header, "日本語", "ja-JP", 0.89f);
             var title = Rect("Title", header, new Vector2(0.025f, 0.42f), new Vector2(0.7f, 0.92f), Vector2.zero, Vector2.zero);
             Text(title, Localized("Explore the whole toolkit", "完整探索 Tritone", "Tritone の機能を体験"), 34, Paper, TextAnchor.MiddleLeft, true);
             var subtitle = Rect("Subtitle", header, new Vector2(0.027f, 0.08f), new Vector2(0.87f, 0.4f), Vector2.zero, Vector2.zero);
@@ -65,6 +69,8 @@ namespace AfterHours.UI
             viewport.gameObject.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.015f);
             viewport.gameObject.AddComponent<Mask>().showMaskGraphic = false;
             var content = Rect("Content", viewport, new Vector2(0f, 1f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero);
+            content.pivot = new Vector2(0.5f, 1f);
+            content.anchoredPosition = Vector2.zero;
             var vertical = content.gameObject.AddComponent<VerticalLayoutGroup>();
             vertical.spacing = 10f;
             vertical.padding = new RectOffset(2, 2, 2, 14);
@@ -77,6 +83,29 @@ namespace AfterHours.UI
             scrollRect.viewport = viewport;
             scrollRect.content = content;
             Populate(content, catalog.Features);
+            Canvas.ForceUpdateCanvases();
+            scrollRect.verticalNormalizedPosition = 1f;
+        }
+
+        private void AddLanguageOption(RectTransform header, string label, string locale, float left)
+        {
+            var option = Rect("Language - " + locale, header, new Vector2(left, 0.65f),
+                              new Vector2(left + 0.095f, 0.94f), Vector2.zero, Vector2.zero);
+            bool selected = mLocale == locale;
+            option.gameObject.AddComponent<Image>().color = selected ? Card : Color.clear;
+            option.gameObject.AddComponent<Button>().onClick.AddListener(() => ChangeLanguage(locale));
+            Text(option, label, 15, selected ? Signal : Paper, TextAnchor.MiddleCenter, selected);
+        }
+
+        private void ChangeLanguage(string locale)
+        {
+            if (mLocale == locale)
+                return;
+
+            mRoot.SetActive(false);
+            Dispose();
+            AfterHoursFeatureCatalog.SetLocale(locale);
+            Show();
         }
 
         private void Populate(Transform content, IReadOnlyList<AfterHoursFeatureCatalog.Feature> features)
@@ -128,7 +157,7 @@ namespace AfterHours.UI
             var prerequisiteRect = Rect("Prerequisite", card, new Vector2(0.027f, 0.04f), new Vector2(0.78f, 0.26f), Vector2.zero, Vector2.zero);
             Text(prerequisiteRect, feature.Prerequisite(mLocale), 11, Signal, TextAnchor.MiddleLeft);
             var routeRect = Rect("Route", card, new Vector2(0.80f, 0.1f), new Vector2(0.97f, 0.9f), Vector2.zero, Vector2.zero);
-            Text(routeRect, string.IsNullOrWhiteSpace(feature.ScenePath) ? "EDITOR ↗" : "OPEN ↗", 12, Signal, TextAnchor.MiddleCenter, true);
+            Text(routeRect, Localized("OPEN ↗", "打开 ↗", "開く ↗"), 12, Signal, TextAnchor.MiddleCenter, true);
         }
 
         private void Open(AfterHoursFeatureCatalog.Feature feature)
@@ -190,7 +219,7 @@ namespace AfterHours.UI
 
         private static string Localized(string english, string chinese, string japanese)
         {
-            string locale = AfterHoursFeatureCatalog.CurrentLocale();
+            string locale = AfterHoursFeatureCatalog.CurrentLocale;
             return locale == "zh-CN" ? chinese : locale == "ja-JP" ? japanese : english;
         }
 

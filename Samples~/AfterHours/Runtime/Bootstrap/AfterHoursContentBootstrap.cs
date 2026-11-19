@@ -25,9 +25,15 @@ namespace AfterHours.Bootstrap
             {
                 try
                 {
+                    ResetVisual();
                     SetResult("CHECKING / contacting the optional local content host...");
                     var result = await scope.UpdateAsync(progress =>
-                        SetResult($"CONTENT UPDATE / {progress.Stage} / {progress.CompletedBytes} / {progress.TotalBytes} bytes"));
+                    {
+                        if (progress.TotalBytes > 0)
+                            SetVisualProgress((float)((double)progress.CompletedBytes / progress.TotalBytes));
+                        SetResult($"CONTENT UPDATE / {progress.Stage} / {progress.CompletedBytes} / {progress.TotalBytes} bytes");
+                    });
+                    SetVisualProgress(1f);
                     SetResult($"UPDATE COMPLETE / {result.ActiveManifest?.Version ?? "active content"}");
                 }
                 catch (Exception exception)
@@ -37,6 +43,10 @@ namespace AfterHours.Bootstrap
             }
         }
 
-        protected override void ResetProbe() => SetResult("READY / Start the optional local content host, then click Check Update.");
+        protected override void ResetProbe()
+        {
+            ResetVisual();
+            SetResult("READY / Start the optional local content host, then click Check Update.");
+        }
     }
 }
