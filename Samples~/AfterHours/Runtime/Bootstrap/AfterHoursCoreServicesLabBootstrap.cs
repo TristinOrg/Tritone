@@ -26,7 +26,7 @@ namespace AfterHours.Bootstrap
             EnsureEventSystem();
             base.Awake();
             mTimers = Application.Services.GetRequired<ITimerService>().CreateScope();
-            mController = new AfterHoursFeatureLabController("CoreServicesLab", RunProbe, ResetProbe);
+            mController = new AfterHoursFeatureLabController("TimerLab", RunProbe, ResetProbe);
             mController.Show();
         }
 

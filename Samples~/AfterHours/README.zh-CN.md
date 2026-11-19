@@ -16,29 +16,42 @@
 
 ## 在 Unity 中开始
 
-1. 在 Unity 2022.3 LTS 中安装或打开 Tritone。
-2. 打开 Package Manager，选择 Tritone，并从 **Samples** 导入 **Tritone Feature Playground**。
-3. 在 Unity 的 Project 窗口中，将导入的 **Tritone Feature Playground** 文件夹移动到 `Assets` 下，并重命名为 `AfterHours`。编辑器工具使用 `Assets/AfterHours` 路径。
-4. 首次运行 **Tritone → After Hours → Generate Sample Scenes**。此命令会生成示例场景并将入口加入 Build Settings，不会更改宿主场景。
-5. 打开 `AfterHours/Scenes/SampleHub.unity`，点击 **Play**。
-6. 选择 **Timer Lab** 或其他功能卡片。点击高亮按钮，查看结果，然后使用 **Reset** 或 **Back to Hub**。
+1. 在 Unity 2022.3 LTS 安装 Tritone。
+2. 在包的 **Samples** 标签导入 **Tritone Feature Playground**。
+3. 执行 **Tritone → After Hours → Open Sample Hub**，然后点击 **Play**。命令会将示例准备到 `Assets/AfterHours`，并注册到 Build Settings。
+4. 选择功能，按照场景内的说明操作。点击**返回示例目录**可试下一个功能。
 
-本地演示无需服务器、账号或网络。Network 示例可选使用本机回环 Relay，具体步骤见场景和下文。
+也可以直接打开 `Assets/AfterHours/Scenes` 下的单个场景。每个场景都会告诉你该做什么、操作后发生了什么。资源交付和网络场景另有本机配置说明。
 
-## 选择演示
+## 选择场景
 
-| Sample | 操作 | 结果 |
+| 场景 | 功能 | 操作与结果 |
 | --- | --- | --- |
-| **Timer Lab** | Run Timer | Tritone 安排一次性计时器，并显示回调触发结果。Reset 会取消等待中的计时器。 |
-| **ECS** | Spawn Signal | 场景 World 新增实体；组件查询数量和系统脉冲随之更新。Reset 会清空 World。 |
-| **UI** | Open Window | Tritone 生成的窗口显示在 Popup 层。关闭并重新打开，可观察窗口绑定和生命周期。 |
-| **Typed Tables** | Load Table | Tritone 加载生成的 `ClueRow` 数据，并显示行数和第一条记录。 |
-| **Content Update** | 打开 Content Workshop | 在独立配置中查看本地内容更新和恢复流程。 |
-| **Addressables** | 打开 Addressables Desk | 独立体验基于 Addressables 的资源配置。 |
-| **AssetBundle** | 打开 Bundle Desk | 独立体验基于 AssetBundle 的资源配置。 |
-| **Network** | 打开 Network Desk | 查看生成协议以及可选本机 Relay 的请求/响应流程。 |
-
-Hub 每个独立场景只显示一张卡片。完整 Feature Index 仍会把 Tritone 能力映射到对应演示、可选配置或精确的 Editor 命令。
+| `ApplicationLab` | 应用生命周期 | 查看运行中的应用，点击两次观察模块计数。 |
+| `FlowLab` | 流程切换 | 点击两次，依次进入 Running 和 Ready，观察旧流程退出。 |
+| `ModelLab` | 共享模型 | 连续累加两次，重置后再累加，观察计数重新开始。 |
+| `ScopeLab` | 模块作用域 | 先发布一次，再点击解除绑定并发布。观察监听器不再收到消息，重置后重新绑定。 |
+| `DiagnosticsLab` | 运行时诊断 | 写入模块日志，查看缓冲条数和采样帧。 |
+| `DispatcherLab` | 主线程派发 | 排入回调，观察 Unity 下一次更新执行并显示线程编号。 |
+| `EventLab` | 类型化事件 | 多次发布信号，观察监听器接收每条带编号的消息。 |
+| `TweenLab` | 补间动画 | 播放补间，观察进度从 0% 到 100%。播放中重置可取消。 |
+| `TimerLab` | 计时器 | 安排和取消一次性回调。 |
+| `SceneModuleLab` | 场景模块 | 在 Lobby 和 Round 间切换，当前 Unity 场景仍保持打开。 |
+| `InputLab` | 命名输入 | 点击发送 Interact 动作，观察计数增加。启用旧版键盘输入时也可按 E。 |
+| `AudioLab` | 音效播放 | 取消 Game 视图静音，播放提示音，使用重置停止。 |
+| `SaveLab` | 存档读写 | 存档并读回计数。离开再进入可以续计，重置会清除示例槽。 |
+| `SettingsLab` | 类型化设置 | 让示例设置在 0 到 3 循环，每次修改后读回当前值。 |
+| `LocalizationLab` | 本地化 | 切换语言，观察相同的 office.open 键返回不同文本。 |
+| `EcsLab` | ECS — 生成并查询实体 | 点击 Spawn Marker 添加实体，观察查询数量并重置 World。 |
+| `UiLab` | UI — 打开和关闭 Tritone 窗口 | 在 Popup 层打开一个生成窗口，关闭后再重新打开。 |
+| `PoolLab` | 对象池 | 租出、归还、再次租用，对比引用确认对象复用。 |
+| `DataWorkshop` | Tables — 加载一张类型化数据表 | 加载生成的 ClueRow 数据表，查看行数和首条记录。 |
+| `ResourcesLab` | Resources 加载 | 通过 Tritone 作用域加载线索文本、查看字符数，随后释放引用。 |
+| `ContentWorkshop` | 内容更新与事务 | 体验离线内容更新的暂存、提交与回滚流程。 |
+| `AddressablesDesk` | Addressables 提供器配置 | 通过可选的 Addressables 配置加载同一 Sample 资源。 |
+| `BundleDesk` | AssetBundle 提供器配置 | 使用本地 Bundle、清单与对应 Provider 配置加载内容。 |
+| `NetworkDesk` | Network — 发送本地示例请求 | 打开独立网络示例；场景会显示可选的本地 Relay 设置。 |
+| `ProtocolLab` | 握手与重连 | 用 Node.js 启动 LocalServices/relay.js 并连接，停止和重启 relay 观察状态变化。 |
 
 ## Tritone 能力覆盖
 

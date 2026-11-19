@@ -22,6 +22,8 @@ namespace AfterHours.UI
         private GameObject mRoot;
         private Text mEcsReadout;
         private Text mResult;
+        private RectTransform mProgress;
+        private AfterHoursFeatureCatalog.Feature mFeature;
         private readonly Action mRunDemo;
         private readonly Action mResetDemo;
 
@@ -35,6 +37,7 @@ namespace AfterHours.UI
         public void Show()
         {
             mLocale = AfterHoursFeatureCatalog.CurrentLocale();
+            mFeature = AfterHoursFeatureCatalog.Load().Find(mLabId);
             var canvas = new GameObject("After Hours Feature Lab", typeof(RectTransform), typeof(Canvas),
                                         typeof(CanvasScaler), typeof(GraphicRaycaster));
             mRoot = canvas;
@@ -49,22 +52,35 @@ namespace AfterHours.UI
             var header = Rect("Header", background, new Vector2(0.055f, 0.78f), new Vector2(0.945f, 0.955f), Vector2.zero, Vector2.zero);
             header.gameObject.AddComponent<Image>().color = Panel;
             Text(Rect("Eyebrow", header, new Vector2(0.025f, 0.65f), new Vector2(0.9f, 0.95f), Vector2.zero, Vector2.zero),
-                 "AFTER HOURS   /   FEATURE LAB", 15, Signal, TextAnchor.MiddleLeft, true);
+                 "TRITONE", 15, Signal, TextAnchor.MiddleLeft, true);
             Text(Rect("Title", header, new Vector2(0.025f, 0.22f), new Vector2(0.9f, 0.70f), Vector2.zero, Vector2.zero),
                  Title(), 32, Paper, TextAnchor.MiddleLeft, true);
 
             var body = Rect("Guide", background, new Vector2(0.055f, 0.2f), new Vector2(0.945f, 0.75f), Vector2.zero, Vector2.zero);
             body.gameObject.AddComponent<Image>().color = Card;
             Text(Rect("Purpose", body, new Vector2(0.035f, 0.69f), new Vector2(0.96f, 0.96f), Vector2.zero, Vector2.zero),
-                 Purpose(), 18, Paper, TextAnchor.MiddleLeft, true);
-            Text(Rect("Try", body, new Vector2(0.035f, 0.34f), new Vector2(0.96f, 0.67f), Vector2.zero, Vector2.zero),
-                 Directions(), 16, Muted, TextAnchor.UpperLeft);
-            Text(Rect("Path", body, new Vector2(0.035f, 0.25f), new Vector2(0.96f, 0.33f), Vector2.zero, Vector2.zero),
-                 CodePath(), 13, Signal, TextAnchor.MiddleLeft);
-            mResult = Text(Rect("Result", body, new Vector2(0.035f, 0.16f), new Vector2(0.96f, 0.24f), Vector2.zero, Vector2.zero),
-                           ReadyText(), 14, Signal, TextAnchor.MiddleLeft, true);
+                 mFeature?.Summary(mLocale) ?? Purpose(), 18, Paper, TextAnchor.MiddleLeft, true);
+            var directions = Text(Rect("Try", body, new Vector2(0.035f, 0.39f), new Vector2(0.96f, 0.68f), Vector2.zero, Vector2.zero),
+                                  mFeature?.Prerequisite(mLocale) ?? Directions(), 16, Muted, TextAnchor.UpperLeft);
+            directions.resizeTextForBestFit = true;
+            directions.resizeTextMinSize = 12;
+            directions.resizeTextMaxSize = 16;
+            Text(Rect("Result Label", body, new Vector2(0.035f, 0.30f), new Vector2(0.96f, 0.38f), Vector2.zero, Vector2.zero),
+                 Localized("RESULT", "运行结果", "実行結果"), 13, Signal, TextAnchor.MiddleLeft);
+            mResult = Text(Rect("Result", body, new Vector2(0.035f, 0.15f), new Vector2(0.96f, 0.30f), Vector2.zero, Vector2.zero),
+                           ReadyText(), 15, Paper, TextAnchor.MiddleLeft, true);
+            if (mLabId == "tweens")
+            {
+                var track = Rect("Tween Track", body, new Vector2(0.05f, 0.43f), new Vector2(0.94f, 0.48f), Vector2.zero, Vector2.zero);
+                track.gameObject.AddComponent<Image>().color = Panel;
+                mProgress = Rect("Tween Fill", track, Vector2.zero, Vector2.up, Vector2.zero, Vector2.zero);
+                mProgress.gameObject.AddComponent<Image>().color = Signal;
+            }
             if (mLabId == "EcsLab")
+            {
+                mResult.gameObject.SetActive(false);
                 AddEcsControls(body);
+            }
             else
                 AddDemoControls(body);
 
@@ -98,12 +114,24 @@ namespace AfterHours.UI
                 mResult.text = value ?? string.Empty;
         }
 
+        public void SetProgress(float progress)
+        {
+            if (mProgress != null)
+                mProgress.anchorMax = new Vector2(Mathf.Clamp01(progress), 1f);
+        }
+
+        public void ResetResult()
+        {
+            SetResult(ReadyText());
+            SetProgress(0f);
+        }
+
         private void AddDemoControls(RectTransform body)
         {
             var runRect = Rect("Run Demo", body, new Vector2(0.035f, 0.025f), new Vector2(0.48f, 0.14f), Vector2.zero, Vector2.zero);
             runRect.gameObject.AddComponent<Image>().color = Signal;
             runRect.gameObject.AddComponent<Button>().onClick.AddListener(() => mRunDemo?.Invoke());
-            Text(runRect, DemoLabel(), 13, Ink, TextAnchor.MiddleCenter, true);
+            Text(runRect, mFeature?.ActionLabel(mLocale) ?? DemoLabel(), 13, Ink, TextAnchor.MiddleCenter, true);
 
             var resetRect = Rect("Reset Demo", body, new Vector2(0.52f, 0.025f), new Vector2(0.96f, 0.14f), Vector2.zero, Vector2.zero);
             resetRect.gameObject.AddComponent<Image>().color = Panel;
@@ -113,7 +141,7 @@ namespace AfterHours.UI
 
         private void AddEcsControls(RectTransform body)
         {
-            var readoutRect = Rect("Entity Readout", body, new Vector2(0.47f, 0.16f), new Vector2(0.96f, 0.25f), Vector2.zero, Vector2.zero);
+            var readoutRect = Rect("Entity Readout", body, new Vector2(0.035f, 0.15f), new Vector2(0.96f, 0.30f), Vector2.zero, Vector2.zero);
             mEcsReadout = Text(readoutRect, Localized("SCENE WORLD / STARTING...", "场景 World / 正在启动…", "Scene World / 起動中…"),
                                12, Signal, TextAnchor.MiddleLeft, true);
             ActionButton(body, "Spawn Entity", Localized("+ SPAWN SIGNAL", "+ 生成信号实体", "+ Signal Entity"),
@@ -133,16 +161,16 @@ namespace AfterHours.UI
             Text(rect, caption, 12, Ink, TextAnchor.MiddleCenter, true);
         }
 
-        private string Title() => Localized(
-            mLabId == "CoreServicesLab" ? "Timer Lab" : mLabId == "EcsLab" ? "ECS Lab" :
+        private string Title() => mFeature?.Title(mLocale) ?? Localized(
+            mLabId == "TimerLab" ? "Timer Lab" : mLabId == "EcsLab" ? "ECS Lab" :
             mLabId == "UiLab" ? "UI Lab" : mLabId == "DataWorkshop" ? "Typed Tables" :
             mLabId == "ContentWorkshop" ? "Content Update" : mLabId == "AddressablesDesk" ? "Addressables" :
             mLabId == "BundleDesk" ? "AssetBundle" : mLabId == "NetworkDesk" ? "Network" : mLabId,
-            mLabId == "CoreServicesLab" ? "计时器演示" : mLabId == "EcsLab" ? "ECS 实验室" :
+            mLabId == "TimerLab" ? "计时器演示" : mLabId == "EcsLab" ? "ECS 实验室" :
             mLabId == "UiLab" ? "UI 实验室" : mLabId == "DataWorkshop" ? "类型化数据表" :
             mLabId == "ContentWorkshop" ? "内容更新" : mLabId == "AddressablesDesk" ? "Addressables" :
             mLabId == "BundleDesk" ? "AssetBundle" : mLabId == "NetworkDesk" ? "网络" : mLabId,
-            mLabId == "CoreServicesLab" ? "Timer デモ" : mLabId == "EcsLab" ? "ECS ラボ" :
+            mLabId == "TimerLab" ? "Timer デモ" : mLabId == "EcsLab" ? "ECS ラボ" :
             mLabId == "UiLab" ? "UI ラボ" : mLabId == "DataWorkshop" ? "型付き Table" :
             mLabId == "ContentWorkshop" ? "Content Update" : mLabId == "AddressablesDesk" ? "Addressables" :
             mLabId == "BundleDesk" ? "AssetBundle" : mLabId == "NetworkDesk" ? "Network" : mLabId);
@@ -193,18 +221,6 @@ namespace AfterHours.UI
             }
         }
 
-        private string CodePath()
-        {
-            if (mLabId == "UiLab") return "Tritone / After Hours / Generate Systems Window View\nTritone / After Hours / Bind Generated Systems Window View";
-            if (mLabId == "DataWorkshop") return "Schemas/Tables.json   →   Generated/Tables/*.Generated.cs   →   Resources/Tables/*.json";
-            if (mLabId == "AddressablesDesk") return "Tritone.Unity.Assets.AddressablesAssetProvider";
-            if (mLabId == "BundleDesk") return "Tritone.Unity.Assets.AssetBundleAssetProvider";
-            if (mLabId == "ContentWorkshop") return "Tritone.Content.IContentUpdateService";
-            if (mLabId == "NetworkDesk") return "Tritone.Networking.INetworkService";
-            if (mLabId == "EcsLab") return "Runtime/Entities/CaseComponents.cs   ·   Runtime/Entities/SignalSystems.cs   ·   Runtime/Modules/CaseSceneModules.cs";
-            return "Runtime/Bootstrap/AfterHoursCoreServicesLabBootstrap.cs   ·   Tritone.Timing.ITimerScope";
-        }
-
         private string DemoLabel()
         {
             switch (mLabId)
@@ -232,6 +248,14 @@ namespace AfterHours.UI
 
         private void ReturnToHub()
         {
+            if (!Application.CanStreamedLevelBeLoaded("SampleHub"))
+            {
+                SetResult(Localized("Register the sample scenes from the Tritone / After Hours menu first.",
+                                    "请先从 Tritone / After Hours 菜单注册示例场景。",
+                                    "先に Tritone / After Hours メニューでサンプルシーンを登録してください。"));
+                return;
+            }
+
             var bootstrap = UnityEngine.Object.FindObjectOfType<Tritone.Unity.TritoneBootstrap>();
             if (bootstrap != null)
                 UnityEngine.Object.Destroy(bootstrap.gameObject);

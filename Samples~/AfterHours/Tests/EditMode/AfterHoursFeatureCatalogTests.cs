@@ -16,8 +16,8 @@ namespace AfterHours.Tests
         {
             "application-composition", "module-contexts-scopes", "diagnostics-logging",
             "main-thread-dispatch", "flows-transitions", "models-state", "entities-systems",
-            "events-timers-tweens", "scene-modules-switching", "input-audio",
-            "ui-composition-generation", "pooling-ownership", "saves-settings-localization",
+            "events", "timers", "tweens", "scene-modules-switching", "input", "audio",
+            "ui-composition-generation", "pooling-ownership", "saves", "settings", "localization",
             "tables-generation-compilation", "network-tcp-messages", "protocol-handshake-reconnect",
             "resources-provider", "addressables-provider", "assetbundle-provider",
             "content-update-transactions", "editor-content-build", "editor-code-generation",
@@ -52,6 +52,7 @@ namespace AfterHours.Tests
             Assert.Greater(catalog.Features.Length, 0, "Feature Index must contain demo and workflow routes.");
 
             var seen = new HashSet<string>(StringComparer.Ordinal);
+            var scenePaths = new HashSet<string>(StringComparer.Ordinal);
             foreach (var feature in catalog.Features)
             {
                 Assert.That(feature, Is.Not.Null);
@@ -76,6 +77,8 @@ namespace AfterHours.Tests
                                 feature.Id + " must point to an exact Tritone menu command.");
                 if (hasScene)
                 {
+                    Assert.That(scenePaths.Add(feature.ScenePath), Is.True,
+                                $"Each runtime feature needs its own scene: {feature.Id} reuses {feature.ScenePath}.");
                     Assert.That(AssetDatabase.LoadAssetAtPath<SceneAsset>(feature.ScenePath), Is.Not.Null,
                                 feature.Id + " points to a missing scene: " + feature.ScenePath);
                     Assert.That(Array.Exists(EditorBuildSettings.scenes, scene => scene.enabled && scene.path == feature.ScenePath),
@@ -96,13 +99,34 @@ namespace AfterHours.Tests
             {
                 AssertSceneBootstrap("SampleHub", typeof(AfterHours.Bootstrap.AfterHoursHubBootstrap), openedScenes);
                 AssertSceneBootstrap("EcsLab", typeof(AfterHours.Bootstrap.AfterHoursEcsLabBootstrap), openedScenes);
-                AssertSceneBootstrap("CoreServicesLab", typeof(AfterHours.Bootstrap.AfterHoursCoreServicesLabBootstrap), openedScenes);
+                AssertSceneBootstrap("TimerLab", typeof(AfterHours.Bootstrap.AfterHoursCoreServicesLabBootstrap), openedScenes);
                 AssertSceneBootstrap("UiLab", typeof(AfterHours.Bootstrap.AfterHoursUiLabBootstrap), openedScenes);
                 AssertSceneBootstrap("DataWorkshop", typeof(AfterHours.Bootstrap.AfterHoursDataWorkshopBootstrap), openedScenes);
                 AssertSceneBootstrap("ContentWorkshop", typeof(AfterHours.Bootstrap.AfterHoursContentBootstrap), openedScenes);
                 AssertSceneBootstrap("AddressablesDesk", typeof(AfterHours.Bootstrap.AfterHoursAddressablesBootstrap), openedScenes);
                 AssertSceneBootstrap("BundleDesk", typeof(AfterHours.Bootstrap.AfterHoursAssetBundleBootstrap), openedScenes);
                 AssertSceneBootstrap("NetworkDesk", typeof(AfterHours.Bootstrap.AfterHoursNetworkBootstrap), openedScenes);
+                foreach (var feature in catalog.Features)
+                {
+                    if (string.IsNullOrWhiteSpace(feature.ActionEn))
+                        continue;
+
+                    Assert.That(feature.ActionZh, Is.Not.Empty, feature.Id);
+                    Assert.That(feature.ActionJa, Is.Not.Empty, feature.Id);
+                    var scene = OpenAdditive(feature.ScenePath, openedScenes);
+                    if (feature.Id == "protocol-handshake-reconnect")
+                    {
+                        var network = FindOnRoot<AfterHours.Bootstrap.AfterHoursNetworkBootstrap>(scene);
+                        Assert.That(network, Is.Not.Null, feature.Id);
+                        Assert.That(network.ObservesProtocol, Is.True, feature.Id);
+                    }
+                    else
+                    {
+                        var lab = FindOnRoot<AfterHours.Bootstrap.AfterHoursFocusedLabBootstrap>(scene);
+                        Assert.That(lab, Is.Not.Null, feature.Id);
+                        Assert.That(lab.FeatureId, Is.EqualTo(feature.Id));
+                    }
+                }
             }
             finally
             {
@@ -115,12 +139,7 @@ namespace AfterHours.Tests
         private static void AssertSceneBootstrap(string sceneName, Type bootstrapType, List<Scene> openedScenes)
         {
             string path = $"Assets/AfterHours/Scenes/{sceneName}.unity";
-            Scene scene = SceneManager.GetSceneByPath(path);
-            if (!scene.isLoaded)
-            {
-                scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
-                openedScenes.Add(scene);
-            }
+            Scene scene = OpenAdditive(path, openedScenes);
             bool found = false;
             foreach (var root in scene.GetRootGameObjects())
                 if (root.GetComponent(bootstrapType) != null)
@@ -132,6 +151,26 @@ namespace AfterHours.Tests
                 throw new InvalidOperationException(sceneName + " must start its own Tritone application, not the RPG bootstrap.");
             if (typeof(AfterHours.Bootstrap.AfterHoursBootstrap).IsAssignableFrom(bootstrapType))
                 throw new InvalidOperationException(sceneName + " must not inherit the RPG application composition.");
+        }
+
+        private static Scene OpenAdditive(string path, List<Scene> openedScenes)
+        {
+            var scene = SceneManager.GetSceneByPath(path);
+            if (scene.isLoaded)
+                return scene;
+
+            scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
+            openedScenes.Add(scene);
+            return scene;
+        }
+
+        private static T FindOnRoot<T>(Scene scene) where T : Component
+        {
+            foreach (var root in scene.GetRootGameObjects())
+                if (root.TryGetComponent<T>(out var component))
+                    return component;
+
+            return null;
         }
 
         [Serializable]
@@ -152,6 +191,9 @@ namespace AfterHours.Tests
             public string PrerequisiteJa;
             public string ScenePath;
             public string EditorMenuPath;
+            public string ActionEn;
+            public string ActionZh;
+            public string ActionJa;
         }
     }
 }

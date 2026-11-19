@@ -59,6 +59,10 @@ For reproducible production projects, pin the current release tag:
 https://github.com/TristinOrg/Tritone.git#v0.2.0
 ```
 
+## Interactive samples
+
+Import **Tritone Feature Playground** from the package's **Samples** tab, then choose **Tritone → After Hours → Open Sample Hub** and press **Play**. Each core demo has its own scene, on-screen instructions, and observable result. See the [scene guide](Samples~/AfterHours/README.md).
+
 ## Continuous integration
 
 The `Unity Package` GitHub workflow validates package metadata and GUID integrity, then runs EditMode and PlayMode tests with Unity 2022.3. Configure the repository secrets `UNITY_LICENSE`, `UNITY_EMAIL`, and `UNITY_PASSWORD` to enable Unity test jobs; without them, package validation still runs and Unity jobs report an explicit skip warning.

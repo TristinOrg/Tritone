@@ -11,6 +11,7 @@ namespace AfterHours.Models
         private sealed class Payload { public Feature[] Features; }
 
         [Serializable]
+        /// <summary>Describes one localized scene or editor workflow.</summary>
         public sealed class Feature
         {
             public string Id;
@@ -29,16 +30,22 @@ namespace AfterHours.Models
             public string PrerequisiteJa;
             public string ScenePath;
             public string EditorMenuPath;
+            public string ActionEn;
+            public string ActionZh;
+            public string ActionJa;
 
             public string GroupTitle(string locale) => Localize(locale, GroupTitleEn, GroupTitleZh, GroupTitleJa);
             public string Title(string locale) => Localize(locale, TitleEn, TitleZh, TitleJa);
             public string Summary(string locale) => Localize(locale, SummaryEn, SummaryZh, SummaryJa);
             public string Prerequisite(string locale) => Localize(locale, PrerequisiteEn, PrerequisiteZh, PrerequisiteJa);
+            public string ActionLabel(string locale) => Localize(locale, ActionEn, ActionZh, ActionJa);
         }
 
         private readonly Feature[] mFeatures;
         private AfterHoursFeatureCatalog(Feature[] features) { mFeatures = features; }
         public IReadOnlyList<Feature> Features => mFeatures;
+
+        public Feature Find(string id) => Array.Find(mFeatures, feature => feature.Id == id);
 
         public static AfterHoursFeatureCatalog Load()
         {

@@ -65,6 +65,10 @@ https://github.com/TristinOrg/Tritone.git
 https://github.com/TristinOrg/Tritone.git#v0.2.0
 ```
 
+## インタラクティブなサンプル
+
+パッケージの **Samples** から **Tritone Feature Playground** をインポートし、**Tritone → After Hours → Open Sample Hub** を選んで **Play** を押します。各機能に独立したシーンと操作手順、結果表示があります。[シーンガイド](Samples~/AfterHours/README.ja.md)を参照してください。
+
 ## 継続的インテグレーション
 
 GitHub Actions はパッケージメタデータと Unity GUID を検証し、Unity 2022.3 で EditMode と PlayMode のテストを実行します。Unity テストの実行には `UNITY_LICENSE`、`UNITY_EMAIL`、`UNITY_PASSWORD` のリポジトリシークレットが必要です。未設定の場合もパッケージ検証は行われ、Unity テストをスキップした旨が明示されます。

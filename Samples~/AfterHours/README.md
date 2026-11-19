@@ -16,29 +16,42 @@ The visual language uses ink-dark navy, warm paper, transit-map geometry, and re
 
 ## Start in Unity
 
-1. Install or open Tritone in Unity 2022.3 LTS.
-2. In Package Manager, select Tritone and import **Tritone Feature Playground** from **Samples**.
-3. In Unity's Project window, move the imported **Tritone Feature Playground** folder to `Assets` and rename it to `AfterHours`. The authoring tools use `Assets/AfterHours`.
-4. Run **Tritone → After Hours → Generate Sample Scenes** once. This creates the sample scenes and adds their routes to Build Settings; it does not change your host scene.
-5. Open `AfterHours/Scenes/SampleHub.unity` and press **Play**.
-6. Choose **Timer Lab** or any feature card. Click its highlighted action, read the result, then use **Reset** or **Back to Hub**.
+1. Install Tritone in Unity 2022.3 LTS.
+2. Import **Tritone Feature Playground** from the package's **Samples** tab.
+3. Choose **Tritone → After Hours → Open Sample Hub**, then press **Play**. The command prepares the sample under `Assets/AfterHours` and registers its scenes in Build Settings.
+4. Pick a feature, follow its on-screen guide, and use **Back to Sample Hub** to try another.
 
-No server, account, or network connection is required for the local demos. The Network sample uses an optional loopback relay described in its scene and below.
+To open one demo directly, use its scene from `Assets/AfterHours/Scenes`. Each scene shows what to try and what changed. The provider and network demos list their local setup in the scene.
 
-## Pick a demo
+## Choose a scene
 
-| Sample | Try this | What you see |
+| Scene | Feature | What to try |
 | --- | --- | --- |
-| **Timer Lab** | Run Timer | Tritone schedules a one-shot timer and reports when its callback fires. Reset cancels a pending timer. |
-| **ECS** | Spawn Signal | The scene World gains an entity; the component query count and system pulse update. Reset clears the World. |
-| **UI** | Open Window | A generated Tritone window appears on the Popup layer. Close and reopen it to see window ownership and binding. |
-| **Typed Tables** | Load Table | Tritone reads generated `ClueRow` data and shows the row count and first record. |
-| **Content Update** | Open Content Workshop | Inspect the local content update and recovery workflow in its separate profile. |
-| **Addressables** | Open Addressables Desk | Try the Addressables-backed asset profile independently. |
-| **AssetBundle** | Open Bundle Desk | Try the AssetBundle-backed asset profile independently. |
-| **Network** | Open Network Desk | Inspect the generated protocol and optional local relay request/response flow. |
-
-The Hub shows one card for each independent scene. The complete Feature Index still maps related Tritone capabilities to their focused sample, optional profile, or exact Editor command.
+| `ApplicationLab` | Application lifecycle | Inspect the running application and click twice to see the module counter advance. |
+| `FlowLab` | Flow transitions | Click twice to enter Running and then Ready. The old flow exits when the new flow takes over. |
+| `ModelLab` | Shared models | Increment the shared model twice, reset it, then increment again to see the count restart. |
+| `ScopeLab` | Module scopes | Publish once, then click again to dispose the binding and publish without a listener. Reset reattaches it. |
+| `DiagnosticsLab` | Runtime diagnostics | Write a module log and see the buffer count and sampled frame index. |
+| `DispatcherLab` | Main-thread dispatch | Queue a callback and watch Unity's next update execute it and display its thread ID. |
+| `EventLab` | Typed events | Publish several times and watch the listener receive each numbered signal. |
+| `TweenLab` | Tween animation | Play the tween and watch the bar fill from 0% to 100%. Reset during playback to cancel. |
+| `TimerLab` | Timers | Schedule and cancel a one-shot callback. |
+| `SceneModuleLab` | Scene modules | Switch between Lobby and Round without reloading the current Unity scene. |
+| `InputLab` | Named input | Click to send the Interact action and see the counter increase. The E key also works when legacy keyboard input is enabled. |
+| `AudioLab` | Sound playback | Unmute the Game view, play the chime, and use Reset to stop it. |
+| `SaveLab` | Save and load | Save and reload the counter. Leave and re-enter to continue, or Reset to clear this sample slot. |
+| `SettingsLab` | Typed settings | Cycle the stored sample level from 0 to 3. The result reads back the value after each change. |
+| `LocalizationLab` | Localization | Switch language and watch the same office.open key resolve to different text. |
+| `EcsLab` | ECS — spawn and query entities | Click Spawn Marker to add an entity. Watch the live query count and reset the World. |
+| `UiLab` | UI — open and close a Tritone window | Open one generated window on the Popup layer, close it, and reopen it. |
+| `PoolLab` | Object pooling | Rent, return, then rent again. Compare the two references to confirm object reuse. |
+| `DataWorkshop` | Tables — load one typed data table | Load the generated ClueRow table and inspect its row count and first entry. |
+| `ResourcesLab` | Resources loading | Load the clue text through a Tritone scope and read its character count. The scope releases its reference. |
+| `ContentWorkshop` | Content updates & transactions | Inspect the offline content update, staging, commit, and rollback workflow. |
+| `AddressablesDesk` | Addressables provider profile | Load the same sample asset through the optional Addressables-backed profile. |
+| `BundleDesk` | AssetBundle provider profile | Load content from a local bundle with its manifest and provider setup. |
+| `NetworkDesk` | Network — send a local sample request | Open the isolated network sample. It lists the optional local relay setup. |
+| `ProtocolLab` | Handshake and reconnect | Start LocalServices/relay.js with Node.js, then connect. Stop and restart it to see reconnection states. |
 
 ## Feature coverage
 

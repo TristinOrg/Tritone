@@ -16,29 +16,42 @@
 
 ## Unity で始める
 
-1. Unity 2022.3 LTS に Tritone をインストール、または開きます。
-2. Package Manager で Tritone を選び、**Samples** から **Tritone Feature Playground** を Import します。
-3. Unity の Project ウィンドウで、インポートした **Tritone Feature Playground** フォルダーを `Assets` に移動し、`AfterHours` に名前を変更します。編集ツールは `Assets/AfterHours` を使用します。
-4. 初回のみ **Tritone → After Hours → Generate Sample Scenes** を実行します。サンプル Scene を生成して Build Settings に登録します。ホスト Scene は変更しません。
-5. `AfterHours/Scenes/SampleHub.unity` を開いて **Play** を押します。
-6. **Timer Lab** または確認したい機能カードを選びます。強調表示されたボタンを押して結果を見たら、**Reset** または **Back to Hub** を使います。
+1. Unity 2022.3 LTS に Tritone をインストールします。
+2. パッケージの **Samples** から **Tritone Feature Playground** をインポートします。
+3. **Tritone → After Hours → Open Sample Hub** を選び、**Play** を押します。サンプルが `Assets/AfterHours` に用意され、シーンが Build Settings に登録されます。
+4. 機能を選び、画面の案内に沿って操作します。**サンプル一覧へ戻る**から別の機能を開けます。
 
-ローカルデモにサーバー、アカウント、ネット接続は不要です。Network サンプルでは任意でループバック Relay を使用できます。手順は Scene と以下に記載しています。
+`Assets/AfterHours/Scenes` から各シーンを直接開くこともできます。操作と結果が画面に表示され、配信や通信のデモにはローカル設定手順も表示されます。
 
-## デモを選ぶ
+## シーンを選ぶ
 
-| Sample | 操作 | 表示される結果 |
+| シーン | 機能 | 操作と結果 |
 | --- | --- | --- |
-| **Timer Lab** | Run Timer | Tritone が One-shot Timer を実行し、Callback の発生を表示します。Reset で待機中の Timer をキャンセルします。 |
-| **ECS** | Spawn Signal | Scene World に Entity が追加され、Component Query 数と System Pulse が変化します。Reset で World を消去します。 |
-| **UI** | Open Window | Tritone の生成 Window が Popup Layer に表示されます。閉じて再度開くと、Binding と Lifetime を確認できます。 |
-| **Typed Tables** | Load Table | Tritone が生成済み `ClueRow` データを読み込み、行数と最初の Row を表示します。 |
-| **Content Update** | Content Workshop を開く | 独立した Profile でローカル更新と復旧の手順を確認します。 |
-| **Addressables** | Addressables Desk を開く | Addressables Provider を使う Profile を個別に確認します。 |
-| **AssetBundle** | Bundle Desk を開く | AssetBundle Provider を使う Profile を個別に確認します。 |
-| **Network** | Network Desk を開く | 生成 Protocol と任意のローカル Relay の Request/Response を確認します。 |
-
-Hub には独立した各 Scene のカードを 1 枚ずつ表示します。詳細な Feature Index では、各 Tritone 機能を対応するデモ、任意 Profile、正確な Editor コマンドに割り当てています。
+| `ApplicationLab` | アプリのライフサイクル | アプリが動作していることと、クリックでモジュールのカウントが増えることを確認します。 |
+| `FlowLab` | フロー遷移 | 2 回押して Running から Ready へ切り替えます。古いフローは終了します。 |
+| `ModelLab` | 共有モデル | 2 回加算してからリセットし、カウントが初期値に戻ることを確認します。 |
+| `ScopeLab` | モジュールスコープ | 一度発行し、次に購読を解除して発行します。リセットで再購読します。 |
+| `DiagnosticsLab` | ランタイム診断 | ログを記録し、バッファ件数とフレーム番号を確認します。 |
+| `DispatcherLab` | メインスレッド配送 | コールバックを登録し、次の更新で実行されたスレッドの ID を確認します。 |
+| `EventLab` | 型付きイベント | 数回発行し、連番付きの信号を購読側が受け取ることを確認します。 |
+| `TweenLab` | トゥイーン | 再生するとバーが 0% から 100% へ移動します。リセットで中断します。 |
+| `TimerLab` | タイマー | 一度だけ実行するコールバックを予約します。 |
+| `SceneModuleLab` | シーンモジュール | シーンを再読込せずに Lobby と Round を切り替えます。 |
+| `InputLab` | 名前付き入力 | クリックして Interact を送り、カウントを確認します。旧入力が有効なら E キーも使えます。 |
+| `AudioLab` | 効果音の再生 | Game ビューのミュートを解除して再生します。リセットで停止します。 |
+| `SaveLab` | セーブとロード | 保存して読み戻します。再入場で続きから再開し、リセットで消去します。 |
+| `SettingsLab` | 型付き設定 | 0〜3 の値を順に選び、変更した設定を読み戻します。 |
+| `LocalizationLab` | ローカライズ | 言語を切り替え、同じ office.open キーから別の文字列を取得します。 |
+| `EcsLab` | ECS — Entity の生成と Query | Spawn Marker で Entity を追加し、Query 数を確認して World をリセットします。 |
+| `UiLab` | UI — Tritone Window の開閉 | Popup Layer に生成 Window を開き、閉じて再び開きます。 |
+| `PoolLab` | オブジェクトプール | 貸出、返却、再貸出を行い、同じインスタンスか確認します。 |
+| `DataWorkshop` | Tables — 型付きデータの読込 | 生成済み ClueRow Table を読み込み、行数と最初のデータを確認します。 |
+| `ResourcesLab` | Resources 読込 | スコープでテキストを読み込み、文字数を表示して参照を解放します。 |
+| `ContentWorkshop` | コンテンツ更新とトランザクション | オフラインのコンテンツ更新、ステージング、コミット、ロールバックを確認します。 |
+| `AddressablesDesk` | Addressables Provider プロファイル | 任意の Addressables 構成で同じ Sample Asset を読み込みます。 |
+| `BundleDesk` | AssetBundle Provider プロファイル | ローカル Bundle、Manifest、専用 Provider 構成でコンテンツを読み込みます。 |
+| `NetworkDesk` | Network — ローカル Request を送信 | 独立 Network サンプルを開き、任意のローカル Relay 設定を確認します。 |
+| `ProtocolLab` | ハンドシェイクと再接続 | Node.js で LocalServices/relay.js を起動して接続し、停止・再起動で接続状態を確認します。 |
 
 ## Tritone の機能範囲
 

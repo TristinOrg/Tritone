@@ -65,6 +65,10 @@ https://github.com/TristinOrg/Tritone.git
 https://github.com/TristinOrg/Tritone.git#v0.2.0
 ```
 
+## 交互式示例
+
+从包的 **Samples** 标签导入 **Tritone Feature Playground**，然后执行 **Tritone → After Hours → Open Sample Hub** 并点击 **Play**。每个核心功能都有独立场景、操作说明和可观察的结果。[查看场景指南](Samples~/AfterHours/README.zh-CN.md)。
+
 ## 持续集成
 
 GitHub Actions 工作流会验证包元数据和 Unity GUID 完整性，并使用 Unity 2022.3 运行 EditMode 与 PlayMode 测试。配置 `UNITY_LICENSE`、`UNITY_EMAIL` 和 `UNITY_PASSWORD` 仓库密钥后才会运行 Unity 测试；缺少密钥时仍执行包验证，并明确提示跳过测试。

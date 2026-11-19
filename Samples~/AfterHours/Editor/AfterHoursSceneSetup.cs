@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using AfterHours.Bootstrap;
+using AfterHours.Models;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -13,20 +14,21 @@ namespace AfterHours.Editor
     public static class AfterHoursSceneSetup
     {
         private const string SceneFolder = "Assets/AfterHours/Scenes";
+        private const string SampleFolder = "Assets/AfterHours";
+        private const string HubGuid = "b945111aecf56954e96144effd227f62";
 
-        [MenuItem("Tritone/After Hours/Generate Sample Scenes")]
+        [MenuItem("Tritone/After Hours/Open Sample Hub")]
         public static void GenerateSampleScenes()
         {
-            if (!AssetDatabase.IsValidFolder("Assets/AfterHours"))
-            {
-                Debug.LogError("Import the Tritone Feature Playground sample before generating its scenes.");
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
                 return;
-            }
+            if (!EnsureSampleLocation())
+                return;
             if (!AssetDatabase.IsValidFolder(SceneFolder))
-                AssetDatabase.CreateFolder("Assets/AfterHours", "Scenes");
+                AssetDatabase.CreateFolder(SampleFolder, "Scenes");
 
             var hub = CreateEntryScene("SampleHub", typeof(AfterHoursHubBootstrap));
-            CreateLabScene("CoreServicesLab", typeof(AfterHoursCoreServicesLabBootstrap));
+            CreateLabScene("TimerLab", typeof(AfterHoursCoreServicesLabBootstrap));
             CreateLabScene("EcsLab");
             CreateLabScene("UiLab", typeof(AfterHoursUiLabBootstrap));
             CreateLabScene("DataWorkshop", typeof(AfterHoursDataWorkshopBootstrap));
@@ -34,26 +36,81 @@ namespace AfterHours.Editor
             CreateEntryScene("AddressablesDesk", typeof(AfterHoursAddressablesBootstrap));
             CreateEntryScene("BundleDesk", typeof(AfterHoursAssetBundleBootstrap));
             CreateEntryScene("ContentWorkshop", typeof(AfterHoursContentBootstrap));
+            foreach (var feature in AfterHoursFeatureCatalog.Load().Features)
+            {
+                if (string.IsNullOrEmpty(feature.ActionEn))
+                    continue;
+                CreateFocusedScene(feature);
+            }
             RegisterSampleScenes();
             EditorSceneManager.OpenScene(hub, OpenSceneMode.Single);
             AssetDatabase.SaveAssets();
-            Debug.Log("After Hours scenes generated and added to build settings. The host integration scene was not changed.");
+            Debug.Log("Tritone Sample Hub is open. Press Play to choose a feature.");
+        }
+
+        [MenuItem("Tritone/After Hours/Generate Sample Scenes")]
+        private static void OpenHubUsingLegacyMenu() => GenerateSampleScenes();
+
+        private static bool EnsureSampleLocation()
+        {
+            if (AssetDatabase.IsValidFolder(SampleFolder))
+                return true;
+
+            string hubPath = AssetDatabase.GUIDToAssetPath(HubGuid);
+            string folder  = Path.GetDirectoryName(Path.GetDirectoryName(hubPath))?.Replace('\\', '/');
+            if (string.IsNullOrEmpty(folder) || !folder.StartsWith("Assets/", System.StringComparison.Ordinal))
+            {
+                Debug.LogError("Import the Tritone Feature Playground sample before opening its Hub.");
+                return false;
+            }
+
+            string error = AssetDatabase.MoveAsset(folder, SampleFolder);
+            if (string.IsNullOrEmpty(error))
+                return true;
+
+            Debug.LogError($"Could not prepare the After Hours sample: {error}");
+            return false;
         }
 
         /// <summary>Registers the authored sample routes in the host Build Settings.</summary>
         public static void RegisterSampleScenes()
         {
-            EditorBuildSettings.scenes = MergeBuildScenes(EditorBuildSettings.scenes,
-                ScenePath("SampleHub"), ScenePath("CoreServicesLab"), ScenePath("EcsLab"),
-                ScenePath("UiLab"), ScenePath("DataWorkshop"),
-                ScenePath("NetworkDesk"),
-                ScenePath("AddressablesDesk"), ScenePath("BundleDesk"),
-                ScenePath("ContentWorkshop"));
+            List<string> paths = new() { ScenePath("SampleHub") };
+            foreach (var feature in AfterHoursFeatureCatalog.Load().Features)
+                if (!string.IsNullOrEmpty(feature.ScenePath))
+                    paths.Add(feature.ScenePath);
+            EditorBuildSettings.scenes = MergeBuildScenes(EditorBuildSettings.scenes, paths);
+        }
+
+        private static void CreateFocusedScene(AfterHoursFeatureCatalog.Feature feature)
+        {
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(feature.ScenePath) != null)
+                return;
+
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            CreateCameraAndLight();
+            var root = new GameObject("Tritone Feature Demo");
+            if (feature.Id == "protocol-handshake-reconnect")
+            {
+                var network = new SerializedObject(root.AddComponent<AfterHoursNetworkBootstrap>());
+                network.FindProperty("mObserveProtocol").boolValue = true;
+                network.ApplyModifiedPropertiesWithoutUndo();
+            }
+            else
+            {
+                var lab = new SerializedObject(root.AddComponent<AfterHoursFocusedLabBootstrap>());
+                lab.FindProperty("mFeatureId").stringValue = feature.Id;
+                lab.ApplyModifiedPropertiesWithoutUndo();
+            }
+            EditorSceneManager.SaveScene(scene, feature.ScenePath);
         }
 
         private static string CreateLabScene(string sceneName, System.Type runtimeBootstrapType = null)
         {
             string path = ScenePath(sceneName);
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(path) != null)
+                return path;
+
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             CreateCameraAndLight();
             if (runtimeBootstrapType == null)
@@ -75,6 +132,9 @@ namespace AfterHours.Editor
         private static string CreateEntryScene(string sceneName, System.Type bootstrapType)
         {
             string path = ScenePath(sceneName);
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(path) != null)
+                return path;
+
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             CreateCameraAndLight();
             var bootstrap = new GameObject("After Hours Bootstrap");
@@ -102,7 +162,7 @@ namespace AfterHours.Editor
 
         private static string ScenePath(string name) => Path.Combine(SceneFolder, name + ".unity").Replace('\\', '/');
 
-        private static EditorBuildSettingsScene[] MergeBuildScenes(EditorBuildSettingsScene[] current, params string[] additions)
+        private static EditorBuildSettingsScene[] MergeBuildScenes(EditorBuildSettingsScene[] current, IEnumerable<string> additions)
         {
             var entries = new List<EditorBuildSettingsScene>(current);
             foreach (string path in additions)

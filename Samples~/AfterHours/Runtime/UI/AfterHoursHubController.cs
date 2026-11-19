@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using AfterHours.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -84,12 +83,9 @@ namespace AfterHours.UI
         {
             var groupOrder = new List<string>();
             var groups = new Dictionary<string, List<AfterHoursFeatureCatalog.Feature>>(StringComparer.Ordinal);
-            var destinations = new HashSet<string>(StringComparer.Ordinal);
             foreach (var feature in features)
             {
                 if (!string.IsNullOrWhiteSpace(feature.EditorMenuPath) || string.IsNullOrWhiteSpace(feature.ScenePath))
-                    continue;
-                if (!destinations.Add(feature.ScenePath))
                     continue;
                 if (!groups.TryGetValue(feature.GroupId, out var list))
                 {
@@ -139,15 +135,15 @@ namespace AfterHours.UI
         {
             if (!string.IsNullOrWhiteSpace(feature.ScenePath))
             {
-                string sceneName = Path.GetFileNameWithoutExtension(feature.ScenePath);
-                if (!Application.CanStreamedLevelBeLoaded(sceneName))
+                int sceneIndex = SceneUtility.GetBuildIndexByScenePath(feature.ScenePath);
+                if (sceneIndex < 0)
                 {
-                    SetStatus(Localized("Scene is not in Build Settings. Run Tritone / After Hours / Generate Sample Scenes.",
-                                        "场景未加入 Build Settings。请运行 Tritone / After Hours / Generate Sample Scenes。",
-                                        "シーンが Build Settings にありません。Tritone / After Hours / Generate Sample Scenes を実行してください。"));
+                    SetStatus(Localized("Register the scenes with Tritone / After Hours / Open Sample Hub.",
+                                        "请运行 Tritone / After Hours / Open Sample Hub 来注册场景。",
+                                        "Tritone / After Hours / Open Sample Hub でシーンを登録してください。"));
                     return;
                 }
-                SceneManager.LoadScene(sceneName);
+                SceneManager.LoadScene(sceneIndex);
                 return;
             }
 
