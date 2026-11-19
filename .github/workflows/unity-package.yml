@@ -49,7 +49,7 @@ jobs:
         uses: game-ci/unity-test-runner@v4
         with:
           projectPath: .ci/TestProject
-          unityVersion: 2022.3.62f1
+          unityVersion: auto
           testMode: ${{ matrix.testMode }}
           customParameters: ${{ matrix.customParameters }}
           artifactsPath: test-results/${{ matrix.name }}
