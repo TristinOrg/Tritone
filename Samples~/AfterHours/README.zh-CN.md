@@ -68,6 +68,8 @@
 
 ## 可选本地配置
 
+在 After Hours 场景点击 Play，Unity 会自动准备缺失的 Addressables 和 AssetBundle 内容。若 Unity 的 PATH 中有 Node.js，网络和内容更新示例也会自动启动本机服务。下方菜单可用于手动重建。
+
 Addressables、AssetBundle、内容更新和 Network 使用独立 Bootstrap。每次只运行你想了解的配置，它们不会与本地功能演示混在一起。
 
 - **内容更新：** 依次运行 **Tritone → After Hours → Prepare Provider Labs** 和 **Build Local Bundle and Update Manifest**。通过 `node "<导入后的 sample 目录>/LocalServices/content-host.js"` 启动随包提供的本地内容服务。

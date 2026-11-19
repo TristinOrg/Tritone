@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
+using UnityEditor.AddressableAssets.Build;
 using UnityEngine;
 
 namespace AfterHours.Editor
@@ -12,8 +13,8 @@ namespace AfterHours.Editor
     /// <summary>Prepares the sample's provider labs and builds local bundle content.</summary>
     public static class AfterHoursContentAuthoring
     {
-        private const string ClueTablePath = "Assets/AfterHours/Runtime/Resources/Tables/clues.json";
-        private const string SystemsPanelPath = "Assets/AfterHours/Runtime/Resources/UI/SystemsPanel.prefab";
+        internal const string ClueTablePath = "Assets/AfterHours/Runtime/Resources/Tables/clues.json";
+        internal const string SystemsPanelPath = "Assets/AfterHours/Runtime/Resources/UI/SystemsPanel.prefab";
         private const string BundleName = "after-hours-case-data";
 
         [MenuItem("Tritone/After Hours/Prepare Provider Labs")]
@@ -56,7 +57,9 @@ namespace AfterHours.Editor
                 Debug.LogError("Run Prepare Provider Labs before building Addressables content.");
                 return;
             }
-            AddressableAssetSettings.BuildPlayerContent();
+            AddressableAssetSettings.BuildPlayerContent(out AddressablesPlayerBuildResult result);
+            if (result == null || !string.IsNullOrEmpty(result.Error))
+                throw new System.InvalidOperationException(result?.Error ?? "Addressables returned no build result.");
             Debug.Log("After Hours Addressables content built for the active profile and platform.");
         }
 

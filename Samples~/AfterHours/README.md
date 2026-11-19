@@ -68,6 +68,8 @@ Editor-only commands are listed in the relevant sample and use the `Tritone/Afte
 
 ## Optional local profiles
 
+When you press Play in an After Hours scene, Unity prepares missing Addressables and AssetBundle content automatically. The network and content-update demos also start their loopback services if Node.js is on Unity's PATH. The menus below are available for manual rebuilds.
+
 The Addressables, AssetBundle, content-update and Network samples are separate bootstraps. Run only the profile you want to inspect; they do not get combined with the local feature demos.
 
 - **Content update:** run **Tritone → After Hours → Prepare Provider Labs**, then **Build Local Bundle and Update Manifest**. Start the included loopback content host with `node "<imported sample folder>/LocalServices/content-host.js"`.

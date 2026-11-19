@@ -68,6 +68,8 @@ Editor 専用コマンドは対応する Sample と `Tritone/After Hours/…` �
 
 ## 任意のローカル Profile
 
+After Hours のシーンで Play を押すと、不足している Addressables と AssetBundle コンテンツが自動生成されます。Unity の PATH に Node.js がある場合、ネットワークとコンテンツ更新のローカルサービスも起動します。次のメニューは手動で再構築する場合に使います。
+
 Addressables、AssetBundle、Content Update、Network は別々の Bootstrap を使います。試したい Profile だけを実行してください。ローカルの機能デモには統合されません。
 
 - **Content Update：** **Tritone → After Hours → Prepare Provider Labs**、続けて **Build Local Bundle and Update Manifest** を実行します。`node "<Import した Sample フォルダー>/LocalServices/content-host.js"` で同梱の Loopback Content Host を起動します。
