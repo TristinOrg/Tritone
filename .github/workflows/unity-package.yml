@@ -43,7 +43,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Prepare UPM sample for EditMode tests
         if: matrix.name == 'Sample' && env.UNITY_LICENSE != ''
-        run: cp -R Samples~/AfterHours .ci/TestProject/Assets/AfterHours
+        shell: pwsh
+        run: ./.ci/Prepare-Sample.ps1
       - name: Run Unity tests
         if: env.UNITY_LICENSE != ''
         uses: game-ci/unity-test-runner@v4

@@ -23,6 +23,16 @@ $RECYCLE.BIN/
 .ci/TestProject/ProjectSettings/*
 !.ci/TestProject/ProjectSettings/ProjectVersion.txt
 
+### Local sample imports and build output
+.ci/TestProject/Assets/AfterHours/
+.ci/TestProject/Assets/AfterHours.meta
+.ci/TestProject/Assets/AddressableAssetsData/
+.ci/TestProject/Assets/AddressableAssetsData.meta
+.ci/TestProject/Assets/Screenshots/
+.ci/TestProject/Assets/Screenshots.meta
+.ci/TestProject/ContentBuilds/
+Samples~/AfterHours.meta
+
 ### Graphify
 graphify-out/
 graphify-out.meta
