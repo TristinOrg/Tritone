@@ -9,7 +9,8 @@
     "Tritone.Tweening",
     "Tritone.Dispatching",
     "Tritone.Unity",
-    "Tritone.Editor"
+    "Tritone.Editor",
+    "Unity.ResourceManager"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

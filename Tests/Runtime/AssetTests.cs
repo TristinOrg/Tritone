@@ -5,6 +5,8 @@ using NUnit.Framework;
 using Tritone.Assets;
 using Tritone.Kernel;
 using Tritone.Unity.Assets;
+using UnityEngine.ResourceManagement;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Tritone.Tests
 {
@@ -20,6 +22,40 @@ namespace Tritone.Tests
         public void AddressablesProvider_RejectsNonUnityAssetTypes()
         {
             Assert.Throws<ArgumentException>(() => new AddressablesAssetProvider().Load("Data/Managed", typeof(AssetTestData)));
+        }
+
+        /// <summary>
+        /// Verifies that waiting before or after completion returns the same Addressables result.
+        /// </summary>
+        [Test]
+        public void AddressablesOperation_WaitsForCompletionAndReturnsCachedResult()
+        {
+            using ResourceManager manager = new();
+            PendingAddressablesOperation operation = new();
+            var handle = manager.StartOperation(operation, default);
+            try
+            {
+                var pending = AddressablesOperation.WaitAsync(handle);
+                Assert.That(pending.IsCompleted, Is.False);
+
+                operation.Complete(42, true, string.Empty);
+                Assert.That(pending.IsCompletedSuccessfully, Is.True);
+                Assert.That(pending.Result, Is.EqualTo(42));
+
+                var completed = AddressablesOperation.WaitAsync(handle);
+                Assert.That(completed.IsCompletedSuccessfully, Is.True);
+                Assert.That(completed.Result, Is.EqualTo(42));
+            }
+            finally
+            {
+                manager.Release(handle);
+            }
+        }
+
+        /// <summary>Lets the test complete a resource operation after it starts waiting.</summary>
+        private sealed class PendingAddressablesOperation : AsyncOperationBase<int>
+        {
+            protected override void Execute() { }
         }
 
         /// <summary>

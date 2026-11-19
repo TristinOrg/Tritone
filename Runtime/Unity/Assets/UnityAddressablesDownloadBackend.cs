@@ -18,7 +18,7 @@ namespace Tritone.Unity.Assets
             var handle = Addressables.GetDownloadSizeAsync(key);
             try
             {
-                var size = await handle.Task;
+                var size = await AddressablesOperation.WaitAsync(handle);
                 cancellationToken.ThrowIfCancellationRequested();
                 ValidateOperation(handle.Status, handle.OperationException, "get Addressables download size");
                 return size;
@@ -43,7 +43,6 @@ namespace Tritone.Unity.Assets
                     await Task.Yield();
                 }
 
-                await handle.Task;
                 cancellationToken.ThrowIfCancellationRequested();
                 ValidateOperation(handle.Status, handle.OperationException, "download Addressables dependencies");
                 ReportProgress(handle, progress);
@@ -61,7 +60,7 @@ namespace Tritone.Unity.Assets
             var handle = Addressables.ClearDependencyCacheAsync(key, false);
             try
             {
-                var cleared = await handle.Task;
+                var cleared = await AddressablesOperation.WaitAsync(handle);
                 cancellationToken.ThrowIfCancellationRequested();
                 ValidateOperation(handle.Status, handle.OperationException, "clear Addressables dependency cache");
                 return cleared;

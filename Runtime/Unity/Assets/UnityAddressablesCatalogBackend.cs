@@ -19,7 +19,7 @@ namespace Tritone.Unity.Assets
             var handle = Addressables.CheckForCatalogUpdates(false);
             try
             {
-                var catalogs = await handle.Task;
+                var catalogs = await AddressablesOperation.WaitAsync(handle);
                 cancellationToken.ThrowIfCancellationRequested();
                 ValidateOperation(handle.Status, handle.OperationException, "check Addressables catalogs");
                 return CopyStrings(catalogs);
@@ -40,7 +40,7 @@ namespace Tritone.Unity.Assets
             var handle = Addressables.UpdateCatalogs(catalogIds, false);
             try
             {
-                var locators = await handle.Task;
+                var locators = await AddressablesOperation.WaitAsync(handle);
                 cancellationToken.ThrowIfCancellationRequested();
                 ValidateOperation(handle.Status, handle.OperationException, "update Addressables catalogs");
                 var locatorIds = new string[locators.Count];

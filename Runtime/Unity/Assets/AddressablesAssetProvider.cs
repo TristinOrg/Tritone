@@ -41,7 +41,7 @@ namespace Tritone.Unity.Assets
             var handle = Addressables.LoadAssetAsync<Object>(path);
             try
             {
-                var asset = await handle.Task;
+                var asset = await AddressablesOperation.WaitAsync(handle);
                 ValidateResult(path, assetType, asset, handle.Status);
                 return asset;
             }
