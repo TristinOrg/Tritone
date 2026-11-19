@@ -340,16 +340,16 @@
       "TitleEn": "Object pooling",
       "TitleZh": "对象池",
       "TitleJa": "オブジェクトプール",
-      "SummaryEn": "Rent, return, then rent again. Compare the two references to confirm object reuse.",
-      "SummaryZh": "租出、归还、再次租用，对比引用确认对象复用。",
-      "SummaryJa": "貸出、返却、再貸出を行い、同じインスタンスか確認します。",
+      "SummaryEn": "Click three times to rent, return, and rent again. Watch the active stage and check whether Tritone reused the same instance.",
+      "SummaryZh": "点击三次，依次租用、归还、再次租用。观察高亮阶段，并检查 Tritone 是否复用了同一个实例。",
+      "SummaryJa": "3 回クリックして貸出、返却、再貸出を順に試します。ハイライトと、同じインスタンスが再利用されたかを確認します。",
       "PrerequisiteEn": "No setup required.",
       "PrerequisiteZh": "无需额外配置。",
       "PrerequisiteJa": "追加設定は不要です。",
       "ScenePath": "Assets/AfterHours/Scenes/PoolLab.unity",
-      "ActionEn": "Rent and reuse",
-      "ActionZh": "租用并复用",
-      "ActionJa": "貸出して再利用"
+      "ActionEn": "Advance pool demo",
+      "ActionZh": "推进对象池演示",
+      "ActionJa": "プールの操作を進める"
     },
     {
       "Id": "tables-generation-compilation",

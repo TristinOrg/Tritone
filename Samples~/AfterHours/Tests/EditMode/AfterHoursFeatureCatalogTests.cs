@@ -6,12 +6,27 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace AfterHours.Tests
 {
     /// <summary>Verifies the sample catalog, scene registration, and scene bootstraps.</summary>
     public sealed class AfterHoursFeatureCatalogTests
     {
+        [Test]
+        public void PopupPrefabHasVisibleGeometryAndReceivesClicks()
+        {
+            var popup = Resources.Load<GameObject>("UI/SystemsPanel");
+            Assert.That(popup, Is.Not.Null);
+            var rect = popup.GetComponent<RectTransform>();
+            Assert.That(rect.sizeDelta.x, Is.GreaterThan(0f));
+            Assert.That(rect.sizeDelta.y, Is.GreaterThan(0f));
+            Assert.That(rect.localScale.x, Is.GreaterThan(0f));
+            Assert.That(rect.localScale.y, Is.GreaterThan(0f));
+            Assert.That(popup.GetComponent<Canvas>().overrideSorting, Is.True);
+            Assert.That(popup.GetComponent<GraphicRaycaster>(), Is.Not.Null);
+        }
+
         private static readonly string[] RequiredFeatureIds =
         {
             "application-composition", "module-contexts-scopes", "diagnostics-logging",
@@ -33,8 +48,9 @@ namespace AfterHours.Tests
             try
             {
                 AfterHoursSceneSetup.RegisterSampleScenes();
-                Assert.That(Array.Exists(EditorBuildSettings.scenes, scene =>
-                    scene.enabled && scene.path == "Assets/AfterHours/Scenes/SampleHub.unity"), Is.True);
+                var first = EditorBuildSettings.scenes[0];
+                Assert.That(first.path, Is.EqualTo("Assets/AfterHours/Scenes/SampleHub.unity"));
+                Assert.That(first.enabled, Is.True);
                 AllFeatureDestinationsAreIndependentAndValid();
             }
             finally

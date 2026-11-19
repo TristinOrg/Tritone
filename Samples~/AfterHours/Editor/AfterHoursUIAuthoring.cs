@@ -72,7 +72,7 @@ namespace AfterHours.Editor
             }
 
             var root = new GameObject("SystemsPanel", typeof(RectTransform), typeof(CanvasRenderer),
-                                      typeof(Image), typeof(Canvas), typeof(UIPrefabRef));
+                                      typeof(Image), typeof(Canvas), typeof(GraphicRaycaster), typeof(UIPrefabRef));
             var rootRect = root.GetComponent<RectTransform>();
             rootRect.sizeDelta = new Vector2(620f, 330f);
             var background = root.GetComponent<Image>();
@@ -83,7 +83,7 @@ namespace AfterHours.Editor
             canvas.sortingOrder = 0;
 
             var bodyObject = CreateText(root.transform, "BodyText", string.Empty, 20,
-                                        new Vector2(-260f, 35f), new Vector2(520f, 180f), TextAnchor.UpperLeft);
+                                        new Vector2(0f, 35f), new Vector2(520f, 180f), TextAnchor.UpperLeft);
             var closeObject = new GameObject("CloseButton", typeof(RectTransform), typeof(CanvasRenderer),
                                              typeof(Image), typeof(Button));
             closeObject.transform.SetParent(root.transform, false);

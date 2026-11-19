@@ -23,6 +23,7 @@ namespace AfterHours.UI
         private Text mEcsReadout;
         private Text mResult;
         private RectTransform mProgress;
+        private Image[] mStages;
         private AfterHoursFeatureCatalog.Feature mFeature;
         private readonly Action mRunDemo;
         private readonly Action mResetDemo;
@@ -34,14 +35,16 @@ namespace AfterHours.UI
             mResetDemo = resetDemo;
         }
 
-        public void Show()
+        public void Show(int sortingOrder = 0)
         {
             mLocale = AfterHoursFeatureCatalog.CurrentLocale();
             mFeature = AfterHoursFeatureCatalog.Load().Find(mLabId);
             var canvas = new GameObject("After Hours Feature Lab", typeof(RectTransform), typeof(Canvas),
                                         typeof(CanvasScaler), typeof(GraphicRaycaster));
             mRoot = canvas;
-            canvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            var guideCanvas = canvas.GetComponent<Canvas>();
+            guideCanvas.renderMode   = RenderMode.ScreenSpaceOverlay;
+            guideCanvas.sortingOrder = sortingOrder;
             var scaler = canvas.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1280f, 800f);
@@ -69,12 +72,25 @@ namespace AfterHours.UI
                  Localized("RESULT", "运行结果", "実行結果"), 13, Signal, TextAnchor.MiddleLeft);
             mResult = Text(Rect("Result", body, new Vector2(0.035f, 0.15f), new Vector2(0.96f, 0.30f), Vector2.zero, Vector2.zero),
                            ReadyText(), 15, Paper, TextAnchor.MiddleLeft, true);
-            if (mLabId == "tweens")
+            if (mLabId is "tweens" or "TimerLab")
             {
                 var track = Rect("Tween Track", body, new Vector2(0.05f, 0.43f), new Vector2(0.94f, 0.48f), Vector2.zero, Vector2.zero);
                 track.gameObject.AddComponent<Image>().color = Panel;
                 mProgress = Rect("Tween Fill", track, Vector2.zero, Vector2.up, Vector2.zero, Vector2.zero);
                 mProgress.gameObject.AddComponent<Image>().color = Signal;
+            }
+            if (mLabId == "pooling-ownership")
+                AddStages(body, "RENT", "RETURN", "REUSE");
+            else if (mLabId == "events")
+                AddStages(body, "PUBLISHER", "TYPED EVENT", "LISTENER");
+            else if (mLabId == "input")
+                AddStages(body, "BUTTON / KEY", "INTERACT", "SUBSCRIBER");
+            else if (mLabId == "flows-transitions")
+                AddStages(body, "READY", "RUNNING");
+            else if (mLabId == "scene-modules-switching")
+            {
+                AddStages(body, "LOBBY", "ROUND");
+                SetStage(0);
             }
             if (mLabId == "EcsLab")
             {
@@ -124,6 +140,29 @@ namespace AfterHours.UI
         {
             SetResult(ReadyText());
             SetProgress(0f);
+            SetStage(mLabId == "scene-modules-switching" ? 0 : -1);
+        }
+
+        private void AddStages(RectTransform body, params string[] labels)
+        {
+            mStages = new Image[labels.Length];
+            for (int i = 0; i < labels.Length; i++)
+            {
+                float left = 0.05f + 0.30f * i;
+                var cell = Rect(labels[i], body, new Vector2(left, 0.41f),
+                                new Vector2(left + 0.28f, 0.53f), Vector2.zero, Vector2.zero);
+                mStages[i] = cell.gameObject.AddComponent<Image>();
+                Text(cell, labels[i], 13, Paper, TextAnchor.MiddleCenter, true);
+            }
+            SetStage(-1);
+        }
+
+        public void SetStage(int index)
+        {
+            if (mStages == null)
+                return;
+            for (int i = 0; i < mStages.Length; i++)
+                mStages[i].color = i == index ? new Color(0.15f, 0.48f, 0.42f) : Panel;
         }
 
         private void AddDemoControls(RectTransform body)

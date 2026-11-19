@@ -75,11 +75,15 @@ namespace AfterHours.Editor
         /// <summary>Registers the authored sample routes in the host Build Settings.</summary>
         public static void RegisterSampleScenes()
         {
-            List<string> paths = new() { ScenePath("SampleHub") };
+            List<string> paths = new();
             foreach (var feature in AfterHoursFeatureCatalog.Load().Features)
                 if (!string.IsNullOrEmpty(feature.ScenePath))
                     paths.Add(feature.ScenePath);
-            EditorBuildSettings.scenes = MergeBuildScenes(EditorBuildSettings.scenes, paths);
+            var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+            string hub = ScenePath("SampleHub");
+            scenes.RemoveAll(scene => scene.path == hub);
+            scenes.Insert(0, new EditorBuildSettingsScene(hub, true));
+            EditorBuildSettings.scenes = MergeBuildScenes(scenes, paths);
         }
 
         private static void CreateFocusedScene(AfterHoursFeatureCatalog.Feature feature)
@@ -162,9 +166,8 @@ namespace AfterHours.Editor
 
         private static string ScenePath(string name) => Path.Combine(SceneFolder, name + ".unity").Replace('\\', '/');
 
-        private static EditorBuildSettingsScene[] MergeBuildScenes(EditorBuildSettingsScene[] current, IEnumerable<string> additions)
+        private static EditorBuildSettingsScene[] MergeBuildScenes(List<EditorBuildSettingsScene> entries, IEnumerable<string> additions)
         {
-            var entries = new List<EditorBuildSettingsScene>(current);
             foreach (string path in additions)
             {
                 int index = entries.FindIndex(entry => entry.path == path);

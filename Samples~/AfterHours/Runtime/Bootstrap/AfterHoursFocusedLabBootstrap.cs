@@ -83,7 +83,7 @@ namespace AfterHours.Bootstrap
                     break;
             }
 
-            mDemo = new FocusedLabModule(mFeatureId, ShowResult, ShowProgress, input);
+            mDemo = new FocusedLabModule(mFeatureId, ShowResult, ShowProgress, ShowStage, input);
             builder.AddModule(mDemo);
         }
 
@@ -138,6 +138,7 @@ namespace AfterHours.Bootstrap
 
         private void ShowResult(string result) => mController?.SetResult(result);
         private void ShowProgress(float progress) => mController?.SetProgress(progress);
+        private void ShowStage(int stage) => mController?.SetStage(stage);
 
         protected override void OnDestroy()
         {
@@ -155,6 +156,7 @@ namespace AfterHours.Bootstrap
             private readonly string mFeature;
             private readonly Action<string> mReport;
             private readonly Action<float> mProgress;
+            private readonly Action<int> mStage;
             private readonly SampleInputSource mInput;
             private readonly Event<int> mSignal = new();
             private ModuleScope mListenerScope;
@@ -163,24 +165,33 @@ namespace AfterHours.Bootstrap
             private int mCount;
             private bool mAlternate;
             private AudioHandle mSound;
+            private PooledMarker mRented;
+            private PooledMarker mReturned;
 
             internal FocusedLabModule(string feature, Action<string> report, Action<float> progress,
-                                      SampleInputSource input)
+                                      Action<int> stage, SampleInputSource input)
             {
                 mFeature  = feature;
                 mReport   = report;
                 mProgress = progress;
+                mStage    = stage;
                 mInput    = input;
             }
 
             protected override void OnStart()
             {
                 if (mFeature == "events")
-                    BindEvent(mSignal, value => mReport($"Listener received signal #{value}."));
+                    BindEvent(mSignal, value => ReportArrival($"Listener received signal #{value}."));
                 if (mFeature == "input")
-                    BindInput("Interact", () => mReport($"Interact received #{++mCount}. Tritone dispatched the named input action."));
+                    BindInput("Interact", () => ReportArrival($"Interact received #{++mCount}. Tritone dispatched the named input action."));
                 if (mFeature == "module-contexts-scopes")
                     AttachListener();
+            }
+
+            private void ReportArrival(string result)
+            {
+                mStage(2);
+                mReport(result);
             }
 
             private void AttachListener()
@@ -219,6 +230,7 @@ namespace AfterHours.Bootstrap
                             await SwitchFlowAsync<RunningFlow>();
                         else
                             await SwitchFlowAsync<ReadyFlow>();
+                        mStage(mAlternate ? 1 : 0);
                         mReport(mAlternate ? "Active flow: Running. Click again to enter Ready." : "Active flow: Ready. Running has exited.");
                         break;
                     case "models-state":
@@ -253,6 +265,7 @@ namespace AfterHours.Bootstrap
                             SwitchModule<RoundModule>();
                         else
                             SwitchModule<LobbyModule>();
+                        mStage(mAlternate ? 1 : 0);
                         mReport(mAlternate ? "Lobby stopped → Round started." : "Round stopped → Lobby started.");
                         break;
                     case "input":
@@ -282,11 +295,7 @@ namespace AfterHours.Bootstrap
                         mReport($"office.open  ·  {(mAlternate ? "ja-JP" : "en-US")}\n{Localize("office.open")}");
                         break;
                     case "pooling-ownership":
-                        var first = Rent<PooledMarker>();
-                        Return(first);
-                        var second = Rent<PooledMarker>();
-                        mReport($"Rent → return → rent again. Same object instance: {ReferenceEquals(first, second)}.");
-                        Return(second);
+                        AdvancePoolDemo();
                         break;
                     case "resources-provider":
                         var asset = await LoadAssetAsync<TextAsset>("Tables/clues");
@@ -301,6 +310,29 @@ namespace AfterHours.Bootstrap
                 }
             }
 
+            private void AdvancePoolDemo()
+            {
+                if (mRented != null)
+                {
+                    mReturned = mRented;
+                    Return(ref mRented);
+                    mStage(1);
+                    mReport("Returned to the pool. Click again to rent and compare the instance.");
+                    return;
+                }
+
+                mRented = Rent<PooledMarker>();
+                if (mReturned == null)
+                {
+                    mStage(0);
+                    mReport("Object rented. Click again to return it.");
+                    return;
+                }
+
+                mStage(2);
+                mReport($"Rented again. Same object instance: {ReferenceEquals(mReturned, mRented)}.");
+            }
+
             internal async Task ResetAsync()
             {
                 switch (mFeature)
@@ -313,6 +345,11 @@ namespace AfterHours.Bootstrap
                     case "models-state": ResetModel<CounterModel>(); break;
                     case "main-thread-dispatch": CancelMainThreadDispatch(mDispatch); break;
                     case "tweens": CancelTween(mTween); break;
+                    case "pooling-ownership":
+                        if (mRented != null)
+                            Return(ref mRented);
+                        mReturned = null;
+                        break;
                     case "scene-modules-switching": SwitchModule<LobbyModule>(); break;
                     case "audio": if (mCount > 0) StopSound(mSound); break;
                     case "saves": DeleteSave(SaveSlot); break;

@@ -17,6 +17,7 @@ namespace AfterHours.Bootstrap
         private AfterHoursFeatureLabController mController;
         private IUIWindowScope mWindows;
         private IUIService mUI;
+        private AfterHoursSystemsPanelWindow mPopup;
 
         protected override void Configure(GameApplicationBuilder builder) => builder.UseAssets().UseUI(mRoot);
 
@@ -29,7 +30,8 @@ namespace AfterHours.Bootstrap
             mWindows = mUI.CreateScope();
             mWindows.AddWindow(typeof(AfterHoursSystemsPanelWindow), "UI/SystemsPanel", EUILayer.Popup, EUIWindowLifetime.Application);
             mController = new AfterHoursFeatureLabController("UiLab", ToggleWindow, ResetWindow);
-            mController.Show();
+            // Tritone starts its Popup sorting range at -5000.
+            mController.Show(sortingOrder: -10000);
         }
 
         private void ToggleWindow()
@@ -41,9 +43,17 @@ namespace AfterHours.Bootstrap
                 return;
             }
 
-            mUI.OpenWindow(typeof(AfterHoursSystemsPanelWindow));
-            mController.SetResult("WINDOW OPEN / Tritone placed it on the Popup layer.");
+            var popup = (AfterHoursSystemsPanelWindow)mUI.OpenWindow(typeof(AfterHoursSystemsPanelWindow));
+            if (mPopup != popup)
+            {
+                mPopup = popup;
+                mPopup.Closed += OnPopupClosed;
+            }
+            mController.SetResult("The popup is on screen. Use its CLOSE button to dismiss it.");
         }
+
+        private void OnPopupClosed() =>
+            mController?.SetResult("WINDOW CLOSED / Click Open Window to show it again.");
 
         private void ResetWindow()
         {
@@ -54,6 +64,8 @@ namespace AfterHours.Bootstrap
 
         protected override void OnDestroy()
         {
+            if (mPopup != null)
+                mPopup.Closed -= OnPopupClosed;
             mController?.Dispose();
             mWindows?.Dispose();
             mController = null;
@@ -68,7 +80,6 @@ namespace AfterHours.Bootstrap
                                                typeof(CanvasScaler), typeof(GraphicRaycaster), typeof(UIRoot));
             var canvas = canvasObject.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 1;
             var scaler = canvasObject.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1280f, 800f);

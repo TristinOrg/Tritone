@@ -44,7 +44,7 @@
 | `LocalizationLab` | ローカライズ | 言語を切り替え、同じ office.open キーから別の文字列を取得します。 |
 | `EcsLab` | ECS — Entity の生成と Query | Spawn Marker で Entity を追加し、Query 数を確認して World をリセットします。 |
 | `UiLab` | UI — Tritone Window の開閉 | Popup Layer に生成 Window を開き、閉じて再び開きます。 |
-| `PoolLab` | オブジェクトプール | 貸出、返却、再貸出を行い、同じインスタンスか確認します。 |
+| `PoolLab` | オブジェクトプール | 3 回クリックして貸出、返却、再貸出を順に試します。ハイライトと、同じインスタンスが再利用されたかを確認します。 |
 | `DataWorkshop` | Tables — 型付きデータの読込 | 生成済み ClueRow Table を読み込み、行数と最初のデータを確認します。 |
 | `ResourcesLab` | Resources 読込 | スコープでテキストを読み込み、文字数を表示して参照を解放します。 |
 | `ContentWorkshop` | コンテンツ更新とトランザクション | オフラインのコンテンツ更新、ステージング、コミット、ロールバックを確認します。 |

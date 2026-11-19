@@ -14,6 +14,7 @@ namespace AfterHours.Bootstrap
     {
         private AfterHoursFeatureLabController mController;
         private ITimerScope mTimers;
+        private float mStartedAt = -1f;
 
         protected override void Configure(GameApplicationBuilder builder)
         {
@@ -33,14 +34,30 @@ namespace AfterHours.Bootstrap
         private void RunProbe()
         {
             mController.SetResult("TIMER SCHEDULED / waiting 1 second…");
+            mStartedAt = Time.unscaledTime;
+            mController.SetProgress(0f);
             mTimers.SetTimer(new TimerKey("sample-delay"), 1d,
-                () => mController?.SetResult("TIMER FIRED / Tritone delivered this callback on the next update."),
+                () =>
+                {
+                    mStartedAt = -1f;
+                    mController?.SetProgress(1f);
+                    mController?.SetResult("TIMER FIRED / Tritone delivered the scheduled callback.");
+                },
                 ETimerTimeMode.Unscaled);
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            if (mStartedAt >= 0f)
+                mController?.SetProgress(Time.unscaledTime - mStartedAt);
         }
 
         private void ResetProbe()
         {
             mTimers?.CancelAllTimers();
+            mStartedAt = -1f;
+            mController?.SetProgress(0f);
             mController?.SetResult("READY / click Run Timer to schedule a one-shot callback.");
         }
 

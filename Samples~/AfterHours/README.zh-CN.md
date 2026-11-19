@@ -44,7 +44,7 @@
 | `LocalizationLab` | 本地化 | 切换语言，观察相同的 office.open 键返回不同文本。 |
 | `EcsLab` | ECS — 生成并查询实体 | 点击 Spawn Marker 添加实体，观察查询数量并重置 World。 |
 | `UiLab` | UI — 打开和关闭 Tritone 窗口 | 在 Popup 层打开一个生成窗口，关闭后再重新打开。 |
-| `PoolLab` | 对象池 | 租出、归还、再次租用，对比引用确认对象复用。 |
+| `PoolLab` | 对象池 | 点击三次，依次租用、归还、再次租用。观察高亮阶段，并检查 Tritone 是否复用了同一个实例。 |
 | `DataWorkshop` | Tables — 加载一张类型化数据表 | 加载生成的 ClueRow 数据表，查看行数和首条记录。 |
 | `ResourcesLab` | Resources 加载 | 通过 Tritone 作用域加载线索文本、查看字符数，随后释放引用。 |
 | `ContentWorkshop` | 内容更新与事务 | 体验离线内容更新的暂存、提交与回滚流程。 |

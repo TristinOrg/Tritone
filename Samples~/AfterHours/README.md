@@ -44,7 +44,7 @@ To open one demo directly, use its scene from `Assets/AfterHours/Scenes`. Each s
 | `LocalizationLab` | Localization | Switch language and watch the same office.open key resolve to different text. |
 | `EcsLab` | ECS — spawn and query entities | Click Spawn Marker to add an entity. Watch the live query count and reset the World. |
 | `UiLab` | UI — open and close a Tritone window | Open one generated window on the Popup layer, close it, and reopen it. |
-| `PoolLab` | Object pooling | Rent, return, then rent again. Compare the two references to confirm object reuse. |
+| `PoolLab` | Object pooling | Click three times to rent, return, and rent again. Watch the active stage and check whether Tritone reused the same instance. |
 | `DataWorkshop` | Tables — load one typed data table | Load the generated ClueRow table and inspect its row count and first entry. |
 | `ResourcesLab` | Resources loading | Load the clue text through a Tritone scope and read its character count. The scope releases its reference. |
 | `ContentWorkshop` | Content updates & transactions | Inspect the offline content update, staging, commit, and rollback workflow. |
