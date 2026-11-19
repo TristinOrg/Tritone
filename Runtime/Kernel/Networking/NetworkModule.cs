@@ -24,6 +24,8 @@ namespace Tritone.Networking
         // Configures bounded automatic reconnection.
         private readonly NetworkReconnectOptions mReconnect;
 
+        private readonly int mMaxFramesPerUpdate;
+
         /// <summary>
         /// Validates every new transport connection before application traffic begins.
         /// </summary>
@@ -62,12 +64,13 @@ namespace Tritone.Networking
                              INetworkTransport transport,
                              NetworkSessionOptions options = null)
         {
-            mSerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
-            mTransport  = transport ?? throw new ArgumentNullException(nameof(transport));
-            mHeartbeat  = options?.CreateHeartbeat(mSerializer, mTransport);
-            mReconnect  = options?.Reconnect;
-            mHandshake  = options?.Handshake;
-            mLastState  = State;
+            mSerializer         = serializer ?? throw new ArgumentNullException(nameof(serializer));
+            mTransport          = transport ?? throw new ArgumentNullException(nameof(transport));
+            mHeartbeat          = options?.CreateHeartbeat(mSerializer, mTransport);
+            mReconnect          = options?.Reconnect;
+            mHandshake          = options?.Handshake;
+            mMaxFramesPerUpdate = options?.MaxFramesPerUpdate ?? NetworkSessionOptions.DefaultMaxFramesPerUpdate;
+            mLastState          = State;
         }
 
         // Stores the last state delivered to listeners.
@@ -195,7 +198,7 @@ namespace Tritone.Networking
             NotifyState();
             UpdateReconnect(time.UnscaledDeltaTime);
             mHeartbeat?.Update(time.UnscaledDeltaTime);
-            while (true)
+            for (int i = 0; i < mMaxFramesPerUpdate; i++)
             {
                 byte[] frame;
                 lock (mQueueLock)

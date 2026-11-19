@@ -9,6 +9,10 @@ namespace Tritone.Networking
     /// </summary>
     public sealed class NetworkSessionOptions
     {
+        internal const int DefaultMaxFramesPerUpdate = 4096;
+
+        internal int MaxFramesPerUpdate { get; private set; } = DefaultMaxFramesPerUpdate;
+
         // Creates the configured heartbeat behavior.
         private Func<IMessageSerializer, INetworkTransport, IHeartbeatSession> mHeartbeatFactory;
 
@@ -19,6 +23,20 @@ namespace Tritone.Networking
 
         // Stores optional automatic reconnection behavior.
         internal NetworkReconnectOptions Reconnect { get; private set; }
+
+        /// <summary>
+        /// Limits receive dispatch per update. Remaining frames stay queued in arrival order.
+        /// </summary>
+        /// <param name="maxFramesPerUpdate">A positive frame limit. The default is 4096.</param>
+        /// <returns>This session options instance.</returns>
+        public NetworkSessionOptions UseDispatchLimit(int maxFramesPerUpdate)
+        {
+            if (maxFramesPerUpdate < 1)
+                throw new ArgumentOutOfRangeException(nameof(maxFramesPerUpdate));
+
+            MaxFramesPerUpdate = maxFramesPerUpdate;
+            return this;
+        }
 
         /// <summary>
         /// Configures heartbeat request and response message types.

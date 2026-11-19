@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -36,6 +37,35 @@ namespace Tritone.Tests
             Assert.AreEqual(10, ((Ping)serializer.Deserialize(transport.LastSent)).Value);
             application.Stop();
             Assert.IsTrue(transport.Disposed);
+        }
+
+        [Test]
+        public void Network_DispatchLimitDefersFramesInArrivalOrder()
+        {
+            MessageSerializer serializer = new();
+            serializer.Register(1, new PingCodec());
+            TestTransport transport = new();
+            NetworkSessionOptions options = new();
+            using var application = new GameApplicationBuilder()
+                .UseNetwork(serializer, transport, options.UseDispatchLimit(2))
+                .Build();
+            application.Start();
+
+            using var scope = application.Services.GetRequired<INetworkService>().CreateScope();
+            List<int> received = new();
+            scope.Bind<Ping>(message => received.Add(message.Value));
+            for (int value = 1; value <= 5; value++)
+                transport.Push(serializer.Serialize(new Ping { Value = value }));
+
+            FrameTime time = new(0.016, 0.016, 0.016, 0);
+            application.Update(in time);
+            Assert.That(received, Is.EqualTo(new[] { 1, 2 }));
+
+            application.Update(in time);
+            Assert.That(received, Is.EqualTo(new[] { 1, 2, 3, 4 }));
+
+            application.Update(in time);
+            Assert.That(received, Is.EqualTo(new[] { 1, 2, 3, 4, 5 }));
         }
 
         [Test]
